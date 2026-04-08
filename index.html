@@ -78,6 +78,14 @@
             text-align: center;
             overflow: hidden;
         }
+        #heroMedia {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
         .hero-overlay {
             position: absolute;
             top: 0;
@@ -206,7 +214,18 @@
 <body>
     <header class="site-header"><div class="container"><div class="logo" id="logo">✨ Mi Negocio</div><div class="header-spacer"></div><button class="menu-toggle" id="menuToggle">☰</button><nav class="main-nav"><ul id="mainMenu"><li><a class="menu-link" data-seccion="inicio">Inicio</a></li><li><a class="menu-link" data-seccion="productos">Productos</a></li><li><a class="menu-link" data-seccion="servicios">Servicios</a></li><li><a class="menu-link" data-seccion="nosotros">Nosotros</a></li><li><a class="menu-link" data-seccion="testimonios">Testimonios</a></li><li><a class="menu-link" data-seccion="galeria">Galería</a></li><li><a class="menu-link" data-seccion="contacto">Contacto</a></li></ul></nav></div></header>
     <main>
-        <section id="inicio" class="seccion activa"><div class="hero" id="hero"><div class="hero-overlay"></div><div class="hero-content"><div class="hero-superior" id="hero-superior"></div><div class="hero-principal" id="hero-principal"></div><div class="hero-inferior" id="hero-inferior"></div><a class="hero-cta" id="hero-boton">Ver productos</a></div></div></section>
+        <section id="inicio" class="seccion activa">
+            <div class="hero" id="hero">
+                <div id="heroMedia"></div>
+                <div class="hero-overlay"></div>
+                <div class="hero-content">
+                    <div class="hero-superior" id="hero-superior"></div>
+                    <div class="hero-principal" id="hero-principal"></div>
+                    <div class="hero-inferior" id="hero-inferior"></div>
+                    <a class="hero-cta" id="hero-boton">Ver productos</a>
+                </div>
+            </div>
+        </section>
         <section id="productos" class="seccion"><div class="container"><h2 class="section-title" id="productos-titulo">Nuestros Productos</h2><p class="section-subtitle" id="productos-subtitulo"></p><div class="productos-grid" id="productos-grid"></div></div></section>
         <section id="servicios" class="seccion"><div class="container"><h2 class="section-title" id="servicios-titulo">Nuestros Servicios</h2><p class="section-subtitle" id="servicios-subtitulo"></p><div class="servicios-grid" id="servicios-grid"></div></div></section>
         <section id="nosotros" class="seccion"><div class="container"><h2 class="section-title" id="nosotros-titulo">Sobre Nosotros</h2><p class="section-subtitle" id="nosotros-subtitulo"></p><div class="nosotros-grid"><div class="nosotros-imagen" id="nosotros-imagen"></div><div class="nosotros-contenido" id="nosotros-contenido"></div></div></div></section>
@@ -303,10 +322,34 @@
 
         function renderizarHero() {
             const hero = negocioConfig.hero;
-            const heroDiv = document.getElementById('hero');
-            if (hero.imagen) heroDiv.style.backgroundImage = `url(${hero.imagen})`;
-            heroDiv.style.backgroundSize = 'cover';
-            heroDiv.style.backgroundPosition = 'center';
+            const heroMedia = document.getElementById('heroMedia');
+            
+            heroMedia.innerHTML = '';
+            
+            if (hero.video && hero.video.trim() !== '') {
+                const video = document.createElement('video');
+                video.autoplay = true;
+                video.muted = true;
+                video.loop = true;
+                video.playsinline = true;
+                video.style.cssText = 'position: absolute; top: 50%; left: 50%; min-width: 100%; min-height: 100%; width: auto; height: auto; transform: translate(-50%, -50%); object-fit: cover; z-index: 0;';
+                const source = document.createElement('source');
+                source.src = hero.video;
+                source.type = 'video/mp4';
+                video.appendChild(source);
+                heroMedia.appendChild(video);
+            } else if (hero.imagen && hero.imagen.trim() !== '') {
+                heroMedia.style.backgroundImage = `url(${hero.imagen})`;
+                heroMedia.style.backgroundSize = 'cover';
+                heroMedia.style.backgroundPosition = 'center';
+                heroMedia.style.position = 'absolute';
+                heroMedia.style.top = '0';
+                heroMedia.style.left = '0';
+                heroMedia.style.width = '100%';
+                heroMedia.style.height = '100%';
+                heroMedia.style.zIndex = '0';
+            }
+            
             document.getElementById('hero-superior').textContent = hero.texto_superior || '';
             document.getElementById('hero-principal').textContent = hero.texto_principal || negocioConfig.marca.nombre || '';
             document.getElementById('hero-inferior').textContent = hero.texto_inferior || '';
@@ -409,4 +452,4 @@
         document.getElementById('modal-galeria')?.addEventListener('click', (e) => { if (e.target === document.getElementById('modal-galeria')) cerrarModalGaleria(); });
     </script>
 </body>
-</html>
+                                                                                                         </html>

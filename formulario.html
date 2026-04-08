@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicita tu página web - Asistente Sera</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0B4F6C 0%, #1a6d8f 100%);
+            padding: 2rem;
+            min-height: 100vh;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 2rem; }
+        .header h1 { color: white; font-size: 2rem; margin-bottom: 0.5rem; }
+        .header p { color: rgba(255,255,255,0.8); }
+        .formulario {
+            background: white;
+            border-radius: 24px;
+            padding: 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        .seccion-formulario {
+            margin-bottom: 2rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .seccion-formulario:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .seccion-titulo {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+            color: #0B4F6C;
+        }
+        .seccion-titulo i { font-size: 1.8rem; color: #F18F01; }
+        .seccion-titulo h2 { font-size: 1.5rem; flex: 1; }
+        .btn-ayuda {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            color: #F18F01;
+            cursor: pointer;
+            transition: all 0.3s;
+            padding: 0.3rem;
+            border-radius: 50%;
+        }
+        .btn-ayuda:hover { transform: scale(1.1); color: #F77F00; }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .form-group label { font-weight: 600; color: #333; font-size: 0.9rem; }
+        .form-group label .required { color: #C41E3A; }
+        .form-group input, .form-group select, .form-group textarea {
+            padding: 0.8rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #F18F01;
+            box-shadow: 0 0 0 3px rgba(241, 143, 1, 0.1);
+        }
+        .color-input {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .color-input input[type="color"] {
+            width: 60px;
+            height: 50px;
+            padding: 0;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+        .color-input span {
+            font-family: monospace;
+            background: #f5f5f5;
+            padding: 0.3rem 0.8rem;
+            border-radius: 8px;
+        }
+        .item-card {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+        .item-header strong { color: #0B4F6C; }
+        .btn-eliminar {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .btn-agregar {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-enviar {
+            width: 100%;
+            background: linear-gradient(135deg, #F18F01, #e67e22);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 1rem;
+        }
+        .btn-enviar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .hidden { display: none; }
+        .mensaje-confirmacion {
+            margin-top: 2rem;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            display: none;
+        }
+        .mensaje-confirmacion h3 { color: #155724; margin-bottom: 0.5rem; }
+        .mensaje-confirmacion p { color: #155724; }
+        .info-box {
+            background: #e8f4f8;
+            border-left: 4px solid #F18F01;
+            padding: 0.8rem;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+        }
+        .info-box p { margin: 0; font-size: 0.8rem; color: #0B4F6C; }
+        @media (max-width: 768px) {
+            body { padding: 1rem; }
+            .formulario { padding: 1.5rem; }
+            .form-row { grid-template-columns: 1fr; gap: 1rem; }
+        }
+        
+        .ayuda-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 450px;
+            max-width: 90vw;
+            max-height: 80vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .ayuda-panel.open { display: flex; animation: fadeInScale 0.2s ease; }
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+        .ayuda-header {
+            background: #0B4F6C;
+            color: white;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .ayuda-header h4 { margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .cerrar-ayuda { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+        .ayuda-preguntas { flex: 1; overflow-y: auto; padding: 1rem; }
+        .pregunta {
+            margin-bottom: 0.8rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .pregunta-btn {
+            width: 100%;
+            text-align: left;
+            padding: 0.8rem 1rem;
+            background: #f8f9fa;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            color: #0B4F6C;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .pregunta-btn:hover { background: #f0f0f0; }
+        .pregunta-btn i { transition: transform 0.3s; }
+        .pregunta-btn.open i { transform: rotate(180deg); }
+        .respuesta {
+            display: none;
+            padding: 1rem;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: #555;
+        }
+        .respuesta.open { display: block; }
+        .ayuda-footer {
+            padding: 1rem;
+            background: #f8f9fa;
+            border-top: 1px solid #e0e0e0;
+            text-align: center;
+        }
+        .btn-contactar {
+            background: #F18F01;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+        }
+        .btn-contactar:hover { background: #F77F00; transform: translateY(-2px); }
+        .overlay-ayuda {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+        }
+        .overlay-ayuda.open { display: block; }
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid white;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📋 Solicita tu página web</h1>
+            <p>Completa el formulario con ayuda de <strong>Sera</strong> (haz clic en el ❓ de cada sección)</p>
+            <p>Te contactaremos para agendar una videollamada y revisar tu página contigo.</p>
+        </div>
+
+        <div class="formulario" id="formularioCliente">
+            <!-- DATOS DE MARCA -->
+            <div class="seccion-formulario">
+                <div class="seccion-titulo">
+                    <i class="fas fa-building"></i>
+                    <h2>Datos de tu negocio</h2>
+                    <button type="button" class="btn-ayuda" data-seccion="marca"><i class="fas fa-question-circle"></i></button>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nombre del negocio <span class="required">*</span></label>
+                        <input type="text" id="nombre-negocio" placeholder="Ej: Mi Negocio">
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre corto / Logo</label>
+                        <input type="text" id="logo-negocio" placeholder="Ej: ✨ MiNegocio">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Eslogan</label>
+                        <input type="text" id="eslogan" placeholder="Ej: Calidad y confianza">
+                    </div>
+                    <div class="form-group">
+                        <label>Email de contacto <span class="required">*</span></label>
+                        <input type="email" id="contacto-email" placeholder="Ej: info@minegocio.com">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Teléfono <span class="required">*</span></label>
+                        <input type="tel" id="contacto-telefono" placeholder="Ej: +53 5 12345678">
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLORES -->
+            <div class="seccion-formulario">
+                <div class="seccion-titulo">
+                    <i class="fas fa-palette"></i>
+                    <h2>Colores de tu marca</h2>
+                    <button type="button" class="btn-ayuda" data-seccion="colores"><i class="fas fa-question-circle"></i></button>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Color principal</label>
+                        <div class="color-input">
+                            <input type="color" id="color-primario" value="#1E3A5F">
+                            <span id="color-primario-text">#1E3A5F</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Color secundario</label>
+                        <div class="color-input">
+                            <input type="color" id="color-secundario" value="#4A90E2">
+                            <span id="color-secundario-text">#4A90E2</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Color de acento</label>
+                        <div class="color-input">
+                            <input type="color" id="color-acento" value="#F77F00">
+                            <span id="color-acento-text">#F77F00</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Color de texto</label>
+                        <div class="color-input">
+                            <input type="color" id="color-texto" value="#0A1C2E">
+                            <span id="color-texto-text">#0A1C2E</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Color de fondo</label>
+                    <div class="color-input">
+                        <input type="color" id="color-fondo" value="#F0F8FF">
+                        <span id="color-fondo-text">#F0F8FF</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HERO -->
+            <div class="seccion-formulario">
+                <div class="seccion-titulo">
+                    <i class="fas fa-image"></i>
+                    <h2>Portada principal (Hero)</h2>
+                    <button type="button" class="btn-ayuda" data-seccion="hero"><i class="fas fa-question-circle"></i></button>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Texto superior</label>
+                        <input type="text" id="hero-superior" placeholder="Ej: BIENVENIDOS A">
+                    </div>
+                    <div class="form-group">
+                        <label>Texto principal</label>
+                        <input type="text" id="hero-principal" placeholder="Ej: Mi Negocio">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Texto inferior</label>
+                        <input type="text" id="hero-inferior" placeholder="Ej: Calidad • Confianza">
+                    </div>
+                    <div class="form-group">
+                        <label>Texto del botón</label>
+                        <input type="text" id="hero-boton" value="Ver productos">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>URL de la imagen de fondo</label>
+                    <input type="text" id="hero-imagen" placeholder="https://images.unsplash.com/photo-1498931299472-f7a63a5a1cfa?w=1600">
+                </div>
+                <div class="form-group">
+                    <label>Opacidad del overlay (0 a 1)</label>
+                    <input type="number" id="hero-overlay" step="0.1" min="0" max="1" value="0.5">
+                </div>
+            </div>
+
+            <!-- SOBRE NOSOTROS -->
+            <div class="seccion-formulario">
+                <div class="seccion-titulo">
+                    <i class="fas fa-users"></i>
+                    <h2>Sobre Nosotros</h2>
+                    <button type="button" class="btn-ayuda" data-seccion="nosotros"><i class="fas fa-question-circle"></i></button>
+                </div>
+                <div class="form-group">
+                    <label>Título</label>
+                    <input type="text" id="nosotros-titulo" value="Sobre Nosotros">
+                </div>
+                <div class="form-group">
+                    <label>Subtítulo</label>
+                    <input type="text" id="nosotros-subtitulo" value="Conócenos mejor">
+                </div>
+                <div class="form-group">
+                    <label>Historia / Descripción</label>
+                    <textarea id="nosotros-historia" rows="4" placeholder="Cuéntanos la historia de tu negocio..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>URL de la imagen</label>
+                    <input type="text" id="nosotros-imagen" placeholder="https://images.unsplash.com/photo-1505842465776-3b4953ca4f44?w=800">
+                </div>
+                <div class="form-group">
+                    <label>Valores (separados por coma)</label>
+                    <input type="text" id="nosotros-valores" placeholder="Ej: Calidad, Confianza, Compromiso">
+                </div>
+            </div>
+
+            <!-- PRODUCTOS -->
+            <div class="seccion-formulario">
+                <div class="seccion-titulo">
+                    <i class="fas fa-box"></i>
+                    <h2>Productos o Servicios</h2>
+                    <button type="button" class="btn-ayuda" data-seccion="productos"><i class="fas fa-question-circle"></i></button>
+                </div>
+                <div id="productos-container"></div>
+                <button type="button" class="btn-agregar" onclick="agregarProducto()"><i class="fas fa-plus"></i> Agregar producto</button>
+            </div>
+
+            <!-- TESTIMONIOS -->
+            <div class="seccion-formulario">
+                <div class="seccion-titulo">
+                    <i class="fas fa-star"></i>
+                    <h2>Testimonios de clientes</h2>
+                    <button type="button" class="btn-ayuda" data-seccion="testimonios"><i class="fas fa-question-circle"></i></button>
+                </div>
+                <div id="testimonios-container"></div>
+                <button type="button" class="btn-agregar" onclick="agregarTestimonio()"><i class="fas fa-plus"></i> Agregar testimonio</button>
+            </div>
+
+            <!-- GALERÍA -->
+            <div class="seccion-formulario">
+                <div class="seccion-titulo">
+                    <i class="fas fa-images"></i>
+                    <h2>Galería de imágenes</h2>
+                    <button type="button" class="btn-ayuda" data-seccion="galeria"><i class="fas fa-question-circle"></i></button>
+                </div>
+                <div id="galeria-container"></div>
+                <button type="button" class="btn-agregar" onclick="agregarGaleria()"><i class="fas fa-plus"></i> Agregar categoría</button>
+            </div>
+
+            <!-- CONTACTO -->
+            <div class="seccion-formulario">
+                <div class="seccion-titulo">
+                    <i class="fas fa-phone-alt"></i>
+                    <h2>Información de contacto</h2>
+                    <button type="button" class="btn-ayuda" data-seccion="contacto"><i class="fas fa-question-circle"></i></button>
+                </div>
+                <div class="form-group">
+                    <label>Dirección</label>
+                    <input type="text" id="contacto-direccion" placeholder="Ej: Calle Principal #123, Ciudad">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>WhatsApp</label>
+                        <input type="text" id="contacto-whatsapp" placeholder="Ej: +53 5 12345678">
+                    </div>
+                    <div class="form-group">
+                        <label>URL del mapa (Google Maps embed)</label>
+                        <input type="text" id="contacto-mapa" placeholder="https://www.google.com/maps/embed?...">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Facebook</label>
+                        <input type="text" id="red-facebook" placeholder="https://facebook.com/tu-pagina">
+                    </div>
+                    <div class="form-group">
+                        <label>Instagram</label>
+                        <input type="text" id="red-instagram" placeholder="https://instagram.com/tu-cuenta">
+                    </div>
+                </div>
+            </div>
+
+            <!-- PIE DE PÁGINA -->
+            <div class="seccion-formulario">
+                <div class="seccion-titulo">
+                    <i class="fas fa-copyright"></i>
+                    <h2>Pie de página</h2>
+                    <button type="button" class="btn-ayuda" data-seccion="general"><i class="fas fa-question-circle"></i></button>
+                </div>
+                <div class="form-group">
+                    <label>Texto del footer</label>
+                    <input type="text" id="footer-texto" placeholder="Ej: © 2025 Mi Negocio · Todos los derechos reservados">
+                </div>
+            </div>
+
+            <button type="button" class="btn-enviar" id="btnEnviar">
+                <i class="fas fa-paper-plane"></i> Enviar mi información
+            </button>
+        </div>
+
+        <div class="mensaje-confirmacion" id="mensajeConfirmacion">
+            <h3><i class="fas fa-check-circle"></i> ¡Solicitud recibida!</h3>
+            <p>Gracias por confiar en nosotros para crear tu página web.</p>
+            <p>Hemos recibido toda tu información. En los próximos días nos pondremos en contacto contigo para agendar una videollamada y revisar tu página.</p>
+            <p><strong>¡Pronto tu negocio estará en línea!</strong></p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-conector.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
+    <script>
+        const preguntasPorSeccion = {
+            marca: {
+                titulo: "💡 Ayuda: Datos de tu negocio",
+                preguntas: [
+                    { q: "¿Qué nombre poner a mi negocio?", a: "Pon el nombre real de tu negocio. Debe ser fácil de recordar y representar lo que haces." },
+                    { q: "¿Qué es el logo y qué pongo ahí?", a: "El logo es el ícono o texto que aparece arriba. Puedes poner un emoji seguido del nombre corto." },
+                    { q: "¿Para qué sirve el eslogan?", a: "Es una frase corta que resume lo que ofreces." }
+                ]
+            },
+            colores: {
+                titulo: "🎨 Ayuda: Colores de tu marca",
+                preguntas: [
+                    { q: "¿Qué colores elijo para mi página?", a: "Los de tu logo. Si no tienes logo, elige 2-3 que representen tu negocio." },
+                    { q: "¿Qué significa cada color?", a: "Rojo=energía, azul=confianza, verde=naturaleza, amarillo=alegría." }
+                ]
+            },
+            hero: {
+                titulo: "🖼️ Ayuda: Portada principal (Hero)",
+                preguntas: [
+                    { q: "¿Qué imagen pongo en el Hero?", a: "Una foto que represente tu negocio: tu local, tu producto estrella." },
+                    { q: "¿Qué texto escribo en el Hero?", a: "Frase corta que diga qué haces y para quién." }
+                ]
+            },
+            nosotros: {
+                titulo: "📖 Ayuda: Sobre Nosotros",
+                preguntas: [
+                    { q: "¿Qué escribo en 'Sobre Nosotros'?", a: "Quiénes son, cómo empezaron, qué los hace diferentes." },
+                    { q: "¿Qué foto pongo aquí?", a: "Tu equipo, tu local, o una escena que muestre tu trabajo real." }
+                ]
+            },
+            productos: {
+                titulo: "📦 Ayuda: Productos o Servicios",
+                preguntas: [
+                    { q: "¿Cuántos productos debo mostrar?", a: "Los más importantes. Entre 4 y 8 es ideal." },
+                    { q: "¿Qué información debe tener cada producto?", a: "Imagen clara, nombre, descripción breve, precio visible." }
+                ]
+            },
+            testimonios: {
+                titulo: "⭐ Ayuda: Testimonios",
+                preguntas: [
+                    { q: "¿Cómo consigo buenos testimonios?", a: "Pide a clientes felices una frase específica sobre su experiencia." },
+                    { q: "¿Qué debe tener un buen testimonio?", a: "Nombre, foto, frase concreta." }
+                ]
+            },
+            galeria: {
+                titulo: "📸 Ayuda: Galería",
+                preguntas: [
+                    { q: "¿Qué fotos pongo en la galería?", a: "Tu mejor trabajo: productos, equipo, espacio." },
+                    { q: "¿Cuántas fotos debo poner?", a: "Mínimo 4, máximo 12." }
+                ]
+            },
+            contacto: {
+                titulo: "📞 Ayuda: Contacto",
+                preguntas: [
+                    { q: "¿Qué información de contacto debo poner?", a: "Teléfono, WhatsApp, email, dirección, redes sociales." },
+                    { q: "¿Qué redes sociales debo incluir?", a: "Solo las que usas activamente." }
+                ]
+            },
+            general: {
+                titulo: "💡 Consejos generales",
+                preguntas: [
+                    { q: "¿Cómo hago que mi página se vea profesional?", a: "Fotos de calidad, texto claro, colores coherentes." },
+                    { q: "¿Qué errores evitar?", a: "Imágenes genéricas, textos muy largos, no mostrar precios." }
+                ]
+            }
+        };
+
+        let productos = [];
+        let testimonios = [];
+        let galeria = [];
+        let productoId = 1;
+        let testimonioId = 1;
+        let galeriaId = 1;
+
+        function mostrarAyuda(seccionId) {
+            const seccion = preguntasPorSeccion[seccionId];
+            if (!seccion) return;
+            
+            let panel = document.getElementById('ayudaPanelGlobal');
+            let overlay = document.getElementById('ayudaOverlayGlobal');
+            
+            if (!panel) {
+                panel = document.createElement('div');
+                panel.id = 'ayudaPanelGlobal';
+                panel.className = 'ayuda-panel';
+                document.body.appendChild(panel);
+                overlay = document.createElement('div');
+                overlay.id = 'ayudaOverlayGlobal';
+                overlay.className = 'overlay-ayuda';
+                document.body.appendChild(overlay);
+                overlay.addEventListener('click', cerrarAyuda);
+            }
+            
+            let html = `<div class="ayuda-header"><h4><i class="fas fa-question-circle"></i> ${seccion.titulo}</h4><button class="cerrar-ayuda" onclick="cerrarAyuda()">&times;</button></div><div class="ayuda-preguntas">`;
+            seccion.preguntas.forEach(p => {
+                html += `<div class="pregunta"><button class="pregunta-btn" onclick="toggleRespuesta(this)"><span>❓ ${p.q}</span><i class="fas fa-chevron-down"></i></button><div class="respuesta"><i class="fas fa-reply" style="margin-right: 8px; color: #F18F01;"></i> ${p.a}</div></div>`;
+            });
+            html += `</div><div class="ayuda-footer"><button class="btn-contactar" onclick="contactarAsesor()"><i class="fab fa-whatsapp"></i> Hablar con un asesor</button></div>`;
+            
+            panel.innerHTML = html;
+            panel.classList.add('open');
+            overlay.classList.add('open');
+        }
+
+        function cerrarAyuda() {
+            const panel = document.getElementById('ayudaPanelGlobal');
+            const overlay = document.getElementById('ayudaOverlayGlobal');
+            if (panel) panel.classList.remove('open');
+            if (overlay) overlay.classList.remove('open');
+        }
+
+        function toggleRespuesta(btn) {
+            const respuesta = btn.nextElementSibling;
+            respuesta.classList.toggle('open');
+            btn.classList.toggle('open');
+        }
+
+        function contactarAsesor() {
+            window.open('https://wa.me/5358481702?text=Hola%2C%20necesito%20ayuda%20con%20mi%20p%C3%A1gina%20web', '_blank');
+            cerrarAyuda();
+        }
+
+        function agregarProducto() {
+            productos.push({ id: productoId++, nombre: '', descripcion: '', precio: 0, imagen: 'https://images.unsplash.com/photo-1498931299472-f7a63a5a1cfa?w=600', caracteristicas: [], badgePermanente: '' });
+            renderizarProductos();
+        }
+
+        function eliminarProducto(id) {
+            productos = productos.filter(p => p.id !== id);
+            renderizarProductos();
+        }
+
+        function renderizarProductos() {
+            const container = document.getElementById('productos-container');
+            if (!container) return;
+            if (productos.length === 0) {
+                container.innerHTML = '<p style="color: #888; text-align: center;">No hay productos. Haz clic en "Agregar producto"</p>';
+                return;
+            }
+            container.innerHTML = productos.map(p => `
+                <div class="item-card">
+                    <div class="item-header" onclick="toggleContenido(this)">
+                        <strong>📦 Producto ${p.id}</strong>
+                        <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarProducto(${p.id})">Eliminar</button>
+                    </div>
+                    <div class="item-contenido hidden">
+                        <div class="form-group"><label>Nombre</label><input type="text" class="prod-nombre" value="${escapeHtml(p.nombre)}" onchange="actualizarProducto(${p.id}, 'nombre', this.value)"></div>
+                        <div class="form-group"><label>Precio</label><input type="number" class="prod-precio" value="${p.precio}" onchange="actualizarProducto(${p.id}, 'precio', parseFloat(this.value))"></div>
+                        <div class="form-group"><label>Descripción</label><textarea class="prod-descripcion" rows="2" onchange="actualizarProducto(${p.id}, 'descripcion', this.value)">${escapeHtml(p.descripcion)}</textarea></div>
+                        <div class="form-group"><label>URL de imagen</label><input type="text" class="prod-imagen" value="${p.imagen}" onchange="actualizarProducto(${p.id}, 'imagen', this.value)"></div>
+                        <div class="form-group"><label>Características (separadas por coma)</label><input type="text" class="prod-caracteristicas" value="${p.caracteristicas.join(', ')}" onchange="actualizarProducto(${p.id}, 'caracteristicas', this.value.split(',').map(c => c.trim()).filter(c => c))"></div>
+                        <div class="form-group"><label>Badge / Etiqueta</label><input type="text" class="prod-badge" value="${p.badgePermanente}" onchange="actualizarProducto(${p.id}, 'badgePermanente', this.value)"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function actualizarProducto(id, campo, valor) {
+            const index = productos.findIndex(p => p.id === id);
+            if (index !== -1) productos[index][campo] = valor;
+        }
+
+        function agregarTestimonio() {
+            testimonios.push({ id: testimonioId++, nombre: '', lugar: '', texto: '', rating: 5, avatar: 'https://randomuser.me/api/portraits/women/44.jpg' });
+            renderizarTestimonios();
+        }
+
+        function eliminarTestimonio(id) {
+            testimonios = testimonios.filter(t => t.id !== id);
+            renderizarTestimonios();
+        }
+
+        function renderizarTestimonios() {
+            const container = document.getElementById('testimonios-container');
+            if (!container) return;
+            if (testimonios.length === 0) {
+                container.innerHTML = '<p style="color: #888; text-align: center;">No hay testimonios. Haz clic en "Agregar testimonio"</p>';
+                return;
+            }
+            container.innerHTML = testimonios.map(t => `
+                <div class="item-card">
+                    <div class="item-header" onclick="toggleContenido(this)">
+                        <strong>⭐ Testimonio ${t.id}</strong>
+                        <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarTestimonio(${t.id})">Eliminar</button>
+                    </div>
+                    <div class="item-contenido hidden">
+                        <div class="form-row">
+                            <div class="form-group"><label>Nombre</label><input type="text" value="${escapeHtml(t.nombre)}" onchange="testimonios.find(t2 => t2.id === ${t.id}).nombre = this.value"></div>
+                            <div class="form-group"><label>Lugar</label><input type="text" value="${escapeHtml(t.lugar)}" onchange="testimonios.find(t2 => t2.id === ${t.id}).lugar = this.value"></div>
+                        </div>
+                        <div class="form-group"><label>Testimonio</label><textarea rows="2" onchange="testimonios.find(t2 => t2.id === ${t.id}).texto = this.value">${escapeHtml(t.texto)}</textarea></div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Rating (1-5)</label><input type="number" min="1" max="5" value="${t.rating}" onchange="testimonios.find(t2 => t2.id === ${t.id}).rating = parseInt(this.value)"></div>
+                            <div class="form-group"><label>Avatar URL</label><input type="text" value="${t.avatar}" onchange="testimonios.find(t2 => t2.id === ${t.id}).avatar = this.value"></div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function agregarGaleria() {
+            galeria.push({ id: galeriaId++, titulo: '', descripcion: '', fotos: ['https://images.unsplash.com/photo-1498931299472-f7a63a5a1cfa?w=600'] });
+            renderizarGaleria();
+        }
+
+        function eliminarGaleria(id) {
+            galeria = galeria.filter(g => g.id !== id);
+            renderizarGaleria();
+        }
+
+        function renderizarGaleria() {
+            const container = document.getElementById('galeria-container');
+            if (!container) return;
+            if (galeria.length === 0) {
+                container.innerHTML = '<p style="color: #888; text-align: center;">No hay categorías. Haz clic en "Agregar categoría"</p>';
+                return;
+            }
+            container.innerHTML = galeria.map(g => `
+                <div class="item-card">
+                    <div class="item-header" onclick="toggleContenido(this)">
+                        <strong>🖼️ ${g.titulo || `Categoría ${g.id}`}</strong>
+                        <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarGaleria(${g.id})">Eliminar</button>
+                    </div>
+                    <div class="item-contenido hidden">
+                        <div class="form-row">
+                            <div class="form-group"><label>Título</label><input type="text" value="${escapeHtml(g.titulo)}" onchange="galeria.find(g2 => g2.id === ${g.id}).titulo = this.value"></div>
+                            <div class="form-group"><label>Descripción</label><input type="text" value="${escapeHtml(g.descripcion)}" onchange="galeria.find(g2 => g2.id === ${g.id}).descripcion = this.value"></div>
+                        </div>
+                        <div class="form-group"><label>URLs de imágenes (separadas por coma)</label><input type="text" value="${g.fotos.join(', ')}" onchange="galeria.find(g2 => g2.id === ${g.id}).fotos = this.value.split(',').map(f => f.trim()).filter(f => f)"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleContenido(header) {
+            const contenido = header.nextElementSibling;
+            contenido.classList.toggle('hidden');
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, m => { if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m; });
+        }
+
+        function actualizarColorPreview() {
+            document.getElementById('color-primario-text').textContent = document.getElementById('color-primario').value;
+            document.getElementById('color-secundario-text').textContent = document.getElementById('color-secundario').value;
+            document.getElementById('color-acento-text').textContent = document.getElementById('color-acento').value;
+            document.getElementById('color-texto-text').textContent = document.getElementById('color-texto').value;
+            document.getElementById('color-fondo-text').textContent = document.getElementById('color-fondo').value;
+        }
+
+        async function enviarFormulario() {
+            const btn = document.getElementById('btnEnviar');
+            const textoOriginal = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner"></span> Enviando...';
+            btn.disabled = true;
+
+            const nombre = document.getElementById('nombre-negocio').value;
+            const email = document.getElementById('contacto-email').value;
+            const telefono = document.getElementById('contacto-telefono').value;
+
+            if (!nombre || !email || !telefono) {
+                alert('Por favor completa: Nombre del negocio, Email y Teléfono');
+                btn.innerHTML = textoOriginal;
+                btn.disabled = false;
+                return;
+            }
+
+            const config = {
+                marca: {
+                    nombre: nombre,
+                    logo: document.getElementById('logo-negocio').value,
+                    eslogan: document.getElementById('eslogan').value,
+                    colores: {
+                        primario: document.getElementById('color-primario').value,
+                        secundario: document.getElementById('color-secundario').value,
+                        acento: document.getElementById('color-acento').value,
+                        texto: document.getElementById('color-texto').value,
+                        fondo: document.getElementById('color-fondo').value
+                    }
+                },
+                hero: {
+                    texto_superior: document.getElementById('hero-superior').value,
+                    texto_principal: document.getElementById('hero-principal').value,
+                    texto_inferior: document.getElementById('hero-inferior').value,
+                    boton: document.getElementById('hero-boton').value,
+                    imagen: document.getElementById('hero-imagen').value,
+                    overlay: parseFloat(document.getElementById('hero-overlay').value)
+                },
+                nosotros: {
+                    titulo: document.getElementById('nosotros-titulo').value,
+                    subtitulo: document.getElementById('nosotros-subtitulo').value,
+                    historia: document.getElementById('nosotros-historia').value,
+                    imagen: document.getElementById('nosotros-imagen').value,
+                    valores: (document.getElementById('nosotros-valores').value || '').split(',').map(v => v.trim())
+                },
+                productos: productos,
+                testimonios: testimonios,
+                galeria: galeria,
+                contacto: {
+                    direccion: document.getElementById('contacto-direccion').value,
+                    telefono: telefono,
+                    email: email,
+                    whatsapp: document.getElementById('contacto-whatsapp').value,
+                    mapa: document.getElementById('contacto-mapa').value,
+                    redes: {
+                        facebook: document.getElementById('red-facebook').value,
+                        instagram: document.getElementById('red-instagram').value
+                    }
+                },
+                footer: {
+                    texto: document.getElementById('footer-texto').value
+                }
+            };
+
+            try {
+                const resultado = await window.crearNegocio({
+                    cliente_nombre: nombre,
+                    cliente_email: email,
+                    cliente_telefono: telefono,
+                    config: config
+                });
+
+                console.log('✅ Negocio creado:', resultado);
+
+                document.getElementById('formularioCliente').style.display = 'none';
+                document.getElementById('mensajeConfirmacion').style.display = 'block';
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error al enviar: ' + error.message);
+                btn.innerHTML = textoOriginal;
+                btn.disabled = false;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            window.initSupabase();
+            agregarProducto();
+            agregarProducto();
+            agregarTestimonio();
+            agregarTestimonio();
+            agregarGaleria();
+            actualizarColorPreview();
+
+            document.getElementById('color-primario')?.addEventListener('input', actualizarColorPreview);
+            document.getElementById('color-secundario')?.addEventListener('input', actualizarColorPreview);
+            document.getElementById('color-acento')?.addEventListener('input', actualizarColorPreview);
+            document.getElementById('color-texto')?.addEventListener('input', actualizarColorPreview);
+            document.getElementById('color-fondo')?.addEventListener('input', actualizarColorPreview);
+            document.getElementById('btnEnviar')?.addEventListener('click', enviarFormulario);
+
+            document.querySelectorAll('.btn-ayuda').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const seccion = btn.dataset.seccion;
+                    if (seccion && preguntasPorSeccion[seccion]) mostrarAyuda(seccion);
+                    else mostrarAyuda('general');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

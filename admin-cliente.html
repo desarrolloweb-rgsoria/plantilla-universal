@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Mi Negocio</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #f5f5f5;
+            padding: 2rem;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .login-form, .panel-principal {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .login-form { max-width: 400px; margin: 0 auto; }
+        .form-group { margin-bottom: 1rem; }
+        label { font-weight: 600; display: block; margin-bottom: 0.3rem; }
+        input, select, textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            font-family: inherit;
+        }
+        button {
+            background: #0B4F6C;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        button:hover { background: #1a6d8f; transform: scale(1.02); }
+        button:active { transform: scale(0.98); }
+        .btn-eliminar { background: #dc3545; }
+        .btn-eliminar:hover { background: #bb2d3b; }
+        .btn-agregar { background: #28a745; margin-bottom: 1rem; }
+        .btn-agregar:hover { background: #218838; }
+        .tab-buttons { display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
+        .tab-btn { background: #e0e0e0; color: #333; }
+        .tab-btn.active { background: #0B4F6C; color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .item-card {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            cursor: pointer;
+        }
+        .item-contenido { margin-top: 1rem; }
+        .hidden { display: none; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+        @media (max-width: 768px) { .form-row { grid-template-columns: 1fr; } }
+        .mensaje {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 12px;
+            display: none;
+        }
+        .mensaje-exito { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .mensaje-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .logout-btn { background: #dc3545; margin-bottom: 1rem; }
+        h2 { color: #0B4F6C; margin-bottom: 1rem; }
+        .img-miniatura {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .categoria-badge {
+            display: inline-block;
+            background: #0B4F6C;
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            margin-left: 0.5rem;
+        }
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid white;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="loginPanel" class="login-form">
+            <h1>🔐 Acceso a tu panel</h1>
+            <div class="form-group">
+                <label>ID de tu negocio</label>
+                <input type="text" id="negocioId" placeholder="Ej: abc123...">
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" id="password" placeholder="admin">
+            </div>
+            <button onclick="login()">Ingresar</button>
+        </div>
+
+        <div id="adminPanel" style="display: none;">
+            <button class="logout-btn" onclick="logout()">🚪 Cerrar sesión</button>
+            <h1>📋 Panel de Administración</h1>
+            <p>Aquí puedes gestionar el contenido de tu página web.</p>
+            
+            <div class="tab-buttons">
+                <button class="tab-btn active" data-tab="productos">📦 Productos</button>
+                <button class="tab-btn" data-tab="servicios">🛠️ Servicios</button>
+                <button class="tab-btn" data-tab="galeria">📸 Galería</button>
+                <button class="tab-btn" data-tab="testimonios">⭐ Testimonios</button>
+            </div>
+
+            <div id="tab-productos" class="tab-content active">
+                <button class="btn-agregar" onclick="abrirModalAgregar('producto')"><i class="fas fa-plus"></i> Agregar producto</button>
+                <div id="productos-list"></div>
+            </div>
+            <div id="tab-servicios" class="tab-content">
+                <button class="btn-agregar" onclick="abrirModalAgregar('servicio')"><i class="fas fa-plus"></i> Agregar servicio</button>
+                <div id="servicios-list"></div>
+            </div>
+            <div id="tab-galeria" class="tab-content">
+                <div style="margin-bottom: 1rem;">
+                    <label>Filtrar por categoría:</label>
+                    <select id="filtroCategoria" onchange="filtrarGaleria()">
+                        <option value="todas">Todas las categorías</option>
+                        <option value="productos">📦 Productos</option>
+                        <option value="servicios">🛠️ Servicios</option>
+                        <option value="equipo">👥 Equipo</option>
+                        <option value="local">🏢 Local</option>
+                        <option value="eventos">🎉 Eventos</option>
+                        <option value="otros">📷 Otros</option>
+                    </select>
+                </div>
+                <button class="btn-agregar" onclick="abrirModalAgregar('imagen')"><i class="fas fa-plus"></i> Agregar imagen</button>
+                <div id="galeria-list"></div>
+            </div>
+            <div id="tab-testimonios" class="tab-content">
+                <button class="btn-agregar" onclick="abrirModalAgregar('testimonio')"><i class="fas fa-plus"></i> Agregar testimonio</button>
+                <div id="testimonios-list"></div>
+            </div>
+
+            <div id="mensaje" class="mensaje"></div>
+        </div>
+    </div>
+
+    <div id="modalAgregar" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;">
+        <div style="background: white; border-radius: 20px; padding: 2rem; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
+            <h3 id="modalTitulo">Agregar</h3>
+            <div id="modalFormulario"></div>
+            <div style="margin-top: 1rem; display: flex; gap: 1rem; justify-content: flex-end;">
+                <button onclick="cerrarModalAgregar()">Cancelar</button>
+                <button id="btnGuardarModal" style="background: #28a745;">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-conector.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
+    <script>
+        let negocioIdActual = null;
+        let productosData = [];
+        let serviciosData = [];
+        let galeriaData = [];
+        let galeriaFiltrada = [];
+        let testimoniosData = [];
+        let tipoAgregando = null;
+        let categoriaActual = 'todas';
+
+        async function login() {
+            const id = document.getElementById('negocioId').value;
+            const pass = document.getElementById('password').value;
+            
+            if (!id) { alert('Ingresa el ID de tu negocio'); return; }
+            if (pass !== 'admin') { alert('Contraseña incorrecta'); return; }
+            
+            try {
+                window.initSupabase();
+                const negocio = await window.getNegocio(id);
+                if (!negocio) { alert('Negocio no encontrado'); return; }
+                if (negocio.estado !== 'publicado') { alert('Tu página aún no está publicada.'); return; }
+                
+                negocioIdActual = id;
+                document.getElementById('loginPanel').style.display = 'none';
+                document.getElementById('adminPanel').style.display = 'block';
+                cargarTodosLosDatos();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        function logout() {
+            document.getElementById('loginPanel').style.display = 'block';
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('negocioId').value = '';
+            document.getElementById('password').value = '';
+            negocioIdActual = null;
+        }
+
+        async function cargarTodosLosDatos() {
+            await cargarProductos();
+            await cargarServicios();
+            await cargarGaleria();
+            await cargarTestimonios();
+        }
+
+        async function cargarProductos() {
+            productosData = await window.getProductosPorNegocio(negocioIdActual);
+            renderizarProductos();
+        }
+
+        function renderizarProductos() {
+            const container = document.getElementById('productos-list');
+            if (!productosData.length) { container.innerHTML = '<p>No hay productos. Agrega uno.</p>'; return; }
+            
+            container.innerHTML = productosData.map(p => `
+                <div class="item-card">
+                    <div class="item-header" onclick="toggleContenido(this)">
+                        <strong>📦 ${escapeHtml(p.nombre)}</strong>
+                        <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarProducto(${p.id})">Eliminar</button>
+                    </div>
+                    <div class="item-contenido hidden">
+                        <div class="form-group"><label>Nombre</label><input type="text" class="edit-nombre" value="${escapeHtml(p.nombre)}"></div>
+                        <div class="form-group"><label>Descripción</label><textarea class="edit-descripcion" rows="2">${escapeHtml(p.descripcion || '')}</textarea></div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Precio</label><input type="number" class="edit-precio" value="${p.precio || 0}"></div>
+                            <div class="form-group"><label>Badge</label><input type="text" class="edit-badge" value="${escapeHtml(p.badge_permanente || '')}"></div>
+                        </div>
+                        <div class="form-group"><label>Características (separadas por coma)</label><input type="text" class="edit-caracteristicas" value="${(p.caracteristicas || []).join(', ')}"></div>
+                        <div class="form-group"><label>URL de imagen</label><input type="text" class="edit-imagen" value="${p.imagen || ''}"></div>
+                        <button onclick="guardarProducto(${p.id})" style="margin-top: 0.5rem;">Guardar cambios</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function guardarProducto(id) {
+            const card = document.querySelector(`.item-card:has(button[onclick*="eliminarProducto(${id})"])`);
+            if (!card) return;
+            
+            const updates = {
+                nombre: card.querySelector('.edit-nombre')?.value || '',
+                descripcion: card.querySelector('.edit-descripcion')?.value || '',
+                precio: parseFloat(card.querySelector('.edit-precio')?.value) || 0,
+                badge_permanente: card.querySelector('.edit-badge')?.value || '',
+                caracteristicas: (card.querySelector('.edit-caracteristicas')?.value || '').split(',').map(c => c.trim()).filter(c => c),
+                imagen: card.querySelector('.edit-imagen')?.value || ''
+            };
+            
+            try {
+                await window.actualizarProducto(id, updates);
+                mostrarMensaje('✅ Producto actualizado');
+                cargarProductos();
+            } catch (error) {
+                mostrarMensaje('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function eliminarProducto(id) {
+            if (!confirm('¿Eliminar este producto?')) return;
+            try {
+                await window.eliminarProducto(id);
+                mostrarMensaje('✅ Producto eliminado');
+                cargarProductos();
+            } catch (error) {
+                mostrarMensaje('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function cargarServicios() {
+            serviciosData = await window.getServiciosPorNegocio(negocioIdActual);
+            renderizarServicios();
+        }
+
+        function renderizarServicios() {
+            const container = document.getElementById('servicios-list');
+            if (!serviciosData.length) { container.innerHTML = '<p>No hay servicios. Agrega uno.</p>'; return; }
+            
+            container.innerHTML = serviciosData.map(s => `
+                <div class="item-card">
+                    <div class="item-header" onclick="toggleContenido(this)">
+                        <strong>🛠️ ${escapeHtml(s.nombre)}</strong>
+                        <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarServicio(${s.id})">Eliminar</button>
+                    </div>
+                    <div class="item-contenido hidden">
+                        <div class="form-group"><label>Nombre</label><input type="text" class="edit-nombre" value="${escapeHtml(s.nombre)}"></div>
+                        <div class="form-group"><label>Descripción</label><textarea class="edit-descripcion" rows="2">${escapeHtml(s.descripcion || '')}</textarea></div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Horario</label><input type="text" class="edit-horario" value="${escapeHtml(s.horario || '')}"></div>
+                            <div class="form-group"><label>Icono (HTML)</label><input type="text" class="edit-icono" value="${escapeHtml(s.icono || '<i class="fas fa-star"></i>')}"></div>
+                        </div>
+                        <button onclick="guardarServicio(${s.id})" style="margin-top: 0.5rem;">Guardar cambios</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function guardarServicio(id) {
+            const card = document.querySelector(`.item-card:has(button[onclick*="eliminarServicio(${id})"])`);
+            if (!card) return;
+            
+            const updates = {
+                nombre: card.querySelector('.edit-nombre')?.value || '',
+                descripcion: card.querySelector('.edit-descripcion')?.value || '',
+                horario: card.querySelector('.edit-horario')?.value || '',
+                icono: card.querySelector('.edit-icono')?.value || '<i class="fas fa-star"></i>'
+            };
+            
+            try {
+                await window.actualizarServicio(id, updates);
+                mostrarMensaje('✅ Servicio actualizado');
+                cargarServicios();
+            } catch (error) {
+                mostrarMensaje('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function eliminarServicio(id) {
+            if (!confirm('¿Eliminar este servicio?')) return;
+            try {
+                await window.eliminarServicio(id);
+                mostrarMensaje('✅ Servicio eliminado');
+                cargarServicios();
+            } catch (error) {
+                mostrarMensaje('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function cargarGaleria() {
+            galeriaData = await window.getTodasLasImagenes(negocioIdActual);
+            filtrarGaleria();
+        }
+
+        function filtrarGaleria() {
+            const filtro = document.getElementById('filtroCategoria')?.value || 'todas';
+            categoriaActual = filtro;
+            
+            if (categoriaActual === 'todas') {
+                galeriaFiltrada = galeriaData;
+            } else {
+                galeriaFiltrada = galeriaData.filter(img => img.categoria === categoriaActual);
+            }
+            renderizarGaleria();
+        }
+
+        function renderizarGaleria() {
+            const container = document.getElementById('galeria-list');
+            if (!galeriaFiltrada.length) { 
+                container.innerHTML = '<p>No hay imágenes en esta categoría. Agrega una.</p>'; 
+                return; 
+            }
+            
+            container.innerHTML = galeriaFiltrada.map(img => `
+                <div class="item-card">
+                    <div class="item-header" onclick="toggleContenido(this)">
+                        <div>
+                            <strong>🖼️ ${escapeHtml(img.titulo || 'Sin título')}</strong>
+                            <span class="categoria-badge">${escapeHtml(img.categoria)}</span>
+                        </div>
+                        <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarImagen(${img.id})">Eliminar</button>
+                    </div>
+                    <div class="item-contenido hidden">
+                        <div class="form-row">
+                            <div class="form-group"><label>Título</label><input type="text" class="edit-titulo" value="${escapeHtml(img.titulo || '')}"></div>
+                            <div class="form-group"><label>Categoría</label>
+                                <select class="edit-categoria">
+                                    <option value="productos" ${img.categoria === 'productos' ? 'selected' : ''}>📦 Productos</option>
+                                    <option value="servicios" ${img.categoria === 'servicios' ? 'selected' : ''}>🛠️ Servicios</option>
+                                    <option value="equipo" ${img.categoria === 'equipo' ? 'selected' : ''}>👥 Equipo</option>
+                                    <option value="local" ${img.categoria === 'local' ? 'selected' : ''}>🏢 Local</option>
+                                    <option value="eventos" ${img.categoria === 'eventos' ? 'selected' : ''}>🎉 Eventos</option>
+                                    <option value="otros" ${img.categoria === 'otros' ? 'selected' : ''}>📷 Otros</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group"><label>Descripción</label><input type="text" class="edit-descripcion" value="${escapeHtml(img.descripcion || '')}"></div>
+                        <div class="form-group"><label>URL de la imagen</label><input type="text" class="edit-imagen" value="${img.imagen_url}"></div>
+                        <img src="${img.imagen_url}" class="img-miniatura" style="margin-top: 0.5rem;">
+                        <button onclick="guardarImagen(${img.id})" style="margin-top: 0.5rem;">Guardar cambios</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function guardarImagen(id) {
+            const card = document.querySelector(`.item-card:has(button[onclick*="eliminarImagen(${id})"])`);
+            if (!card) return;
+            
+            const updates = {
+                titulo: card.querySelector('.edit-titulo')?.value || '',
+                categoria: card.querySelector('.edit-categoria')?.value || 'otros',
+                descripcion: card.querySelector('.edit-descripcion')?.value || '',
+                imagen_url: card.querySelector('.edit-imagen')?.value || ''
+            };
+            
+            try {
+                await window.actualizarImagen(id, updates);
+                mostrarMensaje('✅ Imagen actualizada');
+                cargarGaleria();
+            } catch (error) {
+                mostrarMensaje('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function eliminarImagen(id) {
+            if (!confirm('¿Eliminar esta imagen?')) return;
+            try {
+                await window.eliminarImagen(id);
+                mostrarMensaje('✅ Imagen eliminada');
+                cargarGaleria();
+            } catch (error) {
+                mostrarMensaje('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function cargarTestimonios() {
+            testimoniosData = await window.getTestimoniosPorNegocio(negocioIdActual);
+            renderizarTestimonios();
+        }
+
+        function renderizarTestimonios() {
+            const container = document.getElementById('testimonios-list');
+            if (!testimoniosData.length) { container.innerHTML = '<p>No hay testimonios. Agrega uno.</p>'; return; }
+            
+            container.innerHTML = testimoniosData.map(t => `
+                <div class="item-card">
+                    <div class="item-header" onclick="toggleContenido(this)">
+                        <strong>⭐ ${escapeHtml(t.nombre)}</strong>
+                        <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarTestimonio(${t.id})">Eliminar</button>
+                    </div>
+                    <div class="item-contenido hidden">
+                        <div class="form-row">
+                            <div class="form-group"><label>Nombre</label><input type="text" class="edit-nombre" value="${escapeHtml(t.nombre)}"></div>
+                            <div class="form-group"><label>Lugar</label><input type="text" class="edit-lugar" value="${escapeHtml(t.lugar || '')}"></div>
+                        </div>
+                        <div class="form-group"><label>Testimonio</label><textarea class="edit-texto" rows="3">${escapeHtml(t.texto)}</textarea></div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Rating (1-5)</label><input type="number" class="edit-rating" min="1" max="5" value="${t.rating || 5}"></div>
+                            <div class="form-group"><label>Avatar URL</label><input type="text" class="edit-avatar" value="${t.avatar || ''}"></div>
+                        </div>
+                        <button onclick="guardarTestimonio(${t.id})" style="margin-top: 0.5rem;">Guardar cambios</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function guardarTestimonio(id) {
+            const card = document.querySelector(`.item-card:has(button[onclick*="eliminarTestimonio(${id})"])`);
+            if (!card) return;
+            
+            const updates = {
+                nombre: card.querySelector('.edit-nombre')?.value || '',
+                lugar: card.querySelector('.edit-lugar')?.value || '',
+                texto: card.querySelector('.edit-texto')?.value || '',
+                rating: parseInt(card.querySelector('.edit-rating')?.value) || 5,
+                avatar: card.querySelector('.edit-avatar')?.value || ''
+            };
+            
+            try {
+                await window.actualizarTestimonio(id, updates);
+                mostrarMensaje('✅ Testimonio actualizado');
+                cargarTestimonios();
+            } catch (error) {
+                mostrarMensaje('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function eliminarTestimonio(id) {
+            if (!confirm('¿Eliminar este testimonio?')) return;
+            try {
+                await window.eliminarTestimonio(id);
+                mostrarMensaje('✅ Testimonio eliminado');
+                cargarTestimonios();
+            } catch (error) {
+                mostrarMensaje('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        function abrirModalAgregar(tipo) {
+            tipoAgregando = tipo;
+            const modal = document.getElementById('modalAgregar');
+            const titulo = document.getElementById('modalTitulo');
+            const form = document.getElementById('modalFormulario');
+            
+            if (tipo === 'producto') {
+                titulo.textContent = 'Agregar producto';
+                form.innerHTML = `
+                    <div class="form-group"><label>Nombre *</label><input type="text" id="nuevo-nombre"></div>
+                    <div class="form-group"><label>Descripción</label><textarea id="nuevo-descripcion" rows="2"></textarea></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Precio</label><input type="number" id="nuevo-precio" value="0"></div>
+                        <div class="form-group"><label>Badge</label><input type="text" id="nuevo-badge" placeholder="Ej: Más vendido"></div>
+                    </div>
+                    <div class="form-group"><label>Características (separadas por coma)</label><input type="text" id="nuevo-caracteristicas"></div>
+                    <div class="form-group"><label>URL de imagen</label><input type="text" id="nuevo-imagen" value="https://images.unsplash.com/photo-1498931299472-f7a63a5a1cfa?w=600"></div>
+                `;
+            } else if (tipo === 'servicio') {
+                titulo.textContent = 'Agregar servicio';
+                form.innerHTML = `
+                    <div class="form-group"><label>Nombre *</label><input type="text" id="nuevo-nombre"></div>
+                    <div class="form-group"><label>Descripción</label><textarea id="nuevo-descripcion" rows="2"></textarea></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Horario</label><input type="text" id="nuevo-horario" placeholder="Ej: Lunes a viernes, 9am-5pm"></div>
+                        <div class="form-group"><label>Icono</label><input type="text" id="nuevo-icono" value='<i class="fas fa-star"></i>'></div>
+                    </div>
+                `;
+            } else if (tipo === 'imagen') {
+                titulo.textContent = 'Agregar imagen a galería';
+                form.innerHTML = `
+                    <div class="form-group"><label>Título</label><input type="text" id="nuevo-titulo"></div>
+                    <div class="form-group"><label>Categoría</label>
+                        <select id="nuevo-categoria">
+                            <option value="productos">📦 Productos</option>
+                            <option value="servicios">🛠️ Servicios</option>
+                            <option value="equipo">👥 Equipo</option>
+                            <option value="local">🏢 Local</option>
+                            <option value="eventos">🎉 Eventos</option>
+                            <option value="otros">📷 Otros</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Descripción</label><input type="text" id="nuevo-descripcion"></div>
+                    <div class="form-group"><label>URL de la imagen *</label><input type="text" id="nuevo-imagen" placeholder="https://..."></div>
+                `;
+            } else if (tipo === 'testimonio') {
+                titulo.textContent = 'Agregar testimonio';
+                form.innerHTML = `
+                    <div class="form-row">
+                        <div class="form-group"><label>Nombre *</label><input type="text" id="nuevo-nombre"></div>
+                        <div class="form-group"><label>Lugar</label><input type="text" id="nuevo-lugar"></div>
+                    </div>
+                    <div class="form-group"><label>Testimonio *</label><textarea id="nuevo-texto" rows="3"></textarea></div>
+                    <div class="form-row">
+                        <div class="form-group"><label>Rating (1-5)</label><input type="number" id="nuevo-rating" min="1" max="5" value="5"></div>
+                        <div class="form-group"><label>Avatar URL</label><input type="text" id="nuevo-avatar" value="https://randomuser.me/api/portraits/women/44.jpg"></div>
+                    </div>
+                `;
+            }
+            
+            modal.style.display = 'flex';
+            document.getElementById('btnGuardarModal').onclick = guardarNuevoElemento;
+        }
+
+        function cerrarModalAgregar() {
+            document.getElementById('modalAgregar').style.display = 'none';
+            tipoAgregando = null;
+        }
+
+        async function guardarNuevoElemento() {
+            if (tipoAgregando === 'producto') {
+                const nombre = document.getElementById('nuevo-nombre')?.value;
+                if (!nombre) { alert('El nombre es obligatorio'); return; }
+                
+                const nuevo = {
+                    nombre: nombre,
+                    descripcion: document.getElementById('nuevo-descripcion')?.value || '',
+                    precio: parseFloat(document.getElementById('nuevo-precio')?.value) || 0,
+                    badge_permanente: document.getElementById('nuevo-badge')?.value || '',
+                    caracteristicas: (document.getElementById('nuevo-caracteristicas')?.value || '').split(',').map(c => c.trim()).filter(c => c),
+                    imagen: document.getElementById('nuevo-imagen')?.value || '',
+                    disponible: true,
+                    orden: productosData.length
+                };
+                
+                try {
+                    await window.guardarProducto(negocioIdActual, nuevo);
+                    mostrarMensaje('✅ Producto agregado');
+                    cerrarModalAgregar();
+                    cargarProductos();
+                } catch (error) {
+                    mostrarMensaje('❌ Error: ' + error.message, 'error');
+                }
+            } else if (tipoAgregando === 'servicio') {
+                const nombre = document.getElementById('nuevo-nombre')?.value;
+                if (!nombre) { alert('El nombre es obligatorio'); return; }
+                
+                const nuevo = {
+                    nombre: nombre,
+                    descripcion: document.getElementById('nuevo-descripcion')?.value || '',
+                    horario: document.getElementById('nuevo-horario')?.value || 'Disponible bajo consulta',
+                    icono: document.getElementById('nuevo-icono')?.value || '<i class="fas fa-star"></i>',
+                    orden: serviciosData.length
+                };
+                
+                try {
+                    await window.guardarServicio(negocioIdActual, nuevo);
+                    mostrarMensaje('✅ Servicio agregado');
+                    cerrarModalAgregar();
+                    cargarServicios();
+                } catch (error) {
+                    mostrarMensaje('❌ Error: ' + error.message, 'error');
+                }
+            } else if (tipoAgregando === 'imagen') {
+                const imagenUrl = document.getElementById('nuevo-imagen')?.value;
+                if (!imagenUrl) { alert('La URL de la imagen es obligatoria'); return; }
+                
+                const nuevo = {
+                    titulo: document.getElementById('nuevo-titulo')?.value || '',
+                    categoria: document.getElementById('nuevo-categoria')?.value || 'otros',
+                    descripcion: document.getElementById('nuevo-descripcion')?.value || '',
+                    imagen_url: imagenUrl,
+                    orden: galeriaData.length
+                };
+                
+                try {
+                    await window.guardarImagen(negocioIdActual, nuevo);
+                    mostrarMensaje('✅ Imagen agregada');
+                    cerrarModalAgregar();
+                    cargarGaleria();
+                } catch (error) {
+                    mostrarMensaje('❌ Error: ' + error.message, 'error');
+                }
+            } else if (tipoAgregando === 'testimonio') {
+                const nombre = document.getElementById('nuevo-nombre')?.value;
+                const texto = document.getElementById('nuevo-texto')?.value;
+                if (!nombre || !texto) { alert('Nombre y testimonio son obligatorios'); return; }
+                
+                const nuevo = {
+                    nombre: nombre,
+                    lugar: document.getElementById('nuevo-lugar')?.value || '',
+                    texto: texto,
+                    rating: parseInt(document.getElementById('nuevo-rating')?.value) || 5,
+                    avatar: document.getElementById('nuevo-avatar')?.value || 'https://randomuser.me/api/portraits/lego/1.jpg',
+                    orden: testimoniosData.length
+                };
+                
+                try {
+                    await window.guardarTestimonio(negocioIdActual, nuevo);
+                    mostrarMensaje('✅ Testimonio agregado');
+                    cerrarModalAgregar();
+                    cargarTestimonios();
+                } catch (error) {
+                    mostrarMensaje('❌ Error: ' + error.message, 'error');
+                }
+            }
+        }
+
+        function mostrarMensaje(texto, tipo = 'exito') {
+            const msgDiv = document.getElementById('mensaje');
+            msgDiv.textContent = texto;
+            msgDiv.className = `mensaje mensaje-${tipo}`;
+            msgDiv.style.display = 'block';
+            setTimeout(() => { msgDiv.style.display = 'none'; }, 3000);
+        }
+
+        function toggleContenido(header) {
+            const contenido = header.nextElementSibling;
+            contenido.classList.toggle('hidden');
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, m => {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const tab = btn.dataset.tab;
+                document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+                document.getElementById(`tab-${tab}`).classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

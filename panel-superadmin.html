@@ -91,6 +91,10 @@
             vertical-align: middle;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+        a.button {
+            text-decoration: none;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -190,23 +194,23 @@
                         <button onclick="verJSON('${n.id}')">👁️ Ver JSON completo</button>
                     </div>
                     <div class="acciones">
-                        <button class="btn-whatsapp" onclick="contactar('whatsapp', '${n.cliente_telefono}', '${n.cliente_nombre}')">
-                            <i class="fab fa-whatsapp"></i> WhatsApp
-                        </button>
-                        <button class="btn-call" onclick="contactar('call', '${n.cliente_telefono}')">
-                            <i class="fas fa-phone"></i> Llamar
-                        </button>
-                        <button class="btn-email" onclick="contactar('email', '${n.cliente_email}', '${n.cliente_nombre}')">
-                            <i class="fas fa-envelope"></i> Correo
-                        </button>
+                        <a href="https://wa.me/${n.cliente_telefono.replace(/[^0-9]/g, '')}?text=Hola%20${encodeURIComponent(n.cliente_nombre)}%2C%20vi%20tu%20solicitud%20de%20p%C3%A1gina%20web%20y%20queremos%20agendar%20una%20videollamada%20para%20revisarla%20contigo." target="_blank" class="button">
+                            <button class="btn-whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+                        </a>
+                        <a href="tel:${n.cliente_telefono}" class="button">
+                            <button class="btn-call"><i class="fas fa-phone"></i> Llamar</button>
+                        </a>
+                        <a href="mailto:${n.cliente_email}?subject=Tu%20p%C3%A1gina%20web%20-%20Agendar%20videollamada&body=Hola%20${encodeURIComponent(n.cliente_nombre)}%2C%20vi%20tu%20solicitud%20y%20queremos%20agendar%20una%20videollamada%20para%20mostrarte%20las%20mejoras%20y%20publicar%20tu%20p%C3%A1gina." class="button">
+                            <button class="btn-email"><i class="fas fa-envelope"></i> Correo</button>
+                        </a>
                         ${n.estado === 'pendiente_revision' ? `
                             <button class="btn-publish" onclick="publicarPagina('${n.id}')">
                                 <i class="fas fa-globe"></i> Publicar página
                             </button>
                         ` : `
-                            <button class="btn-view" onclick="verPagina('${n.id}')">
-                                <i class="fas fa-eye"></i> Ver página
-                            </button>
+                            <a href="${BASE_URL}index.html?id=${n.id}" target="_blank" class="button">
+                                <button class="btn-view"><i class="fas fa-eye"></i> Ver página</button>
+                            </a>
                         `}
                     </div>
                 </div>
@@ -221,17 +225,6 @@
                 if (m === '>') return '&gt;';
                 return m;
             });
-        }
-
-        function contactar(tipo, destino, nombre = '') {
-            if (tipo === 'whatsapp') {
-                const telefono = destino.replace(/[^0-9]/g, '');
-                window.open(`https://wa.me/${telefono}?text=Hola%20${encodeURIComponent(nombre)}%2C%20vi%20tu%20solicitud%20de%20p%C3%A1gina%20web%20y%20queremos%20agendar%20una%20videollamada%20para%20revisarla%20contigo.`, '_blank');
-            } else if (tipo === 'call') {
-                window.location.href = `tel:${destino}`;
-            } else if (tipo === 'email') {
-                window.location.href = `mailto:${destino}?subject=Tu%20p%C3%A1gina%20web%20-%20Agendar%20videollamada&body=Hola%20${encodeURIComponent(nombre)}%2C%20vi%20tu%20solicitud%20y%20queremos%20agendar%20una%20videollamada%20para%20mostrarte%20las%20mejoras%20y%20publicar%20tu%20p%C3%A1gina.`;
-            }
         }
 
         async function verJSON(id) {
@@ -277,10 +270,6 @@
                 btn.innerHTML = textoOriginal;
                 btn.disabled = false;
             }
-        }
-
-        function verPagina(id) {
-            window.open(`${BASE_URL}index.html?id=${id}`, '_blank');
         }
     </script>
 </body>

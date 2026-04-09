@@ -56,7 +56,7 @@ jobs:
                 -H "Authorization: Bearer $SUPABASE_SERVICE_KEY" \
                 -H "Content-Type: $(file -b --mime-type "$file")" \
                 --data-binary "@$file" \
-                "$SUPABASE_URL/storage/v1/object/clientes/${{ github.event.repository.name }}/$nombre" && \
+               "$SUPABASE_URL/storage/v1/object/clientes/20640a4e-ebeb-4149-b937-ecc34fa3038a/$nombre"
               echo "✅ Subido: $nombre" || \
               echo "❌ Error subiendo: $nombre"
             fi

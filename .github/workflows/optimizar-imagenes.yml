@@ -1,0 +1,74 @@
+name: Optimizar imágenes y videos automáticamente
+
+on:
+  push:
+    paths:
+      - 'raw/**'  # Se activa cuando subes algo a la carpeta raw
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Clonar repositorio
+        uses: actions/checkout@v4
+      
+      - name: Instalar herramientas
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y imagemagick webp ffmpeg
+      
+      - name: Optimizar imágenes a WebP
+        run: |
+          mkdir -p assets/optimizadas
+          for img in raw/*.{jpg,jpeg,png,gif,JPG,JPEG,PNG,GIF}; do
+            if [ -f "$img" ]; then
+              nombre=$(basename "$img" | sed 's/\.[^.]*$//')
+              convert "$img" -resize 1920x1080 -quality 85 "assets/optimizadas/${nombre}.webp"
+              echo "✅ Imagen optimizada: ${nombre}.webp"
+            fi
+          done
+      
+      - name: Optimizar videos a MP4
+        run: |
+          for video in raw/*.{mp4,mov,avi,MOV,MP4,AVI}; do
+            if [ -f "$video" ]; then
+              nombre=$(basename "$video" | sed 's/\.[^.]*$//')
+              ffmpeg -i "$video" -vf "scale=1280:-2" -c:v libx264 -crf 28 -preset fast "assets/optimizadas/${nombre}.mp4"
+              echo "✅ Video optimizado: ${nombre}.mp4"
+            fi
+          done
+      
+      - name: Subir archivos a Supabase Storage
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          for file in assets/optimizadas/*; do
+            if [ -f "$file" ]; then
+              nombre=$(basename "$file")
+              curl -X POST \
+                -H "apikey: $SUPABASE_SERVICE_KEY" \
+                -H "Authorization: Bearer $SUPABASE_SERVICE_KEY" \
+                -H "Content-Type: $(file -b --mime-type "$file")" \
+                --data-binary "@$file" \
+                "$SUPABASE_URL/storage/v1/object/clientes/${{ github.event.repository.name }}/$nombre"
+              echo "✅ Subido: $nombre"
+            fi
+          done
+      
+      - name: Limpiar archivos temporales
+        run: |
+          rm -rf raw/*
+          rm -rf assets/optimizadas
+          echo "✅ Archivos temporales eliminados"
+      
+      - name: Commit y push de cambios
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add raw/ assets/
+          git commit -m "Limpiar después de optimización" || echo "No hay cambios"
+          git push

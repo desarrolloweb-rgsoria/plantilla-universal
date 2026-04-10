@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administración - Mi Negocio</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -104,6 +105,25 @@
             vertical-align: middle;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+        .upload-area {
+            border: 2px dashed #0B4F6C;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .upload-area:hover {
+            background: #f0f8ff;
+            border-color: #F4A261;
+        }
+        .preview-img {
+            max-width: 100px;
+            max-height: 100px;
+            margin-top: 0.5rem;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
@@ -117,6 +137,14 @@
             <div class="form-group">
                 <label>Contraseña</label>
                 <input type="password" id="password" placeholder="admin">
+            </div>
+            <div class="form-group">
+                <label>URL de Supabase</label>
+                <input type="text" id="supabaseUrl" placeholder="https://...">
+            </div>
+            <div class="form-group">
+                <label>Clave anónima de Supabase</label>
+                <input type="text" id="supabaseKey" placeholder="sb_...">
             </div>
             <button onclick="login()">Ingresar</button>
         </div>
@@ -154,7 +182,17 @@
                         <option value="otros">📷 Otros</option>
                     </select>
                 </div>
-                <button class="btn-agregar" onclick="abrirModalAgregar('imagen')"><i class="fas fa-plus"></i> Agregar imagen</button>
+                
+                <!-- ÁREA DE SUBIDA DE IMÁGENES CON COMPRESIÓN -->
+                <div class="upload-area" id="uploadAreaGaleria">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #0B4F6C;"></i>
+                    <p>Toca o arrastra imágenes aquí</p>
+                    <p style="font-size: 0.8rem; color: #666;">Se optimizarán automáticamente (WebP, 85% calidad, 1920px máx)</p>
+                    <input type="file" id="subirImagenGaleria" accept="image/*" multiple style="display: none;">
+                </div>
+                <div id="uploadPreviewGaleria" style="margin-bottom: 1rem;"></div>
+                
+                <button class="btn-agregar" onclick="abrirModalAgregar('imagen')"><i class="fas fa-plus"></i> Agregar imagen manualmente</button>
                 <div id="galeria-list"></div>
             </div>
             <div id="tab-testimonios" class="tab-content">
@@ -183,6 +221,9 @@
     <script>eruda.init();</script>
     <script>
         let negocioIdActual = null;
+        let supabaseUrlActual = '';
+        let supabaseKeyActual = '';
+        let supabaseClient = null;
         let productosData = [];
         let serviciosData = [];
         let galeriaData = [];
@@ -191,23 +232,70 @@
         let tipoAgregando = null;
         let categoriaActual = 'todas';
 
+        // ============================================
+        // FUNCIÓN DE COMPRESIÓN DE IMÁGENES
+        // ============================================
+        async function comprimirYSubirImagen(file, carpeta) {
+            const options = {
+                maxSizeMB: 1,
+                maxWidthOrHeight: 1920,
+                useWebWorker: true,
+                fileType: 'image/webp'
+            };
+            
+            try {
+                const compressedFile = await imageCompression(file, options);
+                const extension = 'webp';
+                const nombreArchivo = `${Date.now()}.${extension}`;
+                const ruta = `${carpeta}/${nombreArchivo}`;
+                
+                const { data, error } = await supabaseClient.storage
+                    .from('clientes')
+                    .upload(`${negocioIdActual}/${ruta}`, compressedFile);
+                
+                if (error) throw error;
+                return nombreArchivo;
+                
+            } catch (error) {
+                console.error('Error comprimiendo/subiendo:', error);
+                throw error;
+            }
+        }
+
+        // ============================================
+        // LOGIN
+        // ============================================
         async function login() {
             const id = document.getElementById('negocioId').value;
             const pass = document.getElementById('password').value;
+            const supabaseUrl = document.getElementById('supabaseUrl').value;
+            const supabaseKey = document.getElementById('supabaseKey').value;
             
             if (!id) { alert('Ingresa el ID de tu negocio'); return; }
             if (pass !== 'admin') { alert('Contraseña incorrecta'); return; }
+            if (!supabaseUrl || !supabaseKey) { alert('Las credenciales de Supabase son obligatorias'); return; }
             
             try {
-                window.initSupabase();
-                const negocio = await window.getNegocio(id);
-                if (!negocio) { alert('Negocio no encontrado'); return; }
-                if (negocio.estado !== 'publicado') { alert('Tu página aún no está publicada.'); return; }
+                supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+                window.initSupabase(supabaseUrl, supabaseKey);
+                
+                const { data, error } = await supabaseClient
+                    .from('negocios')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+                
+                if (error) throw error;
+                if (!data) { alert('Negocio no encontrado'); return; }
+                if (data.estado !== 'publicado') { alert('Tu página aún no está publicada.'); return; }
                 
                 negocioIdActual = id;
+                supabaseUrlActual = supabaseUrl;
+                supabaseKeyActual = supabaseKey;
                 document.getElementById('loginPanel').style.display = 'none';
                 document.getElementById('adminPanel').style.display = 'block';
                 cargarTodosLosDatos();
+                
             } catch (error) {
                 alert('Error: ' + error.message);
             }
@@ -218,18 +306,84 @@
             document.getElementById('adminPanel').style.display = 'none';
             document.getElementById('negocioId').value = '';
             document.getElementById('password').value = '';
+            document.getElementById('supabaseUrl').value = '';
+            document.getElementById('supabaseKey').value = '';
             negocioIdActual = null;
         }
 
+        // ============================================
+        // SUBIDA DE IMÁGENES CON COMPRESIÓN
+        // ============================================
+        function initUploader() {
+            const uploadArea = document.getElementById('uploadAreaGaleria');
+            const fileInput = document.getElementById('subirImagenGaleria');
+            
+            if (uploadArea) {
+                uploadArea.addEventListener('click', () => {
+                    fileInput.click();
+                });
+            }
+            
+            if (fileInput) {
+                fileInput.addEventListener('change', async (e) => {
+                    const files = Array.from(e.target.files);
+                    const previewDiv = document.getElementById('uploadPreviewGaleria');
+                    
+                    for (const file of files) {
+                        const fileId = Date.now() + Math.random();
+                        previewDiv.innerHTML += `<div id="preview-${fileId}" style="margin-bottom: 0.5rem;"><span class="spinner"></span> Subiendo ${file.name}...</div>`;
+                        
+                        try {
+                            const nombreArchivo = await comprimirYSubirImagen(file, 'galeria');
+                            
+                            // Guardar en la base de datos
+                            const nuevo = {
+                                titulo: file.name.replace(/\.[^/.]+$/, ''),
+                                categoria: 'galeria',
+                                descripcion: '',
+                                imagen_url: nombreArchivo,
+                                orden: galeriaData.length
+                            };
+                            
+                            await window.guardarImagen(negocioIdActual, nuevo, supabaseUrlActual, supabaseKeyActual);
+                            
+                            document.getElementById(`preview-${fileId}`).innerHTML = `<span style="color: green;">✅ ${file.name} → ${nombreArchivo}</span>`;
+                            
+                        } catch (error) {
+                            document.getElementById(`preview-${fileId}`).innerHTML = `<span style="color: red;">❌ Error: ${error.message}</span>`;
+                        }
+                    }
+                    
+                    setTimeout(() => {
+                        previewDiv.innerHTML = '';
+                        cargarGaleria();
+                    }, 2000);
+                    
+                    fileInput.value = '';
+                });
+            }
+        }
+
+        // ============================================
+        // CARGAR DATOS
+        // ============================================
         async function cargarTodosLosDatos() {
             await cargarProductos();
             await cargarServicios();
             await cargarGaleria();
             await cargarTestimonios();
+            initUploader();
         }
 
         async function cargarProductos() {
-            productosData = await window.getProductosPorNegocio(negocioIdActual);
+            const { data, error } = await supabaseClient
+                .from('productos')
+                .select('*')
+                .eq('negocio_id', negocioIdActual)
+                .eq('disponible', true)
+                .order('orden');
+            if (error) throw error;
+            productosData = data || [];
             renderizarProductos();
         }
 
@@ -251,7 +405,7 @@
                             <div class="form-group"><label>Badge</label><input type="text" class="edit-badge" value="${escapeHtml(p.badge_permanente || '')}"></div>
                         </div>
                         <div class="form-group"><label>Características (separadas por coma)</label><input type="text" class="edit-caracteristicas" value="${(p.caracteristicas || []).join(', ')}"></div>
-                        <div class="form-group"><label>URL de imagen</label><input type="text" class="edit-imagen" value="${p.imagen || ''}"></div>
+                        <div class="form-group"><label>Nombre del archivo de imagen</label><input type="text" class="edit-imagen" value="${p.imagen || ''}"></div>
                         <button onclick="guardarProducto(${p.id})" style="margin-top: 0.5rem;">Guardar cambios</button>
                     </div>
                 </div>
@@ -272,7 +426,7 @@
             };
             
             try {
-                await window.actualizarProducto(id, updates);
+                await window.actualizarProducto(id, updates, supabaseUrlActual, supabaseKeyActual);
                 mostrarMensaje('✅ Producto actualizado');
                 cargarProductos();
             } catch (error) {
@@ -283,7 +437,7 @@
         async function eliminarProducto(id) {
             if (!confirm('¿Eliminar este producto?')) return;
             try {
-                await window.eliminarProducto(id);
+                await window.eliminarProducto(id, supabaseUrlActual, supabaseKeyActual);
                 mostrarMensaje('✅ Producto eliminado');
                 cargarProductos();
             } catch (error) {
@@ -292,7 +446,13 @@
         }
 
         async function cargarServicios() {
-            serviciosData = await window.getServiciosPorNegocio(negocioIdActual);
+            const { data, error } = await supabaseClient
+                .from('servicios')
+                .select('*')
+                .eq('negocio_id', negocioIdActual)
+                .order('orden');
+            if (error) throw error;
+            serviciosData = data || [];
             renderizarServicios();
         }
 
@@ -331,7 +491,7 @@
             };
             
             try {
-                await window.actualizarServicio(id, updates);
+                await window.actualizarServicio(id, updates, supabaseUrlActual, supabaseKeyActual);
                 mostrarMensaje('✅ Servicio actualizado');
                 cargarServicios();
             } catch (error) {
@@ -342,7 +502,7 @@
         async function eliminarServicio(id) {
             if (!confirm('¿Eliminar este servicio?')) return;
             try {
-                await window.eliminarServicio(id);
+                await window.eliminarServicio(id, supabaseUrlActual, supabaseKeyActual);
                 mostrarMensaje('✅ Servicio eliminado');
                 cargarServicios();
             } catch (error) {
@@ -351,7 +511,13 @@
         }
 
         async function cargarGaleria() {
-            galeriaData = await window.getTodasLasImagenes(negocioIdActual);
+            const { data, error } = await supabaseClient
+                .from('galeria')
+                .select('*')
+                .eq('negocio_id', negocioIdActual)
+                .order('orden');
+            if (error) throw error;
+            galeriaData = data || [];
             filtrarGaleria();
         }
 
@@ -398,8 +564,7 @@
                             </div>
                         </div>
                         <div class="form-group"><label>Descripción</label><input type="text" class="edit-descripcion" value="${escapeHtml(img.descripcion || '')}"></div>
-                        <div class="form-group"><label>URL de la imagen</label><input type="text" class="edit-imagen" value="${img.imagen_url}"></div>
-                        <img src="${img.imagen_url}" class="img-miniatura" style="margin-top: 0.5rem;">
+                        <div class="form-group"><label>Nombre del archivo de imagen</label><input type="text" class="edit-imagen" value="${img.imagen_url}"></div>
                         <button onclick="guardarImagen(${img.id})" style="margin-top: 0.5rem;">Guardar cambios</button>
                     </div>
                 </div>
@@ -418,7 +583,7 @@
             };
             
             try {
-                await window.actualizarImagen(id, updates);
+                await window.actualizarImagen(id, updates, supabaseUrlActual, supabaseKeyActual);
                 mostrarMensaje('✅ Imagen actualizada');
                 cargarGaleria();
             } catch (error) {
@@ -429,7 +594,7 @@
         async function eliminarImagen(id) {
             if (!confirm('¿Eliminar esta imagen?')) return;
             try {
-                await window.eliminarImagen(id);
+                await window.eliminarImagen(id, supabaseUrlActual, supabaseKeyActual);
                 mostrarMensaje('✅ Imagen eliminada');
                 cargarGaleria();
             } catch (error) {
@@ -438,7 +603,13 @@
         }
 
         async function cargarTestimonios() {
-            testimoniosData = await window.getTestimoniosPorNegocio(negocioIdActual);
+            const { data, error } = await supabaseClient
+                .from('testimonios')
+                .select('*')
+                .eq('negocio_id', negocioIdActual)
+                .order('orden');
+            if (error) throw error;
+            testimoniosData = data || [];
             renderizarTestimonios();
         }
 
@@ -460,7 +631,7 @@
                         <div class="form-group"><label>Testimonio</label><textarea class="edit-texto" rows="3">${escapeHtml(t.texto)}</textarea></div>
                         <div class="form-row">
                             <div class="form-group"><label>Rating (1-5)</label><input type="number" class="edit-rating" min="1" max="5" value="${t.rating || 5}"></div>
-                            <div class="form-group"><label>Avatar URL</label><input type="text" class="edit-avatar" value="${t.avatar || ''}"></div>
+                            <div class="form-group"><label>Nombre del archivo de avatar</label><input type="text" class="edit-avatar" value="${t.avatar || ''}"></div>
                         </div>
                         <button onclick="guardarTestimonio(${t.id})" style="margin-top: 0.5rem;">Guardar cambios</button>
                     </div>
@@ -481,7 +652,7 @@
             };
             
             try {
-                await window.actualizarTestimonio(id, updates);
+                await window.actualizarTestimonio(id, updates, supabaseUrlActual, supabaseKeyActual);
                 mostrarMensaje('✅ Testimonio actualizado');
                 cargarTestimonios();
             } catch (error) {
@@ -492,7 +663,7 @@
         async function eliminarTestimonio(id) {
             if (!confirm('¿Eliminar este testimonio?')) return;
             try {
-                await window.eliminarTestimonio(id);
+                await window.eliminarTestimonio(id, supabaseUrlActual, supabaseKeyActual);
                 mostrarMensaje('✅ Testimonio eliminado');
                 cargarTestimonios();
             } catch (error) {
@@ -516,7 +687,7 @@
                         <div class="form-group"><label>Badge</label><input type="text" id="nuevo-badge" placeholder="Ej: Más vendido"></div>
                     </div>
                     <div class="form-group"><label>Características (separadas por coma)</label><input type="text" id="nuevo-caracteristicas"></div>
-                    <div class="form-group"><label>URL de imagen</label><input type="text" id="nuevo-imagen" value="https://images.unsplash.com/photo-1498931299472-f7a63a5a1cfa?w=600"></div>
+                    <div class="form-group"><label>Nombre del archivo de imagen</label><input type="text" id="nuevo-imagen" placeholder="producto1.webp"></div>
                 `;
             } else if (tipo === 'servicio') {
                 titulo.textContent = 'Agregar servicio';
@@ -525,7 +696,7 @@
                     <div class="form-group"><label>Descripción</label><textarea id="nuevo-descripcion" rows="2"></textarea></div>
                     <div class="form-row">
                         <div class="form-group"><label>Horario</label><input type="text" id="nuevo-horario" placeholder="Ej: Lunes a viernes, 9am-5pm"></div>
-                        <div class="form-group"><label>Icono</label><input type="text" id="nuevo-icono" value='<i class="fas fa-star"></i>'></div>
+                        <div class="form-group"><label>Icono (HTML)</label><input type="text" id="nuevo-icono" value='<i class="fas fa-star"></i>'></div>
                     </div>
                 `;
             } else if (tipo === 'imagen') {
@@ -543,7 +714,7 @@
                         </select>
                     </div>
                     <div class="form-group"><label>Descripción</label><input type="text" id="nuevo-descripcion"></div>
-                    <div class="form-group"><label>URL de la imagen *</label><input type="text" id="nuevo-imagen" placeholder="https://..."></div>
+                    <div class="form-group"><label>Nombre del archivo de imagen</label><input type="text" id="nuevo-imagen" placeholder="foto1.webp"></div>
                 `;
             } else if (tipo === 'testimonio') {
                 titulo.textContent = 'Agregar testimonio';
@@ -555,7 +726,7 @@
                     <div class="form-group"><label>Testimonio *</label><textarea id="nuevo-texto" rows="3"></textarea></div>
                     <div class="form-row">
                         <div class="form-group"><label>Rating (1-5)</label><input type="number" id="nuevo-rating" min="1" max="5" value="5"></div>
-                        <div class="form-group"><label>Avatar URL</label><input type="text" id="nuevo-avatar" value="https://randomuser.me/api/portraits/women/44.jpg"></div>
+                        <div class="form-group"><label>Nombre del archivo de avatar</label><input type="text" id="nuevo-avatar" placeholder="avatar1.webp"></div>
                     </div>
                 `;
             }
@@ -586,7 +757,7 @@
                 };
                 
                 try {
-                    await window.guardarProducto(negocioIdActual, nuevo);
+                    await window.guardarProducto(negocioIdActual, nuevo, supabaseUrlActual, supabaseKeyActual);
                     mostrarMensaje('✅ Producto agregado');
                     cerrarModalAgregar();
                     cargarProductos();
@@ -606,7 +777,7 @@
                 };
                 
                 try {
-                    await window.guardarServicio(negocioIdActual, nuevo);
+                    await window.guardarServicio(negocioIdActual, nuevo, supabaseUrlActual, supabaseKeyActual);
                     mostrarMensaje('✅ Servicio agregado');
                     cerrarModalAgregar();
                     cargarServicios();
@@ -615,7 +786,7 @@
                 }
             } else if (tipoAgregando === 'imagen') {
                 const imagenUrl = document.getElementById('nuevo-imagen')?.value;
-                if (!imagenUrl) { alert('La URL de la imagen es obligatoria'); return; }
+                if (!imagenUrl) { alert('El nombre del archivo de imagen es obligatorio'); return; }
                 
                 const nuevo = {
                     titulo: document.getElementById('nuevo-titulo')?.value || '',
@@ -626,7 +797,7 @@
                 };
                 
                 try {
-                    await window.guardarImagen(negocioIdActual, nuevo);
+                    await window.guardarImagen(negocioIdActual, nuevo, supabaseUrlActual, supabaseKeyActual);
                     mostrarMensaje('✅ Imagen agregada');
                     cerrarModalAgregar();
                     cargarGaleria();
@@ -643,12 +814,12 @@
                     lugar: document.getElementById('nuevo-lugar')?.value || '',
                     texto: texto,
                     rating: parseInt(document.getElementById('nuevo-rating')?.value) || 5,
-                    avatar: document.getElementById('nuevo-avatar')?.value || 'https://randomuser.me/api/portraits/lego/1.jpg',
+                    avatar: document.getElementById('nuevo-avatar')?.value || '',
                     orden: testimoniosData.length
                 };
                 
                 try {
-                    await window.guardarTestimonio(negocioIdActual, nuevo);
+                    await window.guardarTestimonio(negocioIdActual, nuevo, supabaseUrlActual, supabaseKeyActual);
                     mostrarMensaje('✅ Testimonio agregado');
                     cerrarModalAgregar();
                     cargarTestimonios();
@@ -681,6 +852,7 @@
             });
         }
 
+        // Tabs
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -692,4 +864,4 @@
         });
     </script>
 </body>
-</html>
+    </html>

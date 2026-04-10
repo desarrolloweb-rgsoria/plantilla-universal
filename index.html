@@ -266,11 +266,21 @@
             cargarNegocio();
         }
 
-        function getImagenUrl(nombreArchivo, carpeta = 'galeria') {
-            if (!nombreArchivo) return '';
-            return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/${negocioId}/${carpeta}/${nombreArchivo}`;
+        function getImagenUrl(nombreArchivo, carpeta = '') {
+    if (!nombreArchivo) return '';
+    
+    // Si el nombreArchivo ya incluye una carpeta (ej: "galeria/archivo.webp")
+    if (nombreArchivo.includes('/')) {
+        return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/${negocioId}/${nombreArchivo}`;
+    }
+    
+    // Si no, usa la carpeta como parámetro
+    if (carpeta) {
+        return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/${negocioId}/${carpeta}/${nombreArchivo}`;
+    }
+    
+    return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/${negocioId}/${nombreArchivo}`;
         }
-
         function mostrarMensajeRevision() {
             document.body.innerHTML = `
                 <div style="text-align:center; padding:4rem; max-width:600px; margin:0 auto;">

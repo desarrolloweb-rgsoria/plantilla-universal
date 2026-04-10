@@ -245,7 +245,7 @@
                 const ruta = `${carpeta}/${nombreArchivo}`;
                 
                 const { data, error } = await supabaseClient.storage
-                    .from('clientes')
+                    .from('clients')
                     .upload(`${negocioIdActual}/${ruta}`, compressedFile);
                 
                 if (error) throw error;

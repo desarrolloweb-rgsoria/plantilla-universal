@@ -147,14 +147,27 @@
                 <button class="tab-btn" data-tab="testimonios">⭐ Testimonios</button>
             </div>
 
+            <!-- TAB: PRODUCTOS -->
             <div id="tab-productos" class="tab-content active">
-                <button class="btn-agregar" onclick="abrirModalAgregar('producto')"><i class="fas fa-plus"></i> Agregar producto</button>
+                <div class="upload-area" id="uploadAreaProductos">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #0B4F6C;"></i>
+                    <p>Toca o arrastra imágenes aquí para crear productos</p>
+                    <p style="font-size: 0.8rem; color: #666;">Se optimizarán automáticamente (WebP, 85% calidad)</p>
+                    <input type="file" id="subirImagenProductos" accept="image/*" multiple style="display: none;">
+                </div>
+                <div id="uploadPreviewProductos" style="margin-bottom: 1rem;"></div>
+                
+                <button class="btn-agregar" onclick="abrirModalAgregar('producto')"><i class="fas fa-plus"></i> Agregar producto manualmente</button>
                 <div id="productos-list"></div>
             </div>
+
+            <!-- TAB: SERVICIOS -->
             <div id="tab-servicios" class="tab-content">
                 <button class="btn-agregar" onclick="abrirModalAgregar('servicio')"><i class="fas fa-plus"></i> Agregar servicio</button>
                 <div id="servicios-list"></div>
             </div>
+
+            <!-- TAB: GALERÍA -->
             <div id="tab-galeria" class="tab-content">
                 <div style="margin-bottom: 1rem;">
                     <label>Filtrar por categoría:</label>
@@ -169,7 +182,6 @@
                     </select>
                 </div>
                 
-                <!-- ÁREA DE SUBIDA DE IMÁGENES -->
                 <div class="upload-area" id="uploadAreaGaleria">
                     <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #0B4F6C;"></i>
                     <p>Toca o arrastra imágenes aquí</p>
@@ -181,6 +193,8 @@
                 <button class="btn-agregar" onclick="abrirModalAgregar('imagen')"><i class="fas fa-plus"></i> Agregar imagen manualmente</button>
                 <div id="galeria-list"></div>
             </div>
+
+            <!-- TAB: TESTIMONIOS -->
             <div id="tab-testimonios" class="tab-content">
                 <button class="btn-agregar" onclick="abrirModalAgregar('testimonio')"><i class="fas fa-plus"></i> Agregar testimonio</button>
                 <div id="testimonios-list"></div>
@@ -286,9 +300,9 @@
         }
 
         // ============================================
-        // SUBIDA DE IMÁGENES
+        // SUBIDA DE IMÁGENES (GALERÍA)
         // ============================================
-        function initUploader() {
+        function initUploaderGaleria() {
             const uploadArea = document.getElementById('uploadAreaGaleria');
             const fileInput = document.getElementById('subirImagenGaleria');
             
@@ -322,7 +336,7 @@
                             
                             if (error) throw error;
                             
-                            document.getElementById(`preview-${fileId}`).innerHTML = `<span style="color: green;">✅ ${file.name} → ${nombreArchivo}</span>`;
+                            document.getElementById(`preview-${fileId}`).innerHTML = `<span style="color: green;">✅ Imagen agregada a galería: ${nuevo.titulo}</span>`;
                             
                         } catch (error) {
                             document.getElementById(`preview-${fileId}`).innerHTML = `<span style="color: red;">❌ Error: ${error.message}</span>`;
@@ -340,6 +354,63 @@
         }
 
         // ============================================
+        // SUBIDA DE IMÁGENES (PRODUCTOS)
+        // ============================================
+        function initUploaderProductos() {
+            const uploadArea = document.getElementById('uploadAreaProductos');
+            const fileInput = document.getElementById('subirImagenProductos');
+            
+            if (uploadArea) {
+                uploadArea.addEventListener('click', () => fileInput.click());
+            }
+            
+            if (fileInput) {
+                fileInput.addEventListener('change', async (e) => {
+                    const files = Array.from(e.target.files);
+                    const previewDiv = document.getElementById('uploadPreviewProductos');
+                    
+                    for (const file of files) {
+                        const fileId = Date.now() + Math.random();
+                        previewDiv.innerHTML += `<div id="preview-${fileId}" style="margin-bottom: 0.5rem;"><span class="spinner"></span> Subiendo ${file.name}...</div>`;
+                        
+                        try {
+                            const nombreArchivo = await comprimirYSubirImagen(file, 'productos');
+                            
+                            const nuevoProducto = {
+                                nombre: file.name.replace(/\.[^/.]+$/, ''),
+                                descripcion: '',
+                                precio: 0,
+                                imagen: nombreArchivo,
+                                caracteristicas: [],
+                                badge_permanente: '',
+                                disponible: true,
+                                orden: productosData.length
+                            };
+                            
+                            const { error } = await supabaseClient
+                                .from('productos')
+                                .insert([{ ...nuevoProducto, negocio_id: negocioIdActual }]);
+                            
+                            if (error) throw error;
+                            
+                            document.getElementById(`preview-${fileId}`).innerHTML = `<span style="color: green;">✅ Producto creado: ${nuevoProducto.nombre}</span>`;
+                            
+                        } catch (error) {
+                            document.getElementById(`preview-${fileId}`).innerHTML = `<span style="color: red;">❌ Error: ${error.message}</span>`;
+                        }
+                    }
+                    
+                    setTimeout(() => {
+                        previewDiv.innerHTML = '';
+                        cargarProductos();
+                    }, 2000);
+                    
+                    fileInput.value = '';
+                });
+            }
+        }
+
+        // ============================================
         // CARGAR DATOS
         // ============================================
         async function cargarTodosLosDatos() {
@@ -347,7 +418,8 @@
             await cargarServicios();
             await cargarGaleria();
             await cargarTestimonios();
-            initUploader();
+            initUploaderGaleria();
+            initUploaderProductos();
         }
 
         async function cargarProductos() {
@@ -882,4 +954,4 @@
         });
     </script>
 </body>
-                        </html>
+    </html>

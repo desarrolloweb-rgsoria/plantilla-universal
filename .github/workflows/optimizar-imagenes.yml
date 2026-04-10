@@ -1,9 +1,9 @@
-name: Optimizar imágenes y videos automáticamente
+name: Optimizar imágenes y videos
 
 on:
   push:
-    paths:
-      - 'raw/**'
+    branches: [ main, master ]
+    # Sin filtrar por paths para asegurar que siempre se ejecute
 
 jobs:
   optimize:
@@ -12,6 +12,11 @@ jobs:
     steps:
       - name: Clonar repositorio
         uses: actions/checkout@v4
+      
+      - name: Verificar archivos en raw/
+        run: |
+          echo "📁 Archivos encontrados en raw/:"
+          ls -la raw/ || echo "No hay archivos o la carpeta no existe"
       
       - name: Instalar herramientas
         run: |
@@ -30,7 +35,7 @@ jobs:
             fi
           done
       
-      - name: Optimizar videos a MP4 (con manejo de errores)
+      - name: Optimizar videos a MP4
         run: |
           for video in raw/*.{mp4,mov,avi,MOV,MP4,AVI}; do
             if [ -f "$video" ]; then
@@ -38,7 +43,7 @@ jobs:
               if ffmpeg -i "$video" -vf "scale=1280:-2" -c:v libx264 -crf 28 -preset fast "assets/optimizadas/${nombre}.mp4" 2>/dev/null; then
                 echo "✅ Video optimizado: ${nombre}.mp4"
               else
-                echo "⚠️ Error optimizando video: ${nombre} (formato no soportado o archivo corrupto)"
+                echo "⚠️ Error optimizando video: ${nombre}"
               fi
             fi
           done
@@ -56,7 +61,7 @@ jobs:
                 -H "Authorization: Bearer $SUPABASE_SERVICE_KEY" \
                 -H "Content-Type: $(file -b --mime-type "$file")" \
                 --data-binary "@$file" \
-               "$SUPABASE_URL/storage/v1/object/clientes/20640a4e-ebeb-4149-b937-ecc34fa3038a/$nombre"
+                "$SUPABASE_URL/storage/v1/object/clientes/20640a4e-ebeb-4149-b937-ecc34fa3038a/$nombre" && \
               echo "✅ Subido: $nombre" || \
               echo "❌ Error subiendo: $nombre"
             fi

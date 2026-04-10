@@ -118,12 +118,6 @@
             background: #f0f8ff;
             border-color: #F4A261;
         }
-        .preview-img {
-            max-width: 100px;
-            max-height: 100px;
-            margin-top: 0.5rem;
-            border-radius: 8px;
-        }
     </style>
 </head>
 <body>
@@ -175,7 +169,7 @@
                     </select>
                 </div>
                 
-                <!-- ÁREA DE SUBIDA DE IMÁGENES CON COMPRESIÓN -->
+                <!-- ÁREA DE SUBIDA DE IMÁGENES -->
                 <div class="upload-area" id="uploadAreaGaleria">
                     <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #0B4F6C;"></i>
                     <p>Toca o arrastra imágenes aquí</p>
@@ -212,10 +206,11 @@
     <script>eruda.init();</script>
     <script>
         // ============================================
-        // CREDENCIALES FIJAS (cambiar para cada cliente)
+        // CREDENCIALES FIJAS
         // ============================================
         const SUPABASE_URL = 'https://nvrcqlxnvjvhznmxozhh.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_qCtRLmyJxBbYRcO7Suuqnw_mrmqspp6';
+        const BUCKET_NAME = 'cliente';
         
         let negocioIdActual = null;
         let supabaseClient = null;
@@ -225,10 +220,9 @@
         let galeriaFiltrada = [];
         let testimoniosData = [];
         let tipoAgregando = null;
-        let categoriaActual = 'todas';
 
         // ============================================
-        // FUNCIÓN DE COMPRESIÓN DE IMÁGENES
+        // FUNCIÓN DE COMPRESIÓN Y SUBIDA
         // ============================================
         async function comprimirYSubirImagen(file, carpeta) {
             const options = {
@@ -238,23 +232,16 @@
                 fileType: 'image/webp'
             };
             
-            try {
-                const compressedFile = await imageCompression(file, options);
-                const extension = 'webp';
-                const nombreArchivo = `${Date.now()}.${extension}`;
-                const ruta = `${carpeta}/${nombreArchivo}`;
-                
-                const { data, error } = await supabaseClient.storage
-                    .from('clients')
-                    .upload(`${negocioIdActual}/${ruta}`, compressedFile);
-                
-                if (error) throw error;
-                return nombreArchivo;
-                
-            } catch (error) {
-                console.error('Error comprimiendo/subiendo:', error);
-                throw error;
-            }
+            const compressedFile = await imageCompression(file, options);
+            const nombreArchivo = `${Date.now()}.webp`;
+            const ruta = `${negocioIdActual}/${carpeta}/${nombreArchivo}`;
+            
+            const { data, error } = await supabaseClient.storage
+                .from(BUCKET_NAME)
+                .upload(ruta, compressedFile);
+            
+            if (error) throw error;
+            return nombreArchivo;
         }
 
         // ============================================
@@ -299,16 +286,14 @@
         }
 
         // ============================================
-        // SUBIDA DE IMÁGENES CON COMPRESIÓN
+        // SUBIDA DE IMÁGENES
         // ============================================
         function initUploader() {
             const uploadArea = document.getElementById('uploadAreaGaleria');
             const fileInput = document.getElementById('subirImagenGaleria');
             
             if (uploadArea) {
-                uploadArea.addEventListener('click', () => {
-                    fileInput.click();
-                });
+                uploadArea.addEventListener('click', () => fileInput.click());
             }
             
             if (fileInput) {
@@ -529,12 +514,11 @@
 
         function filtrarGaleria() {
             const filtro = document.getElementById('filtroCategoria')?.value || 'todas';
-            categoriaActual = filtro;
             
-            if (categoriaActual === 'todas') {
+            if (filtro === 'todas') {
                 galeriaFiltrada = galeriaData;
             } else {
-                galeriaFiltrada = galeriaData.filter(img => img.categoria === categoriaActual);
+                galeriaFiltrada = galeriaData.filter(img => img.categoria === filtro);
             }
             renderizarGaleria();
         }
@@ -898,4 +882,4 @@
         });
     </script>
 </body>
-    </html>
+                        </html>

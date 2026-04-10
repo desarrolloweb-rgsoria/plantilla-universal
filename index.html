@@ -236,10 +236,16 @@
     <footer class="site-footer" id="site-footer"><div class="container"><p id="footer-texto">© 2025 Mi Negocio</p></div></footer>
     <div class="modal-galeria" id="modal-galeria"><span class="modal-cerrar">&times;</span><div class="modal-contenido"><img id="modal-imagen" src=""><div class="modal-info"><h3 id="modal-titulo"></h3><p id="modal-descripcion"></p></div><button class="modal-prev" onclick="cambiarImagenGaleria(-1)">❮</button><button class="modal-next" onclick="cambiarImagenGaleria(1)">❯</button></div></div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-conector.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();</script>
     <script>
+        // ============================================
+        // CREDENCIALES FIJAS
+        // ============================================
+        const SUPABASE_URL = 'https://nvrcqlxnvjvhznmxozhh.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_qCtRLmyJxBbYRcO7Suuqnw_mrmqspp6';
+        const BUCKET_NAME = 'cliente';
+        
         let negocioConfig = null;
         let negocioId = null;
         let galeriaItems = [];
@@ -260,6 +266,11 @@
             cargarNegocio();
         }
 
+        function getImagenUrl(nombreArchivo, carpeta = 'galeria') {
+            if (!nombreArchivo) return '';
+            return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/${negocioId}/${carpeta}/${nombreArchivo}`;
+        }
+
         function mostrarMensajeRevision() {
             document.body.innerHTML = `
                 <div style="text-align:center; padding:4rem; max-width:600px; margin:0 auto;">
@@ -277,22 +288,28 @@
 
         async function cargarNegocio() {
             try {
-                window.initSupabase();
-                const negocio = await window.getNegocio(negocioId);
+                const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                const { data, error } = await supabaseClient
+                    .from('negocios')
+                    .select('*')
+                    .eq('id', negocioId)
+                    .single();
                 
-                if (negocio.estado !== 'publicado') {
+                if (error) throw error;
+                
+                if (data.estado !== 'publicado') {
                     mostrarMensajeRevision();
                     return;
                 }
                 
-                negocioConfig = negocio.config;
+                negocioConfig = data.config;
                 aplicarColores();
                 renderizarHero();
                 renderizarNosotros();
-                await renderizarProductos();
-                await renderizarServicios();
-                await renderizarTestimonios();
-                await renderizarGaleria();
+                await renderizarProductos(supabaseClient);
+                await renderizarServicios(supabaseClient);
+                await renderizarTestimonios(supabaseClient);
+                await renderizarGaleria(supabaseClient);
                 renderizarContacto();
                 renderizarFooter();
                 document.title = negocioConfig.marca.nombre || 'Mi Negocio';
@@ -334,12 +351,12 @@
                 video.playsinline = true;
                 video.style.cssText = 'position: absolute; top: 50%; left: 50%; min-width: 100%; min-height: 100%; width: auto; height: auto; transform: translate(-50%, -50%); object-fit: cover; z-index: 0;';
                 const source = document.createElement('source');
-                source.src = hero.video;
+                source.src = getImagenUrl(hero.video, '');
                 source.type = 'video/mp4';
                 video.appendChild(source);
                 heroMedia.appendChild(video);
             } else if (hero.imagen && hero.imagen.trim() !== '') {
-                heroMedia.style.backgroundImage = `url(${hero.imagen})`;
+                heroMedia.style.backgroundImage = `url(${getImagenUrl(hero.imagen, '')})`;
                 heroMedia.style.backgroundSize = 'cover';
                 heroMedia.style.backgroundPosition = 'center';
                 heroMedia.style.position = 'absolute';
@@ -362,7 +379,7 @@
             document.getElementById('nosotros-titulo').textContent = nosotros.titulo || 'Sobre Nosotros';
             document.getElementById('nosotros-subtitulo').textContent = nosotros.subtitulo || '';
             const imgContainer = document.getElementById('nosotros-imagen');
-            if (nosotros.imagen) imgContainer.innerHTML = `<img src="${nosotros.imagen}" alt="Sobre nosotros" loading="lazy">`;
+            if (nosotros.imagen) imgContainer.innerHTML = `<img src="${getImagenUrl(nosotros.imagen, '')}" alt="Sobre nosotros" loading="lazy">`;
             let valoresHtml = '';
             if (nosotros.valores && nosotros.valores.length) {
                 valoresHtml = `<div class="nosotros-valores">${nosotros.valores.map(v => `<div class="valor-item"><span class="valor-icono">✓</span><span>${escapeHtml(v)}</span></div>`).join('')}</div>`;
@@ -370,43 +387,128 @@
             document.getElementById('nosotros-contenido').innerHTML = `<div class="nosotros-historia">${escapeHtml(nosotros.historia || '')}</div>${valoresHtml}`;
         }
 
-        async function renderizarProductos() {
+        async function renderizarProductos(supabaseClient) {
             try {
-                const productos = await window.getProductosPorNegocio(negocioId);
+                const { data: productos } = await supabaseClient
+                    .from('productos')
+                    .select('*')
+                    .eq('negocio_id', negocioId)
+                    .eq('disponible', true)
+                    .order('orden');
+                
                 const grid = document.getElementById('productos-grid');
-                if (!productos.length) { grid.innerHTML = '<p style="text-align:center">No hay productos disponibles</p>'; return; }
+                if (!productos || !productos.length) { 
+                    grid.innerHTML = '<p style="text-align:center">No hay productos disponibles</p>'; 
+                    return; 
+                }
+                
                 grid.innerHTML = productos.map(p => `
-                    <article class="producto-card"><div class="producto-img"><img src="${p.imagen || 'https://via.placeholder.com/300'}" alt="${escapeHtml(p.nombre)}" loading="lazy">${p.badge_permanente ? `<div class="producto-badge">${escapeHtml(p.badge_permanente)}</div>` : ''}</div><div class="producto-content"><h3>${escapeHtml(p.nombre)}</h3><p class="producto-desc">${escapeHtml(p.descripcion || '')}</p><div class="producto-features">${(p.caracteristicas || []).map(c => `<span>${escapeHtml(c)}</span>`).join('')}</div><div class="producto-footer"><span class="precio">$${p.precio} <small>desde</small></span><button class="btn-solicitar" onclick="alert('Contáctanos por WhatsApp')">Solicitar</button></div></div></article>
+                    <article class="producto-card">
+                        <div class="producto-img">
+                            <img src="${getImagenUrl(p.imagen, '')}" alt="${escapeHtml(p.nombre)}" loading="lazy" onerror="this.src='https://via.placeholder.com/300'">
+                            ${p.badge_permanente ? `<div class="producto-badge">${escapeHtml(p.badge_permanente)}</div>` : ''}
+                        </div>
+                        <div class="producto-content">
+                            <h3>${escapeHtml(p.nombre)}</h3>
+                            <p class="producto-desc">${escapeHtml(p.descripcion || '')}</p>
+                            <div class="producto-features">${(p.caracteristicas || []).map(c => `<span>${escapeHtml(c)}</span>`).join('')}</div>
+                            <div class="producto-footer">
+                                <span class="precio">$${p.precio} <small>desde</small></span>
+                                <button class="btn-solicitar" onclick="alert('Contáctanos por WhatsApp')">Solicitar</button>
+                            </div>
+                        </div>
+                    </article>
                 `).join('');
-            } catch (error) { console.error('Error productos:', error); }
+            } catch (error) { 
+                console.error('Error productos:', error); 
+            }
         }
 
-        async function renderizarServicios() {
+        async function renderizarServicios(supabaseClient) {
             try {
-                const servicios = await window.getServiciosPorNegocio(negocioId);
+                const { data: servicios } = await supabaseClient
+                    .from('servicios')
+                    .select('*')
+                    .eq('negocio_id', negocioId)
+                    .order('orden');
+                
                 const grid = document.getElementById('servicios-grid');
-                if (!servicios.length) { grid.innerHTML = '<p style="text-align:center">No hay servicios disponibles</p>'; return; }
-                grid.innerHTML = servicios.map(s => `<article class="servicio-card"><div class="servicio-icono">${s.icono || '<i class="fas fa-star"></i>'}</div><h3>${escapeHtml(s.nombre)}</h3><p class="servicio-desc">${escapeHtml(s.descripcion || '')}</p><span class="servicio-horario"><i class="fas fa-clock"></i> ${escapeHtml(s.horario || 'Siempre disponible')}</span></article>`).join('');
-            } catch (error) { console.error('Error servicios:', error); }
+                if (!servicios || !servicios.length) { 
+                    grid.innerHTML = '<p style="text-align:center">No hay servicios disponibles</p>'; 
+                    return; 
+                }
+                
+                grid.innerHTML = servicios.map(s => `
+                    <article class="servicio-card">
+                        <div class="servicio-icono">${s.icono || '<i class="fas fa-star"></i>'}</div>
+                        <h3>${escapeHtml(s.nombre)}</h3>
+                        <p class="servicio-desc">${escapeHtml(s.descripcion || '')}</p>
+                        <span class="servicio-horario"><i class="fas fa-clock"></i> ${escapeHtml(s.horario || 'Siempre disponible')}</span>
+                    </article>
+                `).join('');
+            } catch (error) { 
+                console.error('Error servicios:', error); 
+            }
         }
 
-        async function renderizarTestimonios() {
+        async function renderizarTestimonios(supabaseClient) {
             try {
-                const testimonios = await window.getTestimoniosPorNegocio(negocioId);
+                const { data: testimonios } = await supabaseClient
+                    .from('testimonios')
+                    .select('*')
+                    .eq('negocio_id', negocioId)
+                    .order('orden');
+                
                 const grid = document.getElementById('testimonios-grid');
-                if (!testimonios.length) { grid.innerHTML = '<p style="text-align:center">No hay testimonios aún</p>'; return; }
-                grid.innerHTML = testimonios.map(t => `<div class="testimonio-card"><div class="testimonio-texto">"${escapeHtml(t.texto)}"</div><div class="testimonio-autor"><img class="testimonio-avatar" src="${t.avatar || 'https://randomuser.me/api/portraits/lego/1.jpg'}" alt="${escapeHtml(t.nombre)}"><div class="testimonio-info"><h4>${escapeHtml(t.nombre)}</h4><div class="testimonio-rating">${'★'.repeat(t.rating)}${'☆'.repeat(5-t.rating)}</div><small>${escapeHtml(t.lugar || '')}</small></div></div></div>`).join('');
-            } catch (error) { console.error('Error testimonios:', error); }
+                if (!testimonios || !testimonios.length) { 
+                    grid.innerHTML = '<p style="text-align:center">No hay testimonios aún</p>'; 
+                    return; 
+                }
+                
+                grid.innerHTML = testimonios.map(t => `
+                    <div class="testimonio-card">
+                        <div class="testimonio-texto">"${escapeHtml(t.texto)}"</div>
+                        <div class="testimonio-autor">
+                            <img class="testimonio-avatar" src="${getImagenUrl(t.avatar, '')}" onerror="this.src='https://randomuser.me/api/portraits/lego/1.jpg'" alt="${escapeHtml(t.nombre)}">
+                            <div class="testimonio-info">
+                                <h4>${escapeHtml(t.nombre)}</h4>
+                                <div class="testimonio-rating">${'★'.repeat(t.rating)}${'☆'.repeat(5-t.rating)}</div>
+                                <small>${escapeHtml(t.lugar || '')}</small>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) { 
+                console.error('Error testimonios:', error); 
+            }
         }
 
-        async function renderizarGaleria() {
+        async function renderizarGaleria(supabaseClient) {
             try {
-                const galeria = await window.getImagenesPorCategoria(negocioId, 'todos');
+                const { data: galeria } = await supabaseClient
+                    .from('galeria')
+                    .select('*')
+                    .eq('negocio_id', negocioId)
+                    .order('orden');
+                
                 const grid = document.getElementById('galeria-grid');
-                if (!galeria.length) { grid.innerHTML = '<p style="text-align:center">No hay imágenes en la galería</p>'; return; }
+                if (!galeria || !galeria.length) { 
+                    grid.innerHTML = '<p style="text-align:center">No hay imágenes en la galería</p>'; 
+                    return; 
+                }
                 galeriaItems = galeria;
-                grid.innerHTML = galeria.map((item, idx) => `<div class="galeria-item" onclick="abrirModalGaleria(${idx})"><img src="${item.imagen_url}" alt="${escapeHtml(item.titulo)}" loading="lazy"><div class="galeria-overlay"><h3>${escapeHtml(item.titulo || item.categoria)}</h3><button class="btn-ver-mas">Ver más</button></div></div>`).join('');
-            } catch (error) { console.error('Error galería:', error); }
+                grid.innerHTML = galeria.map((item, idx) => `
+                    <div class="galeria-item" onclick="abrirModalGaleria(${idx})">
+                        <img src="${getImagenUrl(item.imagen_url, 'galeria')}" alt="${escapeHtml(item.titulo)}" loading="lazy" onerror="this.src='https://via.placeholder.com/400'">
+                        <div class="galeria-overlay">
+                            <h3>${escapeHtml(item.titulo || item.categoria)}</h3>
+                            <button class="btn-ver-mas">Ver más</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) { 
+                console.error('Error galería:', error); 
+            }
         }
 
         function renderizarContacto() {
@@ -417,10 +519,18 @@
                 if (contacto.redes.instagram) redesHtml += `<a href="${contacto.redes.instagram}" target="_blank" class="red-social"><i class="fab fa-instagram"></i><span>Instagram</span></a>`;
             }
             if (contacto.whatsapp) redesHtml += `<a href="https://wa.me/${contacto.whatsapp.replace(/[^0-9]/g, '')}" target="_blank" class="red-social"><i class="fab fa-whatsapp"></i><span>WhatsApp</span></a>`;
-            document.getElementById('contacto-info').innerHTML = `<div class="info-card"><h3><i class="fas fa-map-marker-alt"></i> Dirección</h3><p>${escapeHtml(contacto.direccion || 'No especificada')}</p></div><div class="info-card"><h3><i class="fas fa-phone"></i> Teléfono</h3><p><a href="tel:${contacto.telefono}">${escapeHtml(contacto.telefono)}</a></p></div><div class="info-card"><h3><i class="fas fa-envelope"></i> Email</h3><p><a href="mailto:${contacto.email}">${escapeHtml(contacto.email)}</a></p></div><div class="info-card"><h3><i class="fas fa-share-alt"></i> Redes Sociales</h3><div class="redes-sociales">${redesHtml || '<p>No hay redes sociales configuradas</p>'}</div></div>`;
+            document.getElementById('contacto-info').innerHTML = `
+                <div class="info-card"><h3><i class="fas fa-map-marker-alt"></i> Dirección</h3><p>${escapeHtml(contacto.direccion || 'No especificada')}</p></div>
+                <div class="info-card"><h3><i class="fas fa-phone"></i> Teléfono</h3><p><a href="tel:${contacto.telefono}">${escapeHtml(contacto.telefono)}</a></p></div>
+                <div class="info-card"><h3><i class="fas fa-envelope"></i> Email</h3><p><a href="mailto:${contacto.email}">${escapeHtml(contacto.email)}</a></p></div>
+                <div class="info-card"><h3><i class="fas fa-share-alt"></i> Redes Sociales</h3><div class="redes-sociales">${redesHtml || '<p>No hay redes sociales configuradas</p>'}</div></div>
+            `;
             const mapaContainer = document.getElementById('mapa-container');
-            if (contacto.mapa) mapaContainer.innerHTML = `<iframe src="${contacto.mapa}" allowfullscreen loading="lazy"></iframe>`;
-            else mapaContainer.innerHTML = '<p>No hay mapa disponible</p>';
+            if (contacto.mapa && contacto.mapa.trim() !== '') {
+                mapaContainer.innerHTML = `<iframe src="${contacto.mapa}" allowfullscreen loading="lazy"></iframe>`;
+            } else {
+                mapaContainer.innerHTML = '<p>No hay mapa disponible</p>';
+            }
         }
 
         function renderizarFooter() {
@@ -428,28 +538,82 @@
             document.getElementById('site-footer').style.backgroundColor = negocioConfig.marca.colores.primario;
         }
 
-        function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => { if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m; }); }
+        function escapeHtml(str) { 
+            if (!str) return ''; 
+            return str.replace(/[&<>]/g, m => { 
+                if (m === '&') return '&amp;'; 
+                if (m === '<') return '&lt;'; 
+                if (m === '>') return '&gt;'; 
+                return m; 
+            }); 
+        }
 
         function iniciarMenu() {
             const menuToggle = document.getElementById('menuToggle');
             const mainMenu = document.getElementById('mainMenu');
             if (menuToggle && mainMenu) {
-                menuToggle.addEventListener('click', (e) => { e.stopPropagation(); mainMenu.classList.toggle('active'); menuToggle.textContent = mainMenu.classList.contains('active') ? '✕' : '☰'; });
-                document.addEventListener('click', (e) => { if (window.innerWidth <= 992 && mainMenu && menuToggle && !mainMenu.contains(e.target) && !menuToggle.contains(e.target)) { mainMenu.classList.remove('active'); menuToggle.textContent = '☰'; } });
+                menuToggle.addEventListener('click', (e) => { 
+                    e.stopPropagation(); 
+                    mainMenu.classList.toggle('active'); 
+                    menuToggle.textContent = mainMenu.classList.contains('active') ? '✕' : '☰'; 
+                });
+                document.addEventListener('click', (e) => { 
+                    if (window.innerWidth <= 992 && mainMenu && menuToggle && !mainMenu.contains(e.target) && !menuToggle.contains(e.target)) { 
+                        mainMenu.classList.remove('active'); 
+                        menuToggle.textContent = '☰'; 
+                    } 
+                });
             }
             const menuLinks = document.querySelectorAll('.menu-link');
             const secciones = document.querySelectorAll('.seccion');
-            window.cambiarSeccion = function(seccionId) { secciones.forEach(s => s.classList.remove('activa')); document.getElementById(seccionId)?.classList.add('activa'); menuLinks.forEach(link => { link.classList.remove('activo'); if (link.dataset.seccion === seccionId) link.classList.add('activo'); }); if (window.innerWidth <= 992 && mainMenu) { mainMenu.classList.remove('active'); if (menuToggle) menuToggle.textContent = '☰'; } };
-            menuLinks.forEach(link => { link.addEventListener('click', (e) => { e.preventDefault(); window.cambiarSeccion(link.dataset.seccion); }); });
+            window.cambiarSeccion = function(seccionId) { 
+                secciones.forEach(s => s.classList.remove('activa')); 
+                document.getElementById(seccionId)?.classList.add('activa'); 
+                menuLinks.forEach(link => { 
+                    link.classList.remove('activo'); 
+                    if (link.dataset.seccion === seccionId) link.classList.add('activo'); 
+                }); 
+                if (window.innerWidth <= 992 && mainMenu) { 
+                    mainMenu.classList.remove('active'); 
+                    if (menuToggle) menuToggle.textContent = '☰'; 
+                } 
+            };
+            menuLinks.forEach(link => { 
+                link.addEventListener('click', (e) => { 
+                    e.preventDefault(); 
+                    window.cambiarSeccion(link.dataset.seccion); 
+                }); 
+            });
             document.getElementById('hero-boton').onclick = () => window.cambiarSeccion('productos');
         }
 
-        function abrirModalGaleria(index) { const item = galeriaItems[index]; if (!item) return; galeriaFotos = [item.imagen_url]; galeriaIndex = 0; document.getElementById('modal-imagen').src = galeriaFotos[0]; document.getElementById('modal-titulo').textContent = item.titulo || item.categoria; document.getElementById('modal-descripcion').textContent = item.descripcion || ''; document.getElementById('modal-galeria').style.display = 'block'; }
-        function cerrarModalGaleria() { document.getElementById('modal-galeria').style.display = 'none'; }
-        function cambiarImagenGaleria(direccion) { if (!galeriaFotos) return; galeriaIndex = (galeriaIndex + direccion + galeriaFotos.length) % galeriaFotos.length; document.getElementById('modal-imagen').src = galeriaFotos[galeriaIndex]; }
-        window.abrirModalGaleria = abrirModalGaleria; window.cambiarImagenGaleria = cambiarImagenGaleria;
+        function abrirModalGaleria(index) { 
+            const item = galeriaItems[index]; 
+            if (!item) return; 
+            galeriaFotos = [getImagenUrl(item.imagen_url, 'galeria')]; 
+            galeriaIndex = 0; 
+            document.getElementById('modal-imagen').src = galeriaFotos[0]; 
+            document.getElementById('modal-titulo').textContent = item.titulo || item.categoria; 
+            document.getElementById('modal-descripcion').textContent = item.descripcion || ''; 
+            document.getElementById('modal-galeria').style.display = 'block'; 
+        }
+        
+        function cerrarModalGaleria() { 
+            document.getElementById('modal-galeria').style.display = 'none'; 
+        }
+        
+        function cambiarImagenGaleria(direccion) { 
+            if (!galeriaFotos) return; 
+            galeriaIndex = (galeriaIndex + direccion + galeriaFotos.length) % galeriaFotos.length; 
+            document.getElementById('modal-imagen').src = galeriaFotos[galeriaIndex]; 
+        }
+        
+        window.abrirModalGaleria = abrirModalGaleria; 
+        window.cambiarImagenGaleria = cambiarImagenGaleria;
         document.querySelector('.modal-cerrar')?.addEventListener('click', cerrarModalGaleria);
-        document.getElementById('modal-galeria')?.addEventListener('click', (e) => { if (e.target === document.getElementById('modal-galeria')) cerrarModalGaleria(); });
+        document.getElementById('modal-galeria')?.addEventListener('click', (e) => { 
+            if (e.target === document.getElementById('modal-galeria')) cerrarModalGaleria(); 
+        });
     </script>
 </body>
-                                                                                                         </html>
+    </html>

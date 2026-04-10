@@ -138,14 +138,6 @@
                 <label>Contraseña</label>
                 <input type="password" id="password" placeholder="admin">
             </div>
-            <div class="form-group">
-                <label>URL de Supabase</label>
-                <input type="text" id="supabaseUrl" placeholder="https://...">
-            </div>
-            <div class="form-group">
-                <label>Clave anónima de Supabase</label>
-                <input type="text" id="supabaseKey" placeholder="sb_...">
-            </div>
             <button onclick="login()">Ingresar</button>
         </div>
 
@@ -216,13 +208,16 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-conector.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();</script>
     <script>
+        // ============================================
+        // CREDENCIALES FIJAS (cambiar para cada cliente)
+        // ============================================
+        const SUPABASE_URL = 'https://nvrcqlxnvjvhznmxozhh.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_qCtRLmyJxBbYRcO7Suuqnw_mrmqspp6';
+        
         let negocioIdActual = null;
-        let supabaseUrlActual = '';
-        let supabaseKeyActual = '';
         let supabaseClient = null;
         let productosData = [];
         let serviciosData = [];
@@ -268,16 +263,12 @@
         async function login() {
             const id = document.getElementById('negocioId').value;
             const pass = document.getElementById('password').value;
-            const supabaseUrl = document.getElementById('supabaseUrl').value;
-            const supabaseKey = document.getElementById('supabaseKey').value;
             
             if (!id) { alert('Ingresa el ID de tu negocio'); return; }
             if (pass !== 'admin') { alert('Contraseña incorrecta'); return; }
-            if (!supabaseUrl || !supabaseKey) { alert('Las credenciales de Supabase son obligatorias'); return; }
             
             try {
-                supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-                window.initSupabase(supabaseUrl, supabaseKey);
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 
                 const { data, error } = await supabaseClient
                     .from('negocios')
@@ -290,8 +281,6 @@
                 if (data.estado !== 'publicado') { alert('Tu página aún no está publicada.'); return; }
                 
                 negocioIdActual = id;
-                supabaseUrlActual = supabaseUrl;
-                supabaseKeyActual = supabaseKey;
                 document.getElementById('loginPanel').style.display = 'none';
                 document.getElementById('adminPanel').style.display = 'block';
                 cargarTodosLosDatos();
@@ -306,8 +295,6 @@
             document.getElementById('adminPanel').style.display = 'none';
             document.getElementById('negocioId').value = '';
             document.getElementById('password').value = '';
-            document.getElementById('supabaseUrl').value = '';
-            document.getElementById('supabaseKey').value = '';
             negocioIdActual = null;
         }
 
@@ -336,7 +323,6 @@
                         try {
                             const nombreArchivo = await comprimirYSubirImagen(file, 'galeria');
                             
-                            // Guardar en la base de datos
                             const nuevo = {
                                 titulo: file.name.replace(/\.[^/.]+$/, ''),
                                 categoria: 'galeria',
@@ -345,7 +331,11 @@
                                 orden: galeriaData.length
                             };
                             
-                            await window.guardarImagen(negocioIdActual, nuevo, supabaseUrlActual, supabaseKeyActual);
+                            const { error } = await supabaseClient
+                                .from('galeria')
+                                .insert([{ ...nuevo, negocio_id: negocioIdActual }]);
+                            
+                            if (error) throw error;
                             
                             document.getElementById(`preview-${fileId}`).innerHTML = `<span style="color: green;">✅ ${file.name} → ${nombreArchivo}</span>`;
                             
@@ -426,7 +416,11 @@
             };
             
             try {
-                await window.actualizarProducto(id, updates, supabaseUrlActual, supabaseKeyActual);
+                const { error } = await supabaseClient
+                    .from('productos')
+                    .update(updates)
+                    .eq('id', id);
+                if (error) throw error;
                 mostrarMensaje('✅ Producto actualizado');
                 cargarProductos();
             } catch (error) {
@@ -437,7 +431,11 @@
         async function eliminarProducto(id) {
             if (!confirm('¿Eliminar este producto?')) return;
             try {
-                await window.eliminarProducto(id, supabaseUrlActual, supabaseKeyActual);
+                const { error } = await supabaseClient
+                    .from('productos')
+                    .delete()
+                    .eq('id', id);
+                if (error) throw error;
                 mostrarMensaje('✅ Producto eliminado');
                 cargarProductos();
             } catch (error) {
@@ -491,7 +489,11 @@
             };
             
             try {
-                await window.actualizarServicio(id, updates, supabaseUrlActual, supabaseKeyActual);
+                const { error } = await supabaseClient
+                    .from('servicios')
+                    .update(updates)
+                    .eq('id', id);
+                if (error) throw error;
                 mostrarMensaje('✅ Servicio actualizado');
                 cargarServicios();
             } catch (error) {
@@ -502,7 +504,11 @@
         async function eliminarServicio(id) {
             if (!confirm('¿Eliminar este servicio?')) return;
             try {
-                await window.eliminarServicio(id, supabaseUrlActual, supabaseKeyActual);
+                const { error } = await supabaseClient
+                    .from('servicios')
+                    .delete()
+                    .eq('id', id);
+                if (error) throw error;
                 mostrarMensaje('✅ Servicio eliminado');
                 cargarServicios();
             } catch (error) {
@@ -583,7 +589,11 @@
             };
             
             try {
-                await window.actualizarImagen(id, updates, supabaseUrlActual, supabaseKeyActual);
+                const { error } = await supabaseClient
+                    .from('galeria')
+                    .update(updates)
+                    .eq('id', id);
+                if (error) throw error;
                 mostrarMensaje('✅ Imagen actualizada');
                 cargarGaleria();
             } catch (error) {
@@ -594,7 +604,11 @@
         async function eliminarImagen(id) {
             if (!confirm('¿Eliminar esta imagen?')) return;
             try {
-                await window.eliminarImagen(id, supabaseUrlActual, supabaseKeyActual);
+                const { error } = await supabaseClient
+                    .from('galeria')
+                    .delete()
+                    .eq('id', id);
+                if (error) throw error;
                 mostrarMensaje('✅ Imagen eliminada');
                 cargarGaleria();
             } catch (error) {
@@ -652,7 +666,11 @@
             };
             
             try {
-                await window.actualizarTestimonio(id, updates, supabaseUrlActual, supabaseKeyActual);
+                const { error } = await supabaseClient
+                    .from('testimonios')
+                    .update(updates)
+                    .eq('id', id);
+                if (error) throw error;
                 mostrarMensaje('✅ Testimonio actualizado');
                 cargarTestimonios();
             } catch (error) {
@@ -663,7 +681,11 @@
         async function eliminarTestimonio(id) {
             if (!confirm('¿Eliminar este testimonio?')) return;
             try {
-                await window.eliminarTestimonio(id, supabaseUrlActual, supabaseKeyActual);
+                const { error } = await supabaseClient
+                    .from('testimonios')
+                    .delete()
+                    .eq('id', id);
+                if (error) throw error;
                 mostrarMensaje('✅ Testimonio eliminado');
                 cargarTestimonios();
             } catch (error) {
@@ -757,7 +779,10 @@
                 };
                 
                 try {
-                    await window.guardarProducto(negocioIdActual, nuevo, supabaseUrlActual, supabaseKeyActual);
+                    const { error } = await supabaseClient
+                        .from('productos')
+                        .insert([{ ...nuevo, negocio_id: negocioIdActual }]);
+                    if (error) throw error;
                     mostrarMensaje('✅ Producto agregado');
                     cerrarModalAgregar();
                     cargarProductos();
@@ -777,7 +802,10 @@
                 };
                 
                 try {
-                    await window.guardarServicio(negocioIdActual, nuevo, supabaseUrlActual, supabaseKeyActual);
+                    const { error } = await supabaseClient
+                        .from('servicios')
+                        .insert([{ ...nuevo, negocio_id: negocioIdActual }]);
+                    if (error) throw error;
                     mostrarMensaje('✅ Servicio agregado');
                     cerrarModalAgregar();
                     cargarServicios();
@@ -797,7 +825,10 @@
                 };
                 
                 try {
-                    await window.guardarImagen(negocioIdActual, nuevo, supabaseUrlActual, supabaseKeyActual);
+                    const { error } = await supabaseClient
+                        .from('galeria')
+                        .insert([{ ...nuevo, negocio_id: negocioIdActual }]);
+                    if (error) throw error;
                     mostrarMensaje('✅ Imagen agregada');
                     cerrarModalAgregar();
                     cargarGaleria();
@@ -819,7 +850,10 @@
                 };
                 
                 try {
-                    await window.guardarTestimonio(negocioIdActual, nuevo, supabaseUrlActual, supabaseKeyActual);
+                    const { error } = await supabaseClient
+                        .from('testimonios')
+                        .insert([{ ...nuevo, negocio_id: negocioIdActual }]);
+                    if (error) throw error;
                     mostrarMensaje('✅ Testimonio agregado');
                     cerrarModalAgregar();
                     cargarTestimonios();

@@ -1,8 +1,7 @@
-name: Optimizar imágenes y videos
+name: Optimizar imágenes (manual)
 
 on:
-  push:
-    branches: [ main, master ]
+  workflow_dispatch:  # Permite ejecutar manualmente desde GitHub
 
 jobs:
   optimize:
@@ -12,43 +11,21 @@ jobs:
       - name: Clonar repositorio
         uses: actions/checkout@v4
       
-      - name: Verificar archivos en raw
-        run: |
-          echo "=== CONTENIDO DE raw/ ==="
-          ls -la raw/ || echo "No existe la carpeta raw o está vacía"
-          echo "=== FIN ==="
-      
       - name: Instalar herramientas
         run: |
           sudo apt-get update
-          sudo apt-get install -y imagemagick webp ffmpeg
+          sudo apt-get install -y imagemagick webp
       
       - name: Optimizar imágenes a WebP
         run: |
           mkdir -p assets/optimizadas
-          for img in raw/*.jpg raw/*.jpeg raw/*.png raw/*.gif raw/*.JPG raw/*.JPEG raw/*.PNG raw/*.GIF; do
+          for img in raw/*.{jpg,jpeg,png,gif,JPG,JPEG,PNG,GIF}; do
             if [ -f "$img" ]; then
               nombre=$(basename "$img" | sed 's/\.[^.]*$//')
               convert "$img" -resize 1920x1080 -quality 85 "assets/optimizadas/${nombre}.webp"
               echo "✅ Optimizada: ${nombre}.webp"
             fi
           done
-      
-      - name: Optimizar videos a MP4
-        run: |
-          for video in raw/*.mp4 raw/*.mov raw/*.avi raw/*.MP4 raw/*.MOV raw/*.AVI; do
-            if [ -f "$video" ]; then
-              nombre=$(basename "$video" | sed 's/\.[^.]*$//')
-              ffmpeg -i "$video" -vf "scale=1280:-2" -c:v libx264 -crf 28 -preset fast "assets/optimizadas/${nombre}.mp4" 2>/dev/null && \
-              echo "✅ Video optimizado: ${nombre}.mp4" || \
-              echo "⚠️ Error en video: ${nombre}"
-            fi
-          done
-      
-      - name: Mostrar archivos optimizados
-        run: |
-          echo "=== ARCHIVOS OPTIMIZADOS ==="
-          ls -la assets/optimizadas/ || echo "No se generaron archivos optimizados"
       
       - name: Subir a Supabase Storage
         env:
@@ -68,7 +45,5 @@ jobs:
             fi
           done
       
-      - name: Limpiar archivos temporales
-        run: |
-          rm -rf assets/optimizadas
-          echo "✅ Limpieza completada"
+      - name: Limpiar
+        run: rm -rf assets/optimizadas

@@ -3,7 +3,6 @@ name: Optimizar imágenes y videos
 on:
   push:
     branches: [ main, master ]
-    # Sin filtrar por paths para asegurar que siempre se ejecute
 
 jobs:
   optimize:
@@ -13,10 +12,11 @@ jobs:
       - name: Clonar repositorio
         uses: actions/checkout@v4
       
-      - name: Verificar archivos en raw/
+      - name: Verificar archivos en raw
         run: |
-          echo "📁 Archivos encontrados en raw/:"
-          ls -la raw/ || echo "No hay archivos o la carpeta no existe"
+          echo "=== CONTENIDO DE raw/ ==="
+          ls -la raw/ || echo "No existe la carpeta raw o está vacía"
+          echo "=== FIN ==="
       
       - name: Instalar herramientas
         run: |
@@ -26,29 +26,31 @@ jobs:
       - name: Optimizar imágenes a WebP
         run: |
           mkdir -p assets/optimizadas
-          for img in raw/*.{jpg,jpeg,png,gif,JPG,JPEG,PNG,GIF}; do
+          for img in raw/*.jpg raw/*.jpeg raw/*.png raw/*.gif raw/*.JPG raw/*.JPEG raw/*.PNG raw/*.GIF; do
             if [ -f "$img" ]; then
               nombre=$(basename "$img" | sed 's/\.[^.]*$//')
-              convert "$img" -resize 1920x1080 -quality 85 "assets/optimizadas/${nombre}.webp" && \
-              echo "✅ Imagen optimizada: ${nombre}.webp" || \
-              echo "❌ Error optimizando imagen: ${nombre}"
+              convert "$img" -resize 1920x1080 -quality 85 "assets/optimizadas/${nombre}.webp"
+              echo "✅ Optimizada: ${nombre}.webp"
             fi
           done
       
       - name: Optimizar videos a MP4
         run: |
-          for video in raw/*.{mp4,mov,avi,MOV,MP4,AVI}; do
+          for video in raw/*.mp4 raw/*.mov raw/*.avi raw/*.MP4 raw/*.MOV raw/*.AVI; do
             if [ -f "$video" ]; then
               nombre=$(basename "$video" | sed 's/\.[^.]*$//')
-              if ffmpeg -i "$video" -vf "scale=1280:-2" -c:v libx264 -crf 28 -preset fast "assets/optimizadas/${nombre}.mp4" 2>/dev/null; then
-                echo "✅ Video optimizado: ${nombre}.mp4"
-              else
-                echo "⚠️ Error optimizando video: ${nombre}"
-              fi
+              ffmpeg -i "$video" -vf "scale=1280:-2" -c:v libx264 -crf 28 -preset fast "assets/optimizadas/${nombre}.mp4" 2>/dev/null && \
+              echo "✅ Video optimizado: ${nombre}.mp4" || \
+              echo "⚠️ Error en video: ${nombre}"
             fi
           done
       
-      - name: Subir archivos a Supabase Storage
+      - name: Mostrar archivos optimizados
+        run: |
+          echo "=== ARCHIVOS OPTIMIZADOS ==="
+          ls -la assets/optimizadas/ || echo "No se generaron archivos optimizados"
+      
+      - name: Subir a Supabase Storage
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
@@ -61,13 +63,12 @@ jobs:
                 -H "Authorization: Bearer $SUPABASE_SERVICE_KEY" \
                 -H "Content-Type: $(file -b --mime-type "$file")" \
                 --data-binary "@$file" \
-                "$SUPABASE_URL/storage/v1/object/clientes/20640a4e-ebeb-4149-b937-ecc34fa3038a/$nombre" && \
-              echo "✅ Subido: $nombre" || \
-              echo "❌ Error subiendo: $nombre"
+                "$SUPABASE_URL/storage/v1/object/clientes/plantilla-universal/$nombre"
+              echo "✅ Subido: $nombre"
             fi
           done
       
       - name: Limpiar archivos temporales
         run: |
           rm -rf assets/optimizadas
-          echo "✅ Archivos temporales eliminados"
+          echo "✅ Limpieza completada"

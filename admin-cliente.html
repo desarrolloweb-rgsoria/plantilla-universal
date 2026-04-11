@@ -46,6 +46,8 @@
         .btn-eliminar:hover { background: #bb2d3b; }
         .btn-agregar { background: #28a745; margin-bottom: 1rem; }
         .btn-agregar:hover { background: #218838; }
+        .btn-subir-imagen { background: #F4A261; color: #0B2B40; margin-right: 0.5rem; }
+        .btn-subir-imagen:hover { background: #e67e22; }
         .tab-buttons { display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
         .tab-btn { background: #e0e0e0; color: #333; }
         .tab-btn.active { background: #0B4F6C; color: white; }
@@ -63,6 +65,8 @@
             align-items: center;
             margin-bottom: 1rem;
             cursor: pointer;
+            flex-wrap: wrap;
+            gap: 0.5rem;
         }
         .item-contenido { margin-top: 1rem; }
         .hidden { display: none; }
@@ -117,6 +121,12 @@
         .upload-area:hover {
             background: #f0f8ff;
             border-color: #F4A261;
+        }
+        .preview-imagen {
+            max-width: 80px;
+            max-height: 80px;
+            border-radius: 8px;
+            margin-top: 0.5rem;
         }
     </style>
 </head>
@@ -236,6 +246,14 @@
         let tipoAgregando = null;
 
         // ============================================
+        // FUNCIONES DE URL
+        // ============================================
+        function getImagenUrlProducto(nombreArchivo) {
+            if (!nombreArchivo) return '';
+            return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/${negocioIdActual}/productos/${nombreArchivo}`;
+        }
+
+        // ============================================
         // FUNCIÓN DE COMPRESIÓN Y SUBIDA
         // ============================================
         async function comprimirYSubirImagen(file, carpeta) {
@@ -256,6 +274,72 @@
             
             if (error) throw error;
             return nombreArchivo;
+        }
+
+        // ============================================
+        // SUBIR IMAGEN PARA UN PRODUCTO EXISTENTE
+        // ============================================
+        async function subirImagenProducto(event, productoId) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const card = document.querySelector(`.item-card[data-id="${productoId}"]`);
+            if (!card) return;
+            
+            let previewDiv = card.querySelector(`.preview-producto-${productoId}`);
+            if (!previewDiv) {
+                previewDiv = document.createElement('div');
+                previewDiv.className = `preview-producto-${productoId}`;
+                previewDiv.style.marginTop = '0.5rem';
+                card.querySelector('.item-contenido').appendChild(previewDiv);
+            }
+            
+            previewDiv.innerHTML = '<span class="spinner"></span> Subiendo imagen...';
+            
+            try {
+                const options = {
+                    maxSizeMB: 1,
+                    maxWidthOrHeight: 1920,
+                    useWebWorker: true,
+                    fileType: 'image/webp'
+                };
+                
+                const compressedFile = await imageCompression(file, options);
+                const nombreArchivo = `${Date.now()}.webp`;
+                const ruta = `${negocioIdActual}/productos/${nombreArchivo}`;
+                
+                const { error: uploadError } = await supabaseClient.storage
+                    .from(BUCKET_NAME)
+                    .upload(ruta, compressedFile);
+                
+                if (uploadError) throw uploadError;
+                
+                const { error: updateError } = await supabaseClient
+                    .from('productos')
+                    .update({ imagen: nombreArchivo })
+                    .eq('id', productoId);
+                
+                if (updateError) throw updateError;
+                
+                previewDiv.innerHTML = `<span style="color: green;">✅ Imagen actualizada: ${nombreArchivo}</span>`;
+                
+                setTimeout(() => {
+                    cargarProductos();
+                }, 1500);
+                
+            } catch (error) {
+                previewDiv.innerHTML = `<span style="color: red;">❌ Error: ${error.message}</span>`;
+                console.error(error);
+            }
+            
+            event.target.value = '';
+        }
+
+        function abrirSubirImagen(productoId) {
+            const fileInput = document.getElementById(`file-input-${productoId}`);
+            if (fileInput) {
+                fileInput.click();
+            }
         }
 
         // ============================================
@@ -354,7 +438,7 @@
         }
 
         // ============================================
-        // SUBIDA DE IMÁGENES (PRODUCTOS)
+        // SUBIDA DE IMÁGENES (PRODUCTOS - NUEVOS)
         // ============================================
         function initUploaderProductos() {
             const uploadArea = document.getElementById('uploadAreaProductos');
@@ -439,10 +523,15 @@
             if (!productosData.length) { container.innerHTML = '<p>No hay productos. Agrega uno.</p>'; return; }
             
             container.innerHTML = productosData.map(p => `
-                <div class="item-card">
+                <div class="item-card" data-id="${p.id}">
                     <div class="item-header" onclick="toggleContenido(this)">
                         <strong>📦 ${escapeHtml(p.nombre)}</strong>
-                        <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarProducto(${p.id})">Eliminar</button>
+                        <div>
+                            <button class="btn-subir-imagen" onclick="event.stopPropagation(); abrirSubirImagen(${p.id})" style="background: #F4A261; margin-right: 0.5rem;">
+                                <i class="fas fa-upload"></i> Subir imagen
+                            </button>
+                            <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarProducto(${p.id})">Eliminar</button>
+                        </div>
                     </div>
                     <div class="item-contenido hidden">
                         <div class="form-group"><label>Nombre</label><input type="text" class="edit-nombre" value="${escapeHtml(p.nombre)}"></div>
@@ -452,15 +541,22 @@
                             <div class="form-group"><label>Badge</label><input type="text" class="edit-badge" value="${escapeHtml(p.badge_permanente || '')}"></div>
                         </div>
                         <div class="form-group"><label>Características (separadas por coma)</label><input type="text" class="edit-caracteristicas" value="${(p.caracteristicas || []).join(', ')}"></div>
-                        <div class="form-group"><label>Nombre del archivo de imagen</label><input type="text" class="edit-imagen" value="${p.imagen || ''}"></div>
+                        <div class="form-group">
+                            <label>Imagen actual:</label>
+                            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                                ${p.imagen ? `<img src="${getImagenUrlProducto(p.imagen)}" class="img-miniatura" onerror="this.style.display='none'">` : ''}
+                                <span class="edit-imagen-nombre">${p.imagen || 'Sin imagen'}</span>
+                            </div>
+                        </div>
                         <button onclick="guardarProducto(${p.id})" style="margin-top: 0.5rem;">Guardar cambios</button>
                     </div>
+                    <input type="file" id="file-input-${p.id}" accept="image/*" style="display: none;" onchange="subirImagenProducto(event, ${p.id})">
                 </div>
             `).join('');
         }
 
         async function guardarProducto(id) {
-            const card = document.querySelector(`.item-card:has(button[onclick*="eliminarProducto(${id})"])`);
+            const card = document.querySelector(`.item-card[data-id="${id}"]`);
             if (!card) return;
             
             const updates = {
@@ -469,7 +565,7 @@
                 precio: parseFloat(card.querySelector('.edit-precio')?.value) || 0,
                 badge_permanente: card.querySelector('.edit-badge')?.value || '',
                 caracteristicas: (card.querySelector('.edit-caracteristicas')?.value || '').split(',').map(c => c.trim()).filter(c => c),
-                imagen: card.querySelector('.edit-imagen')?.value || ''
+                imagen: card.querySelector('.edit-imagen-nombre')?.textContent || ''
             };
             
             try {

@@ -150,6 +150,48 @@
         .producto-preview-card .content { padding: 1rem; }
         .producto-preview-card h4 { margin: 0 0 0.5rem 0; }
         .precio { color: #F4A261; font-weight: bold; }
+        .testimonio-preview-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            max-width: 300px;
+            margin-top: 0.5rem;
+        }
+        .testimonio-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 1rem;
+        }
+        .galeria-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        .galeria-preview-img {
+            width: 100%;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .contacto-preview-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-top: 0.5rem;
+        }
+        .footer-preview {
+            background: #0B2B40;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            border-radius: 12px;
+            margin-top: 0.5rem;
+        }
         .ql-editor { min-height: 150px; }
     </style>
 </head>
@@ -213,8 +255,6 @@
                     <input type="hidden" id="hero-imagen" value="">
                 </div>
                 <div class="form-group"><label>Opacidad del overlay (0 a 1)</label><input type="number" id="hero-overlay" step="0.1" min="0" max="1" value="0.5" oninput="previewHero()"></div>
-                
-                <!-- Previsualización del Hero -->
                 <div style="background:#e0e0e0; border-radius:12px; padding:1rem; margin-top:1rem;">
                     <h4>📱 Vista previa del Hero</h4>
                     <div id="heroPreview" style="background-size:cover; background-position:center; padding:2rem; text-align:center; border-radius:12px; color:white; text-shadow:0 0 5px black; min-height:200px; display:flex; flex-direction:column; justify-content:center;">
@@ -247,21 +287,26 @@
                 </div>
                 <div class="form-group"><label>Valores (separados por coma)</label><input type="text" id="nosotros-valores" placeholder="Calidad, Confianza, Compromiso" oninput="previewNosotros()"></div>
                 
-                <!-- Contacto -->
+                <!-- Contacto con previsualización -->
                 <h3>📞 Contacto</h3>
-                <div class="form-group"><label>Dirección</label><input type="text" id="contacto-direccion"></div>
+                <div class="form-group"><label>Dirección</label><input type="text" id="contacto-direccion" oninput="previewContacto()"></div>
                 <div class="form-row">
-                    <div class="form-group"><label>WhatsApp</label><input type="text" id="contacto-whatsapp"></div>
-                    <div class="form-group"><label>Mapa (URL embed)</label><input type="text" id="contacto-mapa"></div>
+                    <div class="form-group"><label>WhatsApp</label><input type="text" id="contacto-whatsapp" oninput="previewContacto()"></div>
+                    <div class="form-group"><label>Mapa (URL embed)</label><input type="text" id="contacto-mapa" oninput="previewContacto()"></div>
                 </div>
                 <div class="form-row">
-                    <div class="form-group"><label>Facebook</label><input type="text" id="red-facebook"></div>
-                    <div class="form-group"><label>Instagram</label><input type="text" id="red-instagram"></div>
+                    <div class="form-group"><label>Facebook</label><input type="text" id="red-facebook" oninput="previewContacto()"></div>
+                    <div class="form-group"><label>Instagram</label><input type="text" id="red-instagram" oninput="previewContacto()"></div>
+                </div>
+                <div class="contacto-preview-card" id="contactoPreview">
+                    <h4>📱 Vista previa de Contacto</h4>
+                    <div id="contactoPreviewContent"></div>
                 </div>
                 
-                <!-- Footer -->
+                <!-- Footer con previsualización -->
                 <h3>📄 Pie de página</h3>
-                <div class="form-group"><label>Texto del footer</label><input type="text" id="footer-texto"></div>
+                <div class="form-group"><label>Texto del footer</label><input type="text" id="footer-texto" placeholder="© 2025 Mi Negocio" oninput="previewFooter()"></div>
+                <div class="footer-preview" id="footerPreview">© 2025 Mi Negocio</div>
             </div>
             
             <!-- SECCIÓN CONTENIDO -->
@@ -342,6 +387,76 @@
                 html += `</div>`;
             }
             document.getElementById('nosotrosPreview').innerHTML = html;
+        }
+        
+        function previewContacto() {
+            const direccion = document.getElementById('contacto-direccion').value || 'No especificada';
+            const whatsapp = document.getElementById('contacto-whatsapp').value || '';
+            const facebook = document.getElementById('red-facebook').value || '';
+            const instagram = document.getElementById('red-instagram').value || '';
+            
+            let html = `<div style="margin-bottom:0.5rem;"><strong>📍 Dirección:</strong> ${escapeHtml(direccion)}</div>`;
+            if (whatsapp) html += `<div style="margin-bottom:0.5rem;"><strong>📱 WhatsApp:</strong> <a href="https://wa.me/${whatsapp.replace(/[^0-9]/g, '')}" target="_blank">${escapeHtml(whatsapp)}</a></div>`;
+            if (facebook) html += `<div style="margin-bottom:0.5rem;"><strong>📘 Facebook:</strong> <a href="${facebook}" target="_blank">${escapeHtml(facebook)}</a></div>`;
+            if (instagram) html += `<div style="margin-bottom:0.5rem;"><strong>📷 Instagram:</strong> <a href="${instagram}" target="_blank">${escapeHtml(instagram)}</a></div>`;
+            
+            document.getElementById('contactoPreviewContent').innerHTML = html;
+        }
+        
+        function previewFooter() {
+            const texto = document.getElementById('footer-texto').value || '© 2025 Mi Negocio';
+            document.getElementById('footerPreview').textContent = texto;
+        }
+        
+        function previewTestimonio(id) {
+            const test = testimonios.find(t => t.id === id);
+            if (!test) return;
+            const previewDiv = document.getElementById(`preview-testimonio-${id}`);
+            if (!previewDiv) return;
+            
+            let avatarHtml = '';
+            if (test.avatar && supabaseClient && clienteData) {
+                const url = `${supabaseUrl}/storage/v1/object/public/cliente/${clienteData.uuid}/avatares/${test.avatar}`;
+                avatarHtml = `<img src="${url}" class="testimonio-avatar" onerror="this.src='https://randomuser.me/api/portraits/lego/1.jpg'">`;
+            } else {
+                avatarHtml = `<img src="https://randomuser.me/api/portraits/lego/1.jpg" class="testimonio-avatar">`;
+            }
+            
+            const stars = '★'.repeat(test.rating) + '☆'.repeat(5 - test.rating);
+            
+            previewDiv.innerHTML = `
+                <div style="display:flex; align-items:center; margin-bottom:0.5rem;">
+                    ${avatarHtml}
+                    <div>
+                        <strong>${escapeHtml(test.nombre || 'Anónimo')}</strong>
+                        ${test.lugar ? `<div style="font-size:0.8rem; color:#666;">${escapeHtml(test.lugar)}</div>` : ''}
+                        <div style="color:#FFD700; font-size:0.8rem;">${stars}</div>
+                    </div>
+                </div>
+                <div style="font-style:italic;">"${escapeHtml(test.texto || 'Sin testimonio')}"</div>
+            `;
+        }
+        
+        function previewGaleria(id) {
+            const gal = galeria.find(g => g.id === id);
+            if (!gal) return;
+            const previewDiv = document.getElementById(`preview-galeria-${id}`);
+            if (!previewDiv) return;
+            
+            if (!gal.fotos || gal.fotos.length === 0) {
+                previewDiv.innerHTML = '<div style="color:#666;">No hay imágenes en esta categoría</div>';
+                return;
+            }
+            
+            let html = '<div class="galeria-preview-grid">';
+            gal.fotos.slice(0, 6).forEach(foto => {
+                const url = `${supabaseUrl}/storage/v1/object/public/cliente/${clienteData.uuid}/galeria/${foto}`;
+                html += `<img src="${url}" class="galeria-preview-img" onerror="this.style.display='none'">`;
+            });
+            html += '</div>';
+            if (gal.fotos.length > 6) html += `<div style="font-size:0.7rem; text-align:center;">+${gal.fotos.length - 6} más</div>`;
+            
+            previewDiv.innerHTML = html;
         }
         
         function previewProducto(id) {
@@ -545,12 +660,31 @@
         }
 
         // ============================================
-        // TESTIMONIOS Y GALERÍA (simplificados)
+        // TESTIMONIOS CON PREVISUALIZACIÓN
         // ============================================
         function agregarTestimonio() {
             const id = testimonioId++;
             testimonios.push({ id: id, nombre: '', lugar: '', texto: '', rating: 5, avatar: '' });
             renderizarTestimonios();
+            setTimeout(() => {
+                const uploadArea = document.getElementById(`uploadAreaTestimonio-${id}`);
+                const fileInput = document.getElementById(`subirTestimonio-${id}`);
+                if (uploadArea && fileInput) {
+                    uploadArea.addEventListener('click', () => fileInput.click());
+                    fileInput.addEventListener('change', async (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        const preview = document.getElementById(`previewTestimonio-${id}`);
+                        if (preview) preview.innerHTML = '<span class="spinner"></span> Subiendo...';
+                        try {
+                            const nombre = await subirImagen(file, 'avatares');
+                            const test = testimonios.find(t => t.id === id);
+                            if (test) test.avatar = nombre;
+                            renderizarTestimonios();
+                        } catch (err) { if (preview) preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`; }
+                    });
+                }
+            }, 100);
         }
 
         function eliminarTestimonio(id) {
@@ -569,18 +703,51 @@
                         <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarTestimonio(${t.id})">Eliminar</button>
                     </div>
                     <div class="item-contenido hidden">
-                        <div class="form-row"><div class="form-group"><label>Nombre</label><input type="text" class="test-nombre" value="${escapeHtml(t.nombre)}" onchange="testimonios.find(t2=>t2.id===${t.id}).nombre=this.value"></div><div class="form-group"><label>Lugar</label><input type="text" class="test-lugar" value="${escapeHtml(t.lugar)}" onchange="testimonios.find(t2=>t2.id===${t.id}).lugar=this.value"></div></div>
-                        <div class="form-group"><label>Testimonio</label><textarea class="test-texto" rows="2" onchange="testimonios.find(t2=>t2.id===${t.id}).texto=this.value">${escapeHtml(t.texto)}</textarea></div>
-                        <div class="form-row"><div class="form-group"><label>Rating (1-5)</label><input type="number" class="test-rating" min="1" max="5" value="${t.rating}" onchange="testimonios.find(t2=>t2.id===${t.id}).rating=parseInt(this.value)"></div></div>
+                        <div class="form-row"><div class="form-group"><label>Nombre</label><input type="text" class="test-nombre" value="${escapeHtml(t.nombre)}" onchange="actualizarTestimonioConPreview(${t.id}, 'nombre', this.value)"></div><div class="form-group"><label>Lugar</label><input type="text" class="test-lugar" value="${escapeHtml(t.lugar)}" onchange="actualizarTestimonioConPreview(${t.id}, 'lugar', this.value)"></div></div>
+                        <div class="form-group"><label>Testimonio</label><textarea class="test-texto" rows="2" onchange="actualizarTestimonioConPreview(${t.id}, 'texto', this.value)">${escapeHtml(t.texto)}</textarea></div>
+                        <div class="form-row"><div class="form-group"><label>Rating (1-5)</label><input type="number" class="test-rating" min="1" max="5" value="${t.rating}" onchange="actualizarTestimonioConPreview(${t.id}, 'rating', parseInt(this.value))"></div></div>
+                        <div class="upload-area" id="uploadAreaTestimonio-${t.id}"><i class="fas fa-cloud-upload-alt"></i> Toca para subir avatar<input type="file" id="subirTestimonio-${t.id}" accept="image/*" style="display: none;"></div>
+                        <div id="previewTestimonio-${t.id}" class="preview-upload"></div>
+                        <div id="preview-testimonio-${t.id}" class="testimonio-preview-card"></div>
                     </div>
                 </div>
             `).join('');
+            testimonios.forEach(t => previewTestimonio(t.id));
         }
 
+        function actualizarTestimonioConPreview(id, campo, valor) {
+            const index = testimonios.findIndex(t => t.id === id);
+            if (index !== -1) testimonios[index][campo] = valor;
+            previewTestimonio(id);
+        }
+
+        // ============================================
+        // GALERÍA CON PREVISUALIZACIÓN
+        // ============================================
         function agregarGaleria() {
             const id = galeriaId++;
             galeria.push({ id: id, titulo: '', descripcion: '', fotos: [] });
             renderizarGaleria();
+            setTimeout(() => {
+                const uploadArea = document.getElementById(`uploadAreaGaleria-${id}`);
+                const fileInput = document.getElementById(`subirGaleria-${id}`);
+                if (uploadArea && fileInput) {
+                    uploadArea.addEventListener('click', () => fileInput.click());
+                    fileInput.addEventListener('change', async (e) => {
+                        const files = Array.from(e.target.files);
+                        const preview = document.getElementById(`previewGaleria-${id}`);
+                        for (const file of files) {
+                            if (preview) preview.innerHTML = '<span class="spinner"></span> Subiendo...';
+                            try {
+                                const nombre = await subirImagen(file, 'galeria');
+                                const gal = galeria.find(g => g.id === id);
+                                if (gal) gal.fotos.push(nombre);
+                                renderizarGaleria();
+                            } catch (err) { if (preview) preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`; }
+                        }
+                    });
+                }
+            }, 100);
         }
 
         function eliminarGaleria(id) {
@@ -599,13 +766,20 @@
                         <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarGaleria(${g.id})">Eliminar</button>
                     </div>
                     <div class="item-contenido hidden">
-                        <div class="form-row"><div class="form-group"><label>Título</label><input type="text" class="gal-titulo" value="${escapeHtml(g.titulo)}" onchange="galeria.find(g2=>g2.id===${g.id}).titulo=this.value"></div><div class="form-group"><label>Descripción</label><input type="text" class="gal-descripcion" value="${escapeHtml(g.descripcion)}" onchange="galeria.find(g2=>g2.id===${g.id}).descripcion=this.value"></div></div>
+                        <div class="form-row"><div class="form-group"><label>Título</label><input type="text" class="gal-titulo" value="${escapeHtml(g.titulo)}" onchange="actualizarGaleriaConPreview(${g.id}, 'titulo', this.value)"></div><div class="form-group"><label>Descripción</label><input type="text" class="gal-descripcion" value="${escapeHtml(g.descripcion)}" onchange="actualizarGaleriaConPreview(${g.id}, 'descripcion', this.value)"></div></div>
                         <div class="upload-area" id="uploadAreaGaleria-${g.id}"><i class="fas fa-cloud-upload-alt"></i> Toca para subir imágenes (múltiples)<input type="file" id="subirGaleria-${g.id}" accept="image/*" multiple style="display: none;"></div>
                         <div id="previewGaleria-${g.id}" class="preview-upload"></div>
-                        ${g.fotos.length ? `<div><small>Imágenes: ${g.fotos.join(', ')}</small></div>` : ''}
+                        <div id="preview-galeria-${g.id}" style="margin-top:0.5rem;"></div>
                     </div>
                 </div>
             `).join('');
+            galeria.forEach(g => previewGaleria(g.id));
+        }
+
+        function actualizarGaleriaConPreview(id, campo, valor) {
+            const index = galeria.findIndex(g => g.id === id);
+            if (index !== -1) galeria[index][campo] = valor;
+            previewGaleria(id);
         }
 
         function toggleContenido(header) { const contenido = header.nextElementSibling; contenido.classList.toggle('hidden'); }
@@ -615,79 +789,74 @@
         // LOGIN
         // ============================================
         async function login() {
-    const idPublico = document.getElementById('clienteId').value;
-    const password = document.getElementById('password').value;
-    supabaseUrl = document.getElementById('supabaseUrl').value;
-    supabaseKey = document.getElementById('supabaseKey').value;
-    if (!idPublico || !password) { alert('Ingresa ID y contraseña'); return; }
-    try {
-        supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-        const cliente = await window.loginCliente(idPublico, password, supabaseUrl, supabaseKey);
-        clienteData = cliente;
-        const config = cliente.config || {};
-        
-        // Colores
-        if (config.marca?.colores) {
-            document.getElementById('color-primario').value = config.marca.colores.primario || '#1E3A5F';
-            document.getElementById('color-secundario').value = config.marca.colores.secundario || '#4A90E2';
-            document.getElementById('color-acento').value = config.marca.colores.acento || '#F77F00';
-            document.getElementById('color-texto').value = config.marca.colores.texto || '#0A1C2E';
-            document.getElementById('color-fondo').value = config.marca.colores.fondo || '#F0F8FF';
-            actualizarColorPreview();
+            const idPublico = document.getElementById('clienteId').value;
+            const password = document.getElementById('password').value;
+            supabaseUrl = document.getElementById('supabaseUrl').value;
+            supabaseKey = document.getElementById('supabaseKey').value;
+            if (!idPublico || !password) { alert('Ingresa ID y contraseña'); return; }
+            try {
+                supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+                const cliente = await window.loginCliente(idPublico, password, supabaseUrl, supabaseKey);
+                clienteData = cliente;
+                const config = cliente.config || {};
+                
+                if (config.marca?.colores) {
+                    document.getElementById('color-primario').value = config.marca.colores.primario || '#1E3A5F';
+                    document.getElementById('color-secundario').value = config.marca.colores.secundario || '#4A90E2';
+                    document.getElementById('color-acento').value = config.marca.colores.acento || '#F77F00';
+                    document.getElementById('color-texto').value = config.marca.colores.texto || '#0A1C2E';
+                    document.getElementById('color-fondo').value = config.marca.colores.fondo || '#F0F8FF';
+                    actualizarColorPreview();
+                }
+                if (document.getElementById('hero-superior')) document.getElementById('hero-superior').value = config.hero?.texto_superior || '';
+                if (document.getElementById('hero-principal')) document.getElementById('hero-principal').value = config.hero?.texto_principal || '';
+                if (document.getElementById('hero-inferior')) document.getElementById('hero-inferior').value = config.hero?.texto_inferior || '';
+                if (document.getElementById('hero-boton')) document.getElementById('hero-boton').value = config.hero?.boton || 'Ver productos';
+                if (document.getElementById('hero-imagen')) document.getElementById('hero-imagen').value = config.hero?.imagen || '';
+                if (document.getElementById('hero-overlay')) document.getElementById('hero-overlay').value = config.hero?.overlay || 0.5;
+                if (document.getElementById('nosotros-titulo')) document.getElementById('nosotros-titulo').value = config.nosotros?.titulo || 'Sobre Nosotros';
+                if (document.getElementById('nosotros-subtitulo')) document.getElementById('nosotros-subtitulo').value = config.nosotros?.subtitulo || 'Conócenos mejor';
+                if (document.getElementById('nosotros-historia')) document.getElementById('nosotros-historia').value = config.nosotros?.historia || '';
+                if (document.getElementById('nosotros-imagen')) document.getElementById('nosotros-imagen').value = config.nosotros?.imagen || '';
+                if (document.getElementById('nosotros-valores')) document.getElementById('nosotros-valores').value = (config.nosotros?.valores || []).join(', ');
+                if (document.getElementById('contacto-direccion')) document.getElementById('contacto-direccion').value = config.contacto?.direccion || '';
+                if (document.getElementById('contacto-whatsapp')) document.getElementById('contacto-whatsapp').value = config.contacto?.whatsapp || '';
+                if (document.getElementById('contacto-mapa')) document.getElementById('contacto-mapa').value = config.contacto?.mapa || '';
+                if (document.getElementById('red-facebook')) document.getElementById('red-facebook').value = config.contacto?.redes?.facebook || '';
+                if (document.getElementById('red-instagram')) document.getElementById('red-instagram').value = config.contacto?.redes?.instagram || '';
+                if (document.getElementById('footer-texto')) document.getElementById('footer-texto').value = config.footer?.texto || '';
+                
+                const prods = await window.getProductosPorCliente(cliente.uuid, supabaseUrl, supabaseKey);
+                if (prods.length) productos = prods.map(p => ({ ...p, id: p.id }));
+                const tests = await window.getTestimoniosPorCliente(cliente.uuid, supabaseUrl, supabaseKey);
+                if (tests.length) testimonios = tests.map(t => ({ ...t, id: t.id }));
+                const gals = await window.getGaleriaPorCliente(cliente.uuid, supabaseUrl, supabaseKey);
+                if (gals.length) galeria = gals.map(g => ({ ...g, id: g.id, fotos: g.imagen_url ? [g.imagen_url] : [] }));
+                
+                renderizarProductos();
+                renderizarTestimonios();
+                renderizarGaleria();
+                
+                document.getElementById('loginPanel').style.display = 'none';
+                document.getElementById('adminPanel').style.display = 'block';
+                initColorPalettes();
+                initUploaders();
+                
+                if (!nosotrosEditor && document.getElementById('nosotrosHistoriaEditor')) {
+                    nosotrosEditor = new Quill('#nosotrosHistoriaEditor', { theme: 'snow', placeholder: 'Escribe la historia de tu negocio...' });
+                    nosotrosEditor.on('text-change', () => previewNosotros());
+                }
+                if (nosotrosEditor && config.nosotros?.historia) nosotrosEditor.root.innerHTML = config.nosotros.historia;
+                previewHero();
+                previewNosotros();
+                previewContacto();
+                previewFooter();
+                
+            } catch (error) { alert('Error: ' + error.message); }
         }
-        
-        // Hero - solo si existen
-        if (document.getElementById('hero-superior')) document.getElementById('hero-superior').value = config.hero?.texto_superior || '';
-        if (document.getElementById('hero-principal')) document.getElementById('hero-principal').value = config.hero?.texto_principal || '';
-        if (document.getElementById('hero-inferior')) document.getElementById('hero-inferior').value = config.hero?.texto_inferior || '';
-        if (document.getElementById('hero-boton')) document.getElementById('hero-boton').value = config.hero?.boton || 'Ver productos';
-        if (document.getElementById('hero-imagen')) document.getElementById('hero-imagen').value = config.hero?.imagen || '';
-        if (document.getElementById('hero-overlay')) document.getElementById('hero-overlay').value = config.hero?.overlay || 0.5;
-        
-        // Nosotros
-        if (document.getElementById('nosotros-titulo')) document.getElementById('nosotros-titulo').value = config.nosotros?.titulo || 'Sobre Nosotros';
-        if (document.getElementById('nosotros-subtitulo')) document.getElementById('nosotros-subtitulo').value = config.nosotros?.subtitulo || 'Conócenos mejor';
-        if (document.getElementById('nosotros-historia')) document.getElementById('nosotros-historia').value = config.nosotros?.historia || '';
-        if (document.getElementById('nosotros-imagen')) document.getElementById('nosotros-imagen').value = config.nosotros?.imagen || '';
-        if (document.getElementById('nosotros-valores')) document.getElementById('nosotros-valores').value = (config.nosotros?.valores || []).join(', ');
-        
-        // Contacto
-        if (document.getElementById('contacto-direccion')) document.getElementById('contacto-direccion').value = config.contacto?.direccion || '';
-        if (document.getElementById('contacto-whatsapp')) document.getElementById('contacto-whatsapp').value = config.contacto?.whatsapp || '';
-        if (document.getElementById('contacto-mapa')) document.getElementById('contacto-mapa').value = config.contacto?.mapa || '';
-        if (document.getElementById('red-facebook')) document.getElementById('red-facebook').value = config.contacto?.redes?.facebook || '';
-        if (document.getElementById('red-instagram')) document.getElementById('red-instagram').value = config.contacto?.redes?.instagram || '';
-        if (document.getElementById('footer-texto')) document.getElementById('footer-texto').value = config.footer?.texto || '';
-        
-        // Cargar productos, testimonios, galería
-        const prods = await window.getProductosPorCliente(cliente.uuid, supabaseUrl, supabaseKey);
-        if (prods.length) productos = prods.map(p => ({ ...p, id: p.id }));
-        const tests = await window.getTestimoniosPorCliente(cliente.uuid, supabaseUrl, supabaseKey);
-        if (tests.length) testimonios = tests.map(t => ({ ...t, id: t.id }));
-        const gals = await window.getGaleriaPorCliente(cliente.uuid, supabaseUrl, supabaseKey);
-        if (gals.length) galeria = gals.map(g => ({ ...g, id: g.id, fotos: g.imagen_url ? [g.imagen_url] : [] }));
-        
-        renderizarProductos();
-        renderizarTestimonios();
-        renderizarGaleria();
-        
-        document.getElementById('loginPanel').style.display = 'none';
-        document.getElementById('adminPanel').style.display = 'block';
-        initColorPalettes();
-        initUploaders();
-        
-        // Inicializar editor Quill
-        if (!nosotrosEditor && document.getElementById('nosotrosHistoriaEditor')) {
-            nosotrosEditor = new Quill('#nosotrosHistoriaEditor', { theme: 'snow', placeholder: 'Escribe la historia de tu negocio...' });
-            nosotrosEditor.on('text-change', () => previewNosotros());
-        }
-        if (nosotrosEditor && config.nosotros?.historia) nosotrosEditor.root.innerHTML = config.nosotros.historia;
-        previewHero();
-        previewNosotros();
-        
-    } catch (error) { alert('Error: ' + error.message); }
-        }
-        
+
+        function logout() { document.getElementById('loginPanel').style.display = 'block'; document.getElementById('adminPanel').style.display = 'none'; clienteData = null; }
+
         // ============================================
         // GUARDAR TODO
         // ============================================

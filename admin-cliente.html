@@ -437,38 +437,17 @@
         // FUNCIONES DE SUBIDA CON LOGS
         // ============================================
         async function comprimirYSubirImagen(file, carpeta) {
-            const options = {
-                maxSizeMB: 1,
-                maxWidthOrHeight: 1920,
-                useWebWorker: true,
-                fileType: 'image/webp'
-            };
-            
-            console.log('📊 Iniciando compresión...');
-            console.log('  - Archivo original:', file.name, (file.size / 1024).toFixed(2), 'KB', file.type);
-            
-            const compressedFile = await imageCompression(file, options);
-            
-            console.log('  - Comprimido:', (compressedFile.size / 1024).toFixed(2), 'KB', compressedFile.type);
-            
-            const nombreArchivo = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.webp`;
-            const ruta = `${clienteData.uuid}/${carpeta}/${nombreArchivo}`;
-            
-            console.log('  - Subiendo a:', ruta);
-            
-            const { error } = await supabaseClient.storage
-                .from('cliente')
-                .upload(ruta, compressedFile);
-            
-            if (error) {
-                console.error('❌ Error en upload:', error);
-                throw error;
+    const extension = file.name.split('.').pop();
+    const nombreArchivo = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${extension}`;
+    const ruta = `${clienteData.uuid}/${carpeta}/${nombreArchivo}`;
+    
+    const { error } = await supabaseClient.storage
+        .from('cliente')
+        .upload(ruta, file);
+    
+    if (error) throw error;
+    return nombreArchivo;
             }
-            
-            console.log('✅ Subida exitosa:', nombreArchivo);
-            return nombreArchivo;
-        }
-
         async function subirVideoPendiente(file) {
             const nombreArchivo = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.mp4`;
             const ruta = `${clienteData.uuid}/hero/pendientes/${nombreArchivo}`;

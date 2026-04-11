@@ -15,12 +15,13 @@
             padding: 2rem;
         }
         .container { max-width: 1400px; margin: 0 auto; }
-        .panel-principal {
+        .login-form, .panel-principal {
             background: white;
             border-radius: 20px;
             padding: 2rem;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
+        .login-form { max-width: 400px; margin: 0 auto; }
         .form-group { margin-bottom: 1rem; }
         label { font-weight: 600; display: block; margin-bottom: 0.3rem; }
         input, select, textarea {
@@ -70,19 +71,6 @@
             margin-bottom: 1rem;
         }
         @media (max-width: 768px) { .form-row { grid-template-columns: 1fr; } }
-        .editor-preview {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-bottom: 1.5rem;
-        }
-        .editor-preview .editor, .editor-preview .preview {
-            background: white;
-            border-radius: 12px;
-            padding: 1rem;
-            border: 1px solid #e0e0e0;
-        }
-        .preview h4 { margin-bottom: 0.5rem; color: #0B4F6C; }
         .upload-area {
             border: 2px dashed #0B4F6C;
             border-radius: 12px;
@@ -113,6 +101,7 @@
             padding: 1rem;
             margin-top: 1rem;
         }
+        .logout-btn { background: #dc3545; margin-bottom: 1rem; }
         .mensaje {
             margin-top: 1rem;
             padding: 1rem;
@@ -132,37 +121,22 @@
         .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; cursor: pointer; flex-wrap: wrap; gap: 0.5rem; }
         .item-contenido { margin-top: 1rem; }
         .hidden { display: none; }
-        .producto-preview-card {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            max-width: 300px;
-            margin-top: 0.5rem;
-        }
-        .producto-preview-card img { width: 100%; height: 150px; object-fit: cover; }
-        .producto-preview-card .content { padding: 1rem; }
-        .producto-preview-card h4 { margin: 0 0 0.5rem 0; }
-        .precio { color: #F4A261; font-weight: bold; }
         .ql-editor { min-height: 150px; }
-        .testimonio-preview {
-            background: white;
-            border-radius: 12px;
-            padding: 1rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            max-width: 300px;
-            margin-top: 0.5rem;
-        }
-        .testimonio-preview .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #f0f0f0; }
-        .galeria-preview { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
-        .galeria-preview img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; }
-        .contacto-preview { background: white; border-radius: 12px; padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-top: 0.5rem; }
-        .footer-preview { background: #0B2B40; color: white; padding: 1rem; border-radius: 12px; text-align: center; margin-top: 0.5rem; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div id="adminPanel" class="panel-principal">
+        <div id="loginPanel" class="login-form">
+            <h1>🔐 Acceso a tu panel</h1>
+            <div class="form-group"><label>ID de cliente (ej: RGS-7823)</label><input type="text" id="clienteId" placeholder="RGS-0000"></div>
+            <div class="form-group"><label>Contraseña</label><input type="password" id="password" placeholder="contraseña"></div>
+            <div class="form-group"><label>URL de Supabase</label><input type="text" id="supabaseUrl" value="https://nvrcqlxnvjvhznmxozhh.supabase.co"></div>
+            <div class="form-group"><label>Clave anónima</label><input type="text" id="supabaseKey" value="sb_publishable_qCtRLmyJxBbYRcO7Suuqnw_mrmqspp6"></div>
+            <button onclick="login()">Ingresar</button>
+        </div>
+
+        <div id="adminPanel" style="display: none;">
+            <button class="logout-btn" onclick="logout()">🚪 Cerrar sesión</button>
             <h1>📋 Panel de Control</h1>
             <p>Edita todos los aspectos de tu página web. Los cambios se aplican al instante.</p>
             
@@ -176,32 +150,24 @@
                     <div class="form-group">
                         <label>Color principal</label>
                         <div class="color-input"><input type="color" id="color-primario" value="#1E3A5F"><span id="color-primario-text">#1E3A5F</span><input type="text" id="color-primario-texto" placeholder="O escribe el color"></div>
-                        <div class="paleta-colores" data-target="color-primario"><div class="color-opcion" style="background:#0B2B40;" data-color="#0B2B40"></div><div class="color-opcion" style="background:#1C6E8F;" data-color="#1C6E8F"></div><div class="color-opcion" style="background:#F4A261;" data-color="#F4A261"></div><div class="color-opcion" style="background:#2A9D8F;" data-color="#2A9D8F"></div><div class="color-opcion" style="background:#4A4A4A;" data-color="#4A4A4A"></div><div class="color-opcion" style="background:#F9F9F9;" data-color="#F9F9F9"></div></div>
+                        <div class="paleta-colores" data-target="color-primario"><div class="color-opcion" style="background:#0B2B40;" data-color="#0B2B40"></div><div class="color-opcion" style="background:#1C6E8F;" data-color="#1C6E8F"></div><div class="color-opcion" style="background:#F4A261;" data-color="#F4A261"></div></div>
                     </div>
                     <div class="form-group">
                         <label>Color secundario</label>
                         <div class="color-input"><input type="color" id="color-secundario" value="#4A90E2"><span id="color-secundario-text">#4A90E2</span><input type="text" id="color-secundario-texto" placeholder="O escribe el color"></div>
-                        <div class="paleta-colores" data-target="color-secundario"><div class="color-opcion" style="background:#0B2B40;" data-color="#0B2B40"></div><div class="color-opcion" style="background:#1C6E8F;" data-color="#1C6E8F"></div><div class="color-opcion" style="background:#F4A261;" data-color="#F4A261"></div><div class="color-opcion" style="background:#2A9D8F;" data-color="#2A9D8F"></div><div class="color-opcion" style="background:#4A4A4A;" data-color="#4A4A4A"></div><div class="color-opcion" style="background:#F9F9F9;" data-color="#F9F9F9"></div></div>
+                        <div class="paleta-colores" data-target="color-secundario"><div class="color-opcion" style="background:#0B2B40;" data-color="#0B2B40"></div><div class="color-opcion" style="background:#1C6E8F;" data-color="#1C6E8F"></div><div class="color-opcion" style="background:#F4A261;" data-color="#F4A261"></div></div>
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group"><label>Color de acento</label><div class="color-input"><input type="color" id="color-acento" value="#F77F00"><span id="color-acento-text">#F77F00</span><input type="text" id="color-acento-texto" placeholder="O escribe el color"></div>
-                    <div class="paleta-colores" data-target="color-acento"><div class="color-opcion" style="background:#0B2B40;" data-color="#0B2B40"></div><div class="color-opcion" style="background:#1C6E8F;" data-color="#1C6E8F"></div><div class="color-opcion" style="background:#F4A261;" data-color="#F4A261"></div><div class="color-opcion" style="background:#2A9D8F;" data-color="#2A9D8F"></div><div class="color-opcion" style="background:#4A4A4A;" data-color="#4A4A4A"></div><div class="color-opcion" style="background:#F9F9F9;" data-color="#F9F9F9"></div></div></div>
-                    <div class="form-group"><label>Color de texto</label><div class="color-input"><input type="color" id="color-texto" value="#0A1C2E"><span id="color-texto-text">#0A1C2E</span><input type="text" id="color-texto-texto" placeholder="O escribe el color"></div>
-                    <div class="paleta-colores" data-target="color-texto"><div class="color-opcion" style="background:#0B2B40;" data-color="#0B2B40"></div><div class="color-opcion" style="background:#1C6E8F;" data-color="#1C6E8F"></div><div class="color-opcion" style="background:#F4A261;" data-color="#F4A261"></div><div class="color-opcion" style="background:#2A9D8F;" data-color="#2A9D8F"></div><div class="color-opcion" style="background:#4A4A4A;" data-color="#4A4A4A"></div><div class="color-opcion" style="background:#F9F9F9;" data-color="#F9F9F9"></div></div></div>
-                </div>
-                <div class="form-group"><label>Color de fondo</label><div class="color-input"><input type="color" id="color-fondo" value="#F0F8FF"><span id="color-fondo-text">#F0F8FF</span><input type="text" id="color-fondo-texto" placeholder="O escribe el color"></div>
-                <div class="paleta-colores" data-target="color-fondo"><div class="color-opcion" style="background:#0B2B40;" data-color="#0B2B40"></div><div class="color-opcion" style="background:#1C6E8F;" data-color="#1C6E8F"></div><div class="color-opcion" style="background:#F4A261;" data-color="#F4A261"></div><div class="color-opcion" style="background:#2A9D8F;" data-color="#2A9D8F"></div><div class="color-opcion" style="background:#4A4A4A;" data-color="#4A4A4A"></div><div class="color-opcion" style="background:#F9F9F9;" data-color="#F9F9F9"></div></div></div>
                 
                 <!-- Hero -->
                 <h3>🖼️ Portada principal (Hero)</h3>
                 <div class="form-row">
-                    <div class="form-group"><label>Texto superior</label><input type="text" id="hero-superior" placeholder="BIENVENIDOS A" oninput="previewHero()"></div>
-                    <div class="form-group"><label>Texto principal</label><input type="text" id="hero-principal" placeholder="Mi Negocio" oninput="previewHero()"></div>
+                    <div class="form-group"><label>Texto superior</label><input type="text" id="hero-superior" placeholder="BIENVENIDOS A"></div>
+                    <div class="form-group"><label>Texto principal</label><input type="text" id="hero-principal" placeholder="Mi Negocio"></div>
                 </div>
                 <div class="form-row">
-                    <div class="form-group"><label>Texto inferior</label><input type="text" id="hero-inferior" placeholder="Calidad • Confianza" oninput="previewHero()"></div>
-                    <div class="form-group"><label>Texto del botón</label><input type="text" id="hero-boton" value="Ver productos" oninput="previewHero()"></div>
+                    <div class="form-group"><label>Texto inferior</label><input type="text" id="hero-inferior" placeholder="Calidad • Confianza"></div>
+                    <div class="form-group"><label>Texto del botón</label><input type="text" id="hero-boton" value="Ver productos"></div>
                 </div>
                 <div class="form-group">
                     <label>Imagen de fondo</label>
@@ -209,58 +175,36 @@
                     <div id="previewHero" class="preview-upload"></div>
                     <input type="hidden" id="hero-imagen" value="">
                 </div>
-                <div class="form-group"><label>Opacidad del overlay (0 a 1)</label><input type="number" id="hero-overlay" step="0.1" min="0" max="1" value="0.5" oninput="previewHero()"></div>
-                
-                <!-- Previsualización del Hero -->
-                <div style="background:#e0e0e0; border-radius:12px; padding:1rem; margin-top:1rem;">
-                    <h4>📱 Vista previa del Hero</h4>
-                    <div id="heroPreview" style="background-size:cover; background-position:center; padding:2rem; text-align:center; border-radius:12px; color:white; text-shadow:0 0 5px black; min-height:200px; display:flex; flex-direction:column; justify-content:center;">
-                        <div id="heroPreviewSuperior" style="font-size:1rem; text-transform:uppercase;">BIENVENIDOS A</div>
-                        <div id="heroPreviewPrincipal" style="font-size:2rem; font-weight:bold;">Mi Negocio</div>
-                        <div id="heroPreviewInferior" style="font-size:0.9rem;">Calidad • Confianza</div>
-                        <button id="heroPreviewBoton" style="margin-top:1rem; padding:0.5rem 1rem; border:none; border-radius:50px; cursor:default; background:#F4A261; color:#0B2B40;">Ver productos</button>
-                    </div>
-                </div>
+                <div class="form-group"><label>Opacidad del overlay (0 a 1)</label><input type="number" id="hero-overlay" step="0.1" min="0" max="1" value="0.5"></div>
                 
                 <!-- Sobre Nosotros -->
                 <h3>📖 Sobre Nosotros</h3>
-                <div class="form-group"><label>Título</label><input type="text" id="nosotros-titulo" value="Sobre Nosotros" oninput="previewNosotros()"></div>
-                <div class="form-group"><label>Subtítulo</label><input type="text" id="nosotros-subtitulo" value="Conócenos mejor" oninput="previewNosotros()"></div>
-                <div class="editor-preview">
-                    <div class="editor">
-                        <label>Historia (editor enriquecido)</label>
-                        <div id="nosotrosHistoriaEditor" style="height: 200px;"></div>
-                    </div>
-                    <div class="preview">
-                        <h4>Vista previa</h4>
-                        <div id="nosotrosPreview" style="border:1px solid #ddd; padding:1rem; border-radius:8px; background:white; max-height:300px; overflow:auto;"></div>
-                    </div>
-                </div>
+                <div class="form-group"><label>Título</label><input type="text" id="nosotros-titulo" value="Sobre Nosotros"></div>
+                <div class="form-group"><label>Subtítulo</label><input type="text" id="nosotros-subtitulo" value="Conócenos mejor"></div>
+                <div class="form-group"><label>Historia</label><textarea id="nosotros-historia" rows="4"></textarea></div>
                 <div class="form-group">
                     <label>Imagen</label>
                     <div class="upload-area" id="uploadAreaNosotros"><i class="fas fa-cloud-upload-alt"></i> Toca para subir imagen<input type="file" id="subirNosotros" accept="image/*" style="display: none;"></div>
                     <div id="previewNosotros" class="preview-upload"></div>
                     <input type="hidden" id="nosotros-imagen" value="">
                 </div>
-                <div class="form-group"><label>Valores (separados por coma)</label><input type="text" id="nosotros-valores" placeholder="Calidad, Confianza, Compromiso" oninput="previewNosotros()"></div>
+                <div class="form-group"><label>Valores (separados por coma)</label><input type="text" id="nosotros-valores" placeholder="Calidad, Confianza, Compromiso"></div>
                 
                 <!-- Contacto -->
                 <h3>📞 Contacto</h3>
-                <div class="form-group"><label>Dirección</label><input type="text" id="contacto-direccion" oninput="previewContacto()"></div>
+                <div class="form-group"><label>Dirección</label><input type="text" id="contacto-direccion"></div>
                 <div class="form-row">
-                    <div class="form-group"><label>WhatsApp</label><input type="text" id="contacto-whatsapp" oninput="previewContacto()"></div>
+                    <div class="form-group"><label>WhatsApp</label><input type="text" id="contacto-whatsapp"></div>
                     <div class="form-group"><label>Mapa (URL embed)</label><input type="text" id="contacto-mapa"></div>
                 </div>
                 <div class="form-row">
-                    <div class="form-group"><label>Facebook</label><input type="text" id="red-facebook" oninput="previewContacto()"></div>
-                    <div class="form-group"><label>Instagram</label><input type="text" id="red-instagram" oninput="previewContacto()"></div>
+                    <div class="form-group"><label>Facebook</label><input type="text" id="red-facebook"></div>
+                    <div class="form-group"><label>Instagram</label><input type="text" id="red-instagram"></div>
                 </div>
-                <div class="contacto-preview" id="contactoPreview"></div>
                 
                 <!-- Footer -->
                 <h3>📄 Pie de página</h3>
-                <div class="form-group"><label>Texto del footer</label><input type="text" id="footer-texto" oninput="previewFooter()"></div>
-                <div class="footer-preview" id="footerPreview"></div>
+                <div class="form-group"><label>Texto del footer</label><input type="text" id="footer-texto"></div>
             </div>
             
             <!-- SECCIÓN CONTENIDO -->
@@ -292,197 +236,11 @@
     <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();</script>
     <script>
-        // ============================================
-        // DATOS FIJOS DEL CLIENTE DE PRUEBA
-        // ============================================
-        const SUPABASE_URL = 'https://nvrcqlxnvjvhznmxozhh.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_qCtRLmyJxBbYRcO7Suuqnw_mrmqspp6';
-        const BUCKET_NAME = 'cliente';
-        const CLIENTE_ID_PUBLICO = 'RGS-1000';
-        const CLIENTE_UUID = '20640a4e-ebeb-4149-b937-ecc34fa3038a';
-        
-        let supabaseClient = null;
+        let clienteData = null;
+        let supabaseUrl = '', supabaseKey = '', supabaseClient = null;
         let productos = [], testimonios = [], galeria = [];
         let productoId = 1, testimonioId = 1, galeriaId = 1;
         let nosotrosEditor = null;
-
-        // ============================================
-        // FUNCIÓN DE SUBIDA (que ya funcionaba)
-        // ============================================
-        async function subirImagen(file, carpeta) {
-            const extension = file.name.split('.').pop();
-            const nombreArchivo = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${extension}`;
-            const ruta = `${CLIENTE_UUID}/${carpeta}/${nombreArchivo}`;
-            const { error } = await supabaseClient.storage.from(BUCKET_NAME).upload(ruta, file);
-            if (error) throw error;
-            return nombreArchivo;
-        }
-
-        // ============================================
-        // PREVISUALIZACIONES
-        // ============================================
-        function previewHero() {
-            const superior = document.getElementById('hero-superior').value || 'BIENVENIDOS A';
-            const principal = document.getElementById('hero-principal').value || 'Mi Negocio';
-            const inferior = document.getElementById('hero-inferior').value || 'Calidad • Confianza';
-            const boton = document.getElementById('hero-boton').value || 'Ver productos';
-            const overlay = parseFloat(document.getElementById('hero-overlay').value) || 0.5;
-            
-            document.getElementById('heroPreviewSuperior').textContent = superior;
-            document.getElementById('heroPreviewPrincipal').textContent = principal;
-            document.getElementById('heroPreviewInferior').textContent = inferior;
-            document.getElementById('heroPreviewBoton').textContent = boton;
-            
-            const imagen = document.getElementById('hero-imagen').value;
-            if (imagen) {
-                const url = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/${CLIENTE_UUID}/hero/${imagen}`;
-                document.getElementById('heroPreview').style.backgroundImage = `url(${url})`;
-                document.getElementById('heroPreview').style.backgroundSize = 'cover';
-                document.getElementById('heroPreview').style.backgroundPosition = 'center';
-            }
-            document.getElementById('heroPreview').style.backgroundColor = `rgba(0,0,0,${overlay})`;
-            document.getElementById('heroPreview').style.backgroundBlendMode = 'overlay';
-        }
-        
-        function previewNosotros() {
-            if (!nosotrosEditor) return;
-            const titulo = document.getElementById('nosotros-titulo').value || 'Sobre Nosotros';
-            const subtitulo = document.getElementById('nosotros-subtitulo').value || '';
-            const historia = nosotrosEditor.root.innerHTML;
-            const valores = document.getElementById('nosotros-valores').value || '';
-            const valoresArray = valores.split(',').map(v => v.trim()).filter(v => v);
-            
-            let html = `<h3>${escapeHtml(titulo)}</h3>`;
-            if (subtitulo) html += `<p style="color:#666;">${escapeHtml(subtitulo)}</p>`;
-            html += `<div>${historia}</div>`;
-            if (valoresArray.length) {
-                html += `<div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:1rem;">`;
-                valoresArray.forEach(v => { html += `<span style="background:#f0f0f0; padding:0.3rem 0.8rem; border-radius:50px;">✓ ${escapeHtml(v)}</span>`; });
-                html += `</div>`;
-            }
-            document.getElementById('nosotrosPreview').innerHTML = html;
-        }
-        
-        function previewContacto() {
-            const direccion = document.getElementById('contacto-direccion').value || 'No especificada';
-            const whatsapp = document.getElementById('contacto-whatsapp').value || '';
-            const facebook = document.getElementById('red-facebook').value || '';
-            const instagram = document.getElementById('red-instagram').value || '';
-            
-            let redesHtml = '';
-            if (facebook) redesHtml += `<a href="${facebook}" target="_blank" style="margin-right:1rem; color:#0B4F6C;"><i class="fab fa-facebook-f"></i> Facebook</a>`;
-            if (instagram) redesHtml += `<a href="${instagram}" target="_blank" style="color:#0B4F6C;"><i class="fab fa-instagram"></i> Instagram</a>`;
-            if (whatsapp) redesHtml += `<div style="margin-top:0.5rem;"><i class="fab fa-whatsapp"></i> WhatsApp: ${whatsapp}</div>`;
-            
-            document.getElementById('contactoPreview').innerHTML = `
-                <div><i class="fas fa-map-marker-alt"></i> <strong>Dirección:</strong> ${escapeHtml(direccion)}</div>
-                ${redesHtml ? `<div style="margin-top:0.5rem;">${redesHtml}</div>` : ''}
-            `;
-        }
-        
-        function previewFooter() {
-            const texto = document.getElementById('footer-texto').value || '© 2025 Mi Negocio';
-            document.getElementById('footerPreview').innerHTML = texto;
-        }
-        
-        function previewProducto(id) {
-            const prod = productos.find(p => p.id === id);
-            if (!prod) return;
-            const previewDiv = document.getElementById(`preview-producto-${id}`);
-            if (!previewDiv) return;
-            
-            let imgHtml = '';
-            if (prod.imagen) {
-                const url = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/${CLIENTE_UUID}/productos/${prod.imagen}`;
-                imgHtml = `<img src="${url}" style="width:100%; height:150px; object-fit:cover;" onerror="this.src='https://via.placeholder.com/300'">`;
-            } else {
-                imgHtml = `<div style="width:100%; height:150px; background:#f0f0f0; display:flex; align-items:center; justify-content:center;">Sin imagen</div>`;
-            }
-            
-            let badgeHtml = '';
-            if (prod.badgePermanente) {
-                badgeHtml = `<span style="position:absolute; top:10px; left:10px; background:#F4A261; color:white; padding:0.2rem 0.5rem; border-radius:50px; font-size:0.7rem;">${escapeHtml(prod.badgePermanente)}</span>`;
-            }
-            
-            let featuresHtml = '';
-            if (prod.caracteristicas && prod.caracteristicas.length) {
-                featuresHtml = `<div style="display:flex; flex-wrap:wrap; gap:0.3rem; margin-top:0.5rem;">`;
-                prod.caracteristicas.forEach(c => { featuresHtml += `<span style="background:#f0f0f0; padding:0.2rem 0.5rem; border-radius:50px; font-size:0.7rem;">${escapeHtml(c)}</span>`; });
-                featuresHtml += `</div>`;
-            }
-            
-            previewDiv.innerHTML = `
-                <div style="position:relative; background:white; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.1); max-width:300px; margin-top:0.5rem;">
-                    ${badgeHtml}
-                    ${imgHtml}
-                    <div class="content">
-                        <h4 style="margin:0 0 0.5rem 0;">${escapeHtml(prod.nombre || 'Producto sin nombre')}</h4>
-                        <p style="font-size:0.8rem; color:#666;">${escapeHtml(prod.descripcion || 'Sin descripción')}</p>
-                        ${featuresHtml}
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
-                            <span class="precio">$${prod.precio || 0} <small>desde</small></span>
-                            <button style="background:#0B4F6C; color:white; border:none; padding:0.3rem 0.8rem; border-radius:50px;">Solicitar</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-        
-        function previewTestimonio(id) {
-            const test = testimonios.find(t => t.id === id);
-            if (!test) return;
-            const previewDiv = document.getElementById(`preview-testimonio-${id}`);
-            if (!previewDiv) return;
-            
-            let avatarHtml = '';
-            if (test.avatar) {
-                const url = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/${CLIENTE_UUID}/avatares/${test.avatar}`;
-                avatarHtml = `<img src="${url}" class="avatar" onerror="this.src='https://randomuser.me/api/portraits/lego/1.jpg'">`;
-            } else {
-                avatarHtml = `<div class="avatar" style="background:#f0f0f0; display:flex; align-items:center; justify-content:center;">👤</div>`;
-            }
-            
-            previewDiv.innerHTML = `
-                <div class="testimonio-preview">
-                    <div style="display:flex; align-items:center; gap:1rem;">
-                        ${avatarHtml}
-                        <div>
-                            <strong>${escapeHtml(test.nombre || 'Anónimo')}</strong>
-                            ${test.lugar ? `<div><small>${escapeHtml(test.lugar)}</small></div>` : ''}
-                            <div style="color:#FFD700;">${'★'.repeat(test.rating || 5)}${'☆'.repeat(5 - (test.rating || 5))}</div>
-                        </div>
-                    </div>
-                    <p style="margin-top:0.5rem; font-style:italic;">"${escapeHtml(test.texto || 'Sin testimonio')}"</p>
-                </div>
-            `;
-        }
-        
-        function previewGaleria(id) {
-            const gal = galeria.find(g => g.id === id);
-            if (!gal) return;
-            const previewDiv = document.getElementById(`preview-galeria-${id}`);
-            if (!previewDiv) return;
-            
-            let fotosHtml = '';
-            if (gal.fotos && gal.fotos.length) {
-                fotosHtml = `<div class="galeria-preview">`;
-                gal.fotos.forEach(foto => {
-                    const url = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/${CLIENTE_UUID}/galeria/${foto}`;
-                    fotosHtml += `<img src="${url}" onerror="this.src='https://via.placeholder.com/80'">`;
-                });
-                fotosHtml += `</div>`;
-            } else {
-                fotosHtml = `<p style="color:#999;">Sin imágenes</p>`;
-            }
-            
-            previewDiv.innerHTML = `
-                <div style="margin-top:0.5rem;">
-                    <strong>${escapeHtml(gal.titulo || 'Sin título')}</strong>
-                    ${gal.descripcion ? `<p style="font-size:0.8rem; color:#666;">${escapeHtml(gal.descripcion)}</p>` : ''}
-                    ${fotosHtml}
-                </div>
-            `;
-        }
 
         // ============================================
         // FUNCIONES DE COLOR
@@ -530,8 +288,17 @@
         }
 
         // ============================================
-        // UPLOADERS
+        // FUNCIONES DE SUBIDA
         // ============================================
+        async function subirImagen(file, carpeta) {
+            const extension = file.name.split('.').pop();
+            const nombreArchivo = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${extension}`;
+            const ruta = `${clienteData.uuid}/${carpeta}/${nombreArchivo}`;
+            const { error } = await supabaseClient.storage.from('cliente').upload(ruta, file);
+            if (error) throw error;
+            return nombreArchivo;
+        }
+
         function initUploaders() {
             // Hero imagen
             const heroUpload = document.getElementById('uploadAreaHero');
@@ -546,11 +313,7 @@
                     const nombre = await subirImagen(file, 'hero');
                     document.getElementById('hero-imagen').value = nombre;
                     preview.innerHTML = `<span style="color: green;">✅ Imagen subida: ${nombre}</span>`;
-                    previewHero();
-                } catch (err) { 
-                    preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
-                    console.error(err);
-                }
+                } catch (err) { preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`; }
                 heroInput.value = '';
             });
 
@@ -567,10 +330,7 @@
                     const nombre = await subirImagen(file, 'nosotros');
                     document.getElementById('nosotros-imagen').value = nombre;
                     preview.innerHTML = `<span style="color: green;">✅ Imagen subida: ${nombre}</span>`;
-                } catch (err) { 
-                    preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
-                    console.error(err);
-                }
+                } catch (err) { preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`; }
                 nosotrosInput.value = '';
             });
         }
@@ -597,9 +357,7 @@
                             const prod = productos.find(p => p.id === id);
                             if (prod) prod.imagen = nombre;
                             renderizarProductos();
-                        } catch (err) { 
-                            if (preview) preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
-                        }
+                        } catch (err) { if (preview) preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`; }
                     });
                 }
             }, 100);
@@ -621,11 +379,11 @@
                         <div><button class="btn-subir-imagen" onclick="event.stopPropagation(); document.getElementById('file-input-${p.id}').click()"><i class="fas fa-upload"></i> Subir imagen</button><button class="btn-eliminar" onclick="event.stopPropagation(); eliminarProducto(${p.id})">Eliminar</button></div>
                     </div>
                     <div class="item-contenido hidden">
-                        <div class="form-group"><label>Nombre</label><input type="text" class="prod-nombre" value="${escapeHtml(p.nombre)}" onchange="actualizarProductoConPreview(${p.id}, 'nombre', this.value)"></div>
-                        <div class="form-group"><label>Precio</label><input type="number" class="prod-precio" value="${p.precio}" onchange="actualizarProductoConPreview(${p.id}, 'precio', parseFloat(this.value))"></div>
-                        <div class="form-group"><label>Descripción</label><textarea class="prod-descripcion" rows="2" onchange="actualizarProductoConPreview(${p.id}, 'descripcion', this.value)">${escapeHtml(p.descripcion)}</textarea></div>
-                        <div class="form-group"><label>Características (separadas por coma)</label><input type="text" class="prod-caracteristicas" value="${p.caracteristicas.join(', ')}" onchange="actualizarProductoConPreview(${p.id}, 'caracteristicas', this.value.split(',').map(c=>c.trim()).filter(c=>c))"></div>
-                        <div class="form-group"><label>Badge</label><input type="text" class="prod-badge" value="${p.badgePermanente}" onchange="actualizarProductoConPreview(${p.id}, 'badgePermanente', this.value)"></div>
+                        <div class="form-group"><label>Nombre</label><input type="text" class="prod-nombre" value="${escapeHtml(p.nombre)}" onchange="actualizarProducto(${p.id}, 'nombre', this.value)"></div>
+                        <div class="form-group"><label>Precio</label><input type="number" class="prod-precio" value="${p.precio}" onchange="actualizarProducto(${p.id}, 'precio', parseFloat(this.value))"></div>
+                        <div class="form-group"><label>Descripción</label><textarea class="prod-descripcion" rows="2" onchange="actualizarProducto(${p.id}, 'descripcion', this.value)">${escapeHtml(p.descripcion)}</textarea></div>
+                        <div class="form-group"><label>Características (separadas por coma)</label><input type="text" class="prod-caracteristicas" value="${p.caracteristicas.join(', ')}" onchange="actualizarProducto(${p.id}, 'caracteristicas', this.value.split(',').map(c=>c.trim()).filter(c=>c))"></div>
+                        <div class="form-group"><label>Badge</label><input type="text" class="prod-badge" value="${p.badgePermanente}" onchange="actualizarProducto(${p.id}, 'badgePermanente', this.value)"></div>
                         <div class="upload-area" id="uploadAreaProducto-${p.id}" style="margin-top:0.5rem;"><i class="fas fa-cloud-upload-alt"></i> Toca para subir imagen<input type="file" id="subirProducto-${p.id}" accept="image/*" style="display: none;"></div>
                         <div id="previewProducto-${p.id}" class="preview-upload"></div>
                         <div id="preview-producto-${p.id}"></div>
@@ -636,14 +394,57 @@
             productos.forEach(p => previewProducto(p.id));
         }
 
-        function actualizarProductoConPreview(id, campo, valor) {
+        function actualizarProducto(id, campo, valor) {
             const index = productos.findIndex(p => p.id === id);
             if (index !== -1) productos[index][campo] = valor;
             previewProducto(id);
         }
 
+        function previewProducto(id) {
+            const prod = productos.find(p => p.id === id);
+            if (!prod) return;
+            const previewDiv = document.getElementById(`preview-producto-${id}`);
+            if (!previewDiv) return;
+            
+            let imgHtml = '';
+            if (prod.imagen && supabaseClient && clienteData) {
+                const url = `${supabaseUrl}/storage/v1/object/public/cliente/${clienteData.uuid}/productos/${prod.imagen}`;
+                imgHtml = `<img src="${url}" style="width:100%; height:150px; object-fit:cover;" onerror="this.src='https://via.placeholder.com/300'">`;
+            } else {
+                imgHtml = `<div style="width:100%; height:150px; background:#f0f0f0; display:flex; align-items:center; justify-content:center;">Sin imagen</div>`;
+            }
+            
+            let badgeHtml = '';
+            if (prod.badgePermanente) {
+                badgeHtml = `<span style="position:absolute; top:10px; left:10px; background:#F4A261; color:white; padding:0.2rem 0.5rem; border-radius:50px; font-size:0.7rem;">${escapeHtml(prod.badgePermanente)}</span>`;
+            }
+            
+            let featuresHtml = '';
+            if (prod.caracteristicas && prod.caracteristicas.length) {
+                featuresHtml = `<div style="display:flex; flex-wrap:wrap; gap:0.3rem; margin-top:0.5rem;">`;
+                prod.caracteristicas.forEach(c => { featuresHtml += `<span style="background:#f0f0f0; padding:0.2rem 0.5rem; border-radius:50px; font-size:0.7rem;">${escapeHtml(c)}</span>`; });
+                featuresHtml += `</div>`;
+            }
+            
+            previewDiv.innerHTML = `
+                <div style="position:relative; background:white; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.1); max-width:300px; margin-top:0.5rem;">
+                    ${badgeHtml}
+                    ${imgHtml}
+                    <div class="content">
+                        <h4 style="margin:0 0 0.5rem 0;">${escapeHtml(prod.nombre || 'Producto sin nombre')}</h4>
+                        <p style="font-size:0.8rem; color:#666;">${escapeHtml(prod.descripcion || 'Sin descripción')}</p>
+                        ${featuresHtml}
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
+                            <span class="precio">$${prod.precio || 0} <small>desde</small></span>
+                            <button style="background:#0B4F6C; color:white; border:none; padding:0.3rem 0.8rem; border-radius:50px;">Solicitar</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
         // ============================================
-        // TESTIMONIOS
+        // TESTIMONIOS (simplificado)
         // ============================================
         function agregarTestimonio() {
             const id = testimonioId++;
@@ -664,9 +465,7 @@
                             const test = testimonios.find(t => t.id === id);
                             if (test) test.avatar = nombre;
                             renderizarTestimonios();
-                        } catch (err) { 
-                            if (preview) preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
-                        }
+                        } catch (err) { if (preview) preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`; }
                     });
                 }
             }, 100);
@@ -688,9 +487,9 @@
                         <div><button class="btn-subir-imagen" onclick="event.stopPropagation(); document.getElementById('file-input-test-${t.id}').click()"><i class="fas fa-upload"></i> Subir avatar</button><button class="btn-eliminar" onclick="event.stopPropagation(); eliminarTestimonio(${t.id})">Eliminar</button></div>
                     </div>
                     <div class="item-contenido hidden">
-                        <div class="form-row"><div class="form-group"><label>Nombre</label><input type="text" class="test-nombre" value="${escapeHtml(t.nombre)}" onchange="actualizarTestimonioConPreview(${t.id}, 'nombre', this.value)"></div><div class="form-group"><label>Lugar</label><input type="text" class="test-lugar" value="${escapeHtml(t.lugar)}" onchange="actualizarTestimonioConPreview(${t.id}, 'lugar', this.value)"></div></div>
-                        <div class="form-group"><label>Testimonio</label><textarea class="test-texto" rows="2" onchange="actualizarTestimonioConPreview(${t.id}, 'texto', this.value)">${escapeHtml(t.texto)}</textarea></div>
-                        <div class="form-row"><div class="form-group"><label>Rating (1-5)</label><input type="number" class="test-rating" min="1" max="5" value="${t.rating}" onchange="actualizarTestimonioConPreview(${t.id}, 'rating', parseInt(this.value))"></div></div>
+                        <div class="form-row"><div class="form-group"><label>Nombre</label><input type="text" class="test-nombre" value="${escapeHtml(t.nombre)}" onchange="actualizarTestimonio(${t.id}, 'nombre', this.value)"></div><div class="form-group"><label>Lugar</label><input type="text" class="test-lugar" value="${escapeHtml(t.lugar)}" onchange="actualizarTestimonio(${t.id}, 'lugar', this.value)"></div></div>
+                        <div class="form-group"><label>Testimonio</label><textarea class="test-texto" rows="2" onchange="actualizarTestimonio(${t.id}, 'texto', this.value)">${escapeHtml(t.texto)}</textarea></div>
+                        <div class="form-row"><div class="form-group"><label>Rating (1-5)</label><input type="number" class="test-rating" min="1" max="5" value="${t.rating}" onchange="actualizarTestimonio(${t.id}, 'rating', parseInt(this.value))"></div></div>
                         <div class="upload-area" id="uploadAreaTestimonio-${t.id}" style="margin-top:0.5rem;"><i class="fas fa-cloud-upload-alt"></i> Toca para subir avatar<input type="file" id="subirTestimonio-${t.id}" accept="image/*" style="display: none;"></div>
                         <div id="previewTestimonio-${t.id}" class="preview-upload"></div>
                         <div id="preview-testimonio-${t.id}"></div>
@@ -701,14 +500,43 @@
             testimonios.forEach(t => previewTestimonio(t.id));
         }
 
-        function actualizarTestimonioConPreview(id, campo, valor) {
+        function actualizarTestimonio(id, campo, valor) {
             const index = testimonios.findIndex(t => t.id === id);
             if (index !== -1) testimonios[index][campo] = valor;
             previewTestimonio(id);
         }
 
+        function previewTestimonio(id) {
+            const test = testimonios.find(t => t.id === id);
+            if (!test) return;
+            const previewDiv = document.getElementById(`preview-testimonio-${id}`);
+            if (!previewDiv) return;
+            
+            let avatarHtml = '';
+            if (test.avatar && supabaseClient && clienteData) {
+                const url = `${supabaseUrl}/storage/v1/object/public/cliente/${clienteData.uuid}/avatares/${test.avatar}`;
+                avatarHtml = `<img src="${url}" style="width:50px; height:50px; border-radius:50%; object-fit:cover;" onerror="this.src='https://randomuser.me/api/portraits/lego/1.jpg'">`;
+            } else {
+                avatarHtml = `<div style="width:50px; height:50px; border-radius:50%; background:#f0f0f0; display:flex; align-items:center; justify-content:center;">👤</div>`;
+            }
+            
+            previewDiv.innerHTML = `
+                <div style="background:white; border-radius:12px; padding:1rem; box-shadow:0 2px 8px rgba(0,0,0,0.1); max-width:300px; margin-top:0.5rem;">
+                    <div style="display:flex; align-items:center; gap:1rem;">
+                        ${avatarHtml}
+                        <div>
+                            <strong>${escapeHtml(test.nombre || 'Anónimo')}</strong>
+                            ${test.lugar ? `<div><small>${escapeHtml(test.lugar)}</small></div>` : ''}
+                            <div style="color:#FFD700;">${'★'.repeat(test.rating || 5)}${'☆'.repeat(5 - (test.rating || 5))}</div>
+                        </div>
+                    </div>
+                    <p style="margin-top:0.5rem; font-style:italic;">"${escapeHtml(test.texto || 'Sin testimonio')}"</p>
+                </div>
+            `;
+        }
+
         // ============================================
-        // GALERÍA
+        // GALERÍA (simplificado)
         // ============================================
         function agregarGaleria() {
             const id = galeriaId++;
@@ -729,9 +557,7 @@
                                 const gal = galeria.find(g => g.id === id);
                                 if (gal) gal.fotos.push(nombre);
                                 renderizarGaleria();
-                            } catch (err) { 
-                                if (preview) preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
-                            }
+                            } catch (err) { if (preview) preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`; }
                         }
                     });
                 }
@@ -754,7 +580,7 @@
                         <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarGaleria(${g.id})">Eliminar</button>
                     </div>
                     <div class="item-contenido hidden">
-                        <div class="form-row"><div class="form-group"><label>Título</label><input type="text" class="gal-titulo" value="${escapeHtml(g.titulo)}" onchange="actualizarGaleriaConPreview(${g.id}, 'titulo', this.value)"></div><div class="form-group"><label>Descripción</label><input type="text" class="gal-descripcion" value="${escapeHtml(g.descripcion)}" onchange="actualizarGaleriaConPreview(${g.id}, 'descripcion', this.value)"></div></div>
+                        <div class="form-row"><div class="form-group"><label>Título</label><input type="text" class="gal-titulo" value="${escapeHtml(g.titulo)}" onchange="actualizarGaleria(${g.id}, 'titulo', this.value)"></div><div class="form-group"><label>Descripción</label><input type="text" class="gal-descripcion" value="${escapeHtml(g.descripcion)}" onchange="actualizarGaleria(${g.id}, 'descripcion', this.value)"></div></div>
                         <div class="upload-area" id="uploadAreaGaleria-${g.id}" style="margin-top:0.5rem;"><i class="fas fa-cloud-upload-alt"></i> Toca para subir imágenes (múltiples)<input type="file" id="subirGaleria-${g.id}" accept="image/*" multiple style="display: none;"></div>
                         <div id="previewGaleria-${g.id}" class="preview-upload"></div>
                         <div id="preview-galeria-${g.id}"></div>
@@ -765,78 +591,116 @@
             galeria.forEach(g => previewGaleria(g.id));
         }
 
-        function actualizarGaleriaConPreview(id, campo, valor) {
+        function actualizarGaleria(id, campo, valor) {
             const index = galeria.findIndex(g => g.id === id);
             if (index !== -1) galeria[index][campo] = valor;
             previewGaleria(id);
+        }
+
+        function previewGaleria(id) {
+            const gal = galeria.find(g => g.id === id);
+            if (!gal) return;
+            const previewDiv = document.getElementById(`preview-galeria-${id}`);
+            if (!previewDiv) return;
+            
+            let fotosHtml = '';
+            if (gal.fotos && gal.fotos.length) {
+                fotosHtml = `<div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.5rem;">`;
+                gal.fotos.forEach(foto => {
+                    const url = `${supabaseUrl}/storage/v1/object/public/cliente/${clienteData.uuid}/galeria/${foto}`;
+                    fotosHtml += `<img src="${url}" style="width:80px; height:80px; object-fit:cover; border-radius:8px;" onerror="this.src='https://via.placeholder.com/80'">`;
+                });
+                fotosHtml += `</div>`;
+            } else {
+                fotosHtml = `<p style="color:#999;">Sin imágenes</p>`;
+            }
+            
+            previewDiv.innerHTML = `
+                <div style="margin-top:0.5rem;">
+                    <strong>${escapeHtml(gal.titulo || 'Sin título')}</strong>
+                    ${gal.descripcion ? `<p style="font-size:0.8rem; color:#666;">${escapeHtml(gal.descripcion)}</p>` : ''}
+                    ${fotosHtml}
+                </div>
+            `;
         }
 
         function toggleContenido(header) { const contenido = header.nextElementSibling; contenido.classList.toggle('hidden'); }
         function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => { if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m; }); }
 
         // ============================================
-        // INICIALIZACIÓN
+        // LOGIN Y CARGA DE DATOS
         // ============================================
-        async function init() {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        async function login() {
+            const idPublico = document.getElementById('clienteId').value;
+            const password = document.getElementById('password').value;
+            supabaseUrl = document.getElementById('supabaseUrl').value;
+            supabaseKey = document.getElementById('supabaseKey').value;
             
-            // Cargar datos del cliente desde Supabase
-            const cliente = await window.getClientePorIdPublico(CLIENTE_ID_PUBLICO, SUPABASE_URL, SUPABASE_ANON_KEY);
-            const config = cliente.config || {};
+            if (!idPublico || !password) { alert('Ingresa ID y contraseña'); return; }
             
-            if (config.marca?.colores) {
-                document.getElementById('color-primario').value = config.marca.colores.primario || '#1E3A5F';
-                document.getElementById('color-secundario').value = config.marca.colores.secundario || '#4A90E2';
-                document.getElementById('color-acento').value = config.marca.colores.acento || '#F77F00';
-                document.getElementById('color-texto').value = config.marca.colores.texto || '#0A1C2E';
-                document.getElementById('color-fondo').value = config.marca.colores.fondo || '#F0F8FF';
-                actualizarColorPreview();
-            }
-            document.getElementById('hero-superior').value = config.hero?.texto_superior || '';
-            document.getElementById('hero-principal').value = config.hero?.texto_principal || '';
-            document.getElementById('hero-inferior').value = config.hero?.texto_inferior || '';
-            document.getElementById('hero-boton').value = config.hero?.boton || 'Ver productos';
-            document.getElementById('hero-imagen').value = config.hero?.imagen || '';
-            document.getElementById('hero-overlay').value = config.hero?.overlay || 0.5;
-            document.getElementById('nosotros-titulo').value = config.nosotros?.titulo || 'Sobre Nosotros';
-            document.getElementById('nosotros-subtitulo').value = config.nosotros?.subtitulo || 'Conócenos mejor';
-            document.getElementById('nosotros-historia').value = config.nosotros?.historia || '';
-            document.getElementById('nosotros-imagen').value = config.nosotros?.imagen || '';
-            document.getElementById('nosotros-valores').value = (config.nosotros?.valores || []).join(', ');
-            document.getElementById('contacto-direccion').value = config.contacto?.direccion || '';
-            document.getElementById('contacto-whatsapp').value = config.contacto?.whatsapp || '';
-            document.getElementById('contacto-mapa').value = config.contacto?.mapa || '';
-            document.getElementById('red-facebook').value = config.contacto?.redes?.facebook || '';
-            document.getElementById('red-instagram').value = config.contacto?.redes?.instagram || '';
-            document.getElementById('footer-texto').value = config.footer?.texto || '';
-            
-            if (config.productos && config.productos.length) {
-                productos = config.productos.map(p => ({ ...p, id: p.id || productoId++ }));
-            }
-            if (config.testimonios && config.testimonios.length) {
-                testimonios = config.testimonios.map(t => ({ ...t, id: t.id || testimonioId++ }));
-            }
-            if (config.galeria && config.galeria.length) {
-                galeria = config.galeria.map(g => ({ ...g, id: g.id || galeriaId++ }));
-            }
-            
-            renderizarProductos();
-            renderizarTestimonios();
-            renderizarGaleria();
-            
-            initColorPalettes();
-            initUploaders();
-            
-            if (!nosotrosEditor && document.getElementById('nosotrosHistoriaEditor')) {
-                nosotrosEditor = new Quill('#nosotrosHistoriaEditor', { theme: 'snow', placeholder: 'Escribe la historia de tu negocio...' });
-                nosotrosEditor.on('text-change', () => previewNosotros());
-            }
-            if (nosotrosEditor && config.nosotros?.historia) nosotrosEditor.root.innerHTML = config.nosotros.historia;
-            
-            previewHero();
-            previewNosotros();
-            previewContacto();
-            previewFooter();
+            try {
+                supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+                const cliente = await window.loginCliente(idPublico, password, supabaseUrl, supabaseKey);
+                clienteData = cliente;
+                
+                const config = cliente.config || {};
+                if (config.marca?.colores) {
+                    document.getElementById('color-primario').value = config.marca.colores.primario || '#1E3A5F';
+                    document.getElementById('color-secundario').value = config.marca.colores.secundario || '#4A90E2';
+                    document.getElementById('color-acento').value = config.marca.colores.acento || '#F77F00';
+                    document.getElementById('color-texto').value = config.marca.colores.texto || '#0A1C2E';
+                    document.getElementById('color-fondo').value = config.marca.colores.fondo || '#F0F8FF';
+                    actualizarColorPreview();
+                }
+                document.getElementById('hero-superior').value = config.hero?.texto_superior || '';
+                document.getElementById('hero-principal').value = config.hero?.texto_principal || '';
+                document.getElementById('hero-inferior').value = config.hero?.texto_inferior || '';
+                document.getElementById('hero-boton').value = config.hero?.boton || 'Ver productos';
+                document.getElementById('hero-imagen').value = config.hero?.imagen || '';
+                document.getElementById('hero-overlay').value = config.hero?.overlay || 0.5;
+                document.getElementById('nosotros-titulo').value = config.nosotros?.titulo || 'Sobre Nosotros';
+                document.getElementById('nosotros-subtitulo').value = config.nosotros?.subtitulo || 'Conócenos mejor';
+                document.getElementById('nosotros-historia').value = config.nosotros?.historia || '';
+                document.getElementById('nosotros-imagen').value = config.nosotros?.imagen || '';
+                document.getElementById('nosotros-valores').value = (config.nosotros?.valores || []).join(', ');
+                document.getElementById('contacto-direccion').value = config.contacto?.direccion || '';
+                document.getElementById('contacto-whatsapp').value = config.contacto?.whatsapp || '';
+                document.getElementById('contacto-mapa').value = config.contacto?.mapa || '';
+                document.getElementById('red-facebook').value = config.contacto?.redes?.facebook || '';
+                document.getElementById('red-instagram').value = config.contacto?.redes?.instagram || '';
+                document.getElementById('footer-texto').value = config.footer?.texto || '';
+                
+                if (config.productos && config.productos.length) {
+                    productos = config.productos.map(p => ({ ...p, id: p.id || productoId++ }));
+                }
+                if (config.testimonios && config.testimonios.length) {
+                    testimonios = config.testimonios.map(t => ({ ...t, id: t.id || testimonioId++ }));
+                }
+                if (config.galeria && config.galeria.length) {
+                    galeria = config.galeria.map(g => ({ ...g, id: g.id || galeriaId++ }));
+                }
+                
+                renderizarProductos();
+                renderizarTestimonios();
+                renderizarGaleria();
+                
+                document.getElementById('loginPanel').style.display = 'none';
+                document.getElementById('adminPanel').style.display = 'block';
+                initColorPalettes();
+                initUploaders();
+                
+                if (!nosotrosEditor && document.getElementById('nosotrosHistoriaEditor')) {
+                    nosotrosEditor = new Quill('#nosotrosHistoriaEditor', { theme: 'snow', placeholder: 'Escribe la historia de tu negocio...' });
+                }
+                if (nosotrosEditor && config.nosotros?.historia) nosotrosEditor.root.innerHTML = config.nosotros.historia;
+                
+            } catch (error) { alert('Error: ' + error.message); }
+        }
+
+        function logout() {
+            document.getElementById('loginPanel').style.display = 'block';
+            document.getElementById('adminPanel').style.display = 'none';
+            clienteData = null;
         }
 
         // ============================================
@@ -876,7 +740,7 @@
             
             const config = {
                 marca: { 
-                    nombre: 'RGSoria\'s Solutions', 
+                    nombre: clienteData.nombre, 
                     logo: '', 
                     eslogan: '', 
                     colores: {
@@ -908,8 +772,8 @@
                 galeria: galeriaParaGuardar,
                 contacto: {
                     direccion: document.getElementById('contacto-direccion').value,
-                    telefono: '+5358481702',
-                    email: 'desarrollador.rgsoria@gmail.com',
+                    telefono: clienteData.telefono,
+                    email: clienteData.email,
                     whatsapp: document.getElementById('contacto-whatsapp').value,
                     mapa: document.getElementById('contacto-mapa').value,
                     redes: { 
@@ -921,7 +785,7 @@
             };
             
             try {
-                await window.actualizarCliente(CLIENTE_ID_PUBLICO, { config: config }, SUPABASE_URL, SUPABASE_ANON_KEY);
+                await window.actualizarCliente(clienteData.id_publico, { config: config }, supabaseUrl, supabaseKey);
                 
                 const mensajeDiv = document.getElementById('mensaje');
                 mensajeDiv.textContent = '✅ Todos los cambios guardados correctamente';
@@ -940,9 +804,6 @@
                 btn.disabled = false; 
             }
         }
-        
-        // Iniciar
-        init();
     </script>
 </body>
-    </html>
+                            </html>

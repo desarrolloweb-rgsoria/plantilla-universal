@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicita tu página web - Asistente Sera</title>
+    <title>Configura tu página web - Asistente Sera</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -79,6 +80,7 @@
             display: flex;
             align-items: center;
             gap: 1rem;
+            flex-wrap: wrap;
         }
         .color-input input[type="color"] {
             width: 60px;
@@ -93,6 +95,35 @@
             padding: 0.3rem 0.8rem;
             border-radius: 8px;
         }
+        .color-input input[type="text"] {
+            width: 150px;
+        }
+        .paleta-colores {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .color-opcion {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .color-opcion:hover { transform: scale(1.1); border-color: #333; }
+        .upload-area {
+            border: 2px dashed #0B4F6C;
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .upload-area:hover { background: #f0f8ff; border-color: #F4A261; }
+        .preview-upload { margin-top: 0.5rem; font-size: 0.8rem; }
         .item-card {
             background: #f8f9fa;
             border-radius: 16px;
@@ -142,10 +173,7 @@
             transition: all 0.3s;
             margin-top: 1rem;
         }
-        .btn-enviar:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
+        .btn-enviar:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
         .hidden { display: none; }
         .mensaje-confirmacion {
             margin-top: 2rem;
@@ -157,15 +185,18 @@
             display: none;
         }
         .mensaje-confirmacion h3 { color: #155724; margin-bottom: 0.5rem; }
-        .mensaje-confirmacion p { color: #155724; }
-        .info-box {
-            background: #e8f4f8;
-            border-left: 4px solid #F18F01;
-            padding: 0.8rem;
-            border-radius: 8px;
-            margin-top: 0.5rem;
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid white;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
         }
-        .info-box p { margin: 0; font-size: 0.8rem; color: #0B4F6C; }
+        @keyframes spin { to { transform: rotate(360deg); } }
         @media (max-width: 768px) {
             body { padding: 1rem; }
             .formulario { padding: 1.5rem; }
@@ -267,29 +298,18 @@
             display: none;
         }
         .overlay-ayuda.open { display: block; }
-        .spinner {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid white;
-            border-top-color: transparent;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-right: 8px;
-            vertical-align: middle;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>📋 Solicita tu página web</h1>
+            <h1>📋 Configura tu página web</h1>
             <p>Completa el formulario con ayuda de <strong>Sera</strong> (haz clic en el ❓ de cada sección)</p>
-            <p>Te contactaremos para agendar una videollamada y revisar tu página contigo.</p>
         </div>
 
         <div class="formulario" id="formularioCliente">
+            <input type="hidden" id="negocioId" value="">
+            
             <!-- DATOS DE MARCA -->
             <div class="seccion-formulario">
                 <div class="seccion-titulo">
@@ -338,6 +358,15 @@
                         <div class="color-input">
                             <input type="color" id="color-primario" value="#1E3A5F">
                             <span id="color-primario-text">#1E3A5F</span>
+                            <input type="text" id="color-primario-texto" placeholder="O escribe el color (navy, #0B2B40)">
+                        </div>
+                        <div class="paleta-colores" data-target="color-primario">
+                            <div class="color-opcion" style="background: #0B2B40;" data-color="#0B2B40"></div>
+                            <div class="color-opcion" style="background: #1C6E8F;" data-color="#1C6E8F"></div>
+                            <div class="color-opcion" style="background: #F4A261;" data-color="#F4A261"></div>
+                            <div class="color-opcion" style="background: #2A9D8F;" data-color="#2A9D8F"></div>
+                            <div class="color-opcion" style="background: #4A4A4A;" data-color="#4A4A4A"></div>
+                            <div class="color-opcion" style="background: #F9F9F9;" data-color="#F9F9F9"></div>
                         </div>
                     </div>
                     <div class="form-group">
@@ -345,6 +374,15 @@
                         <div class="color-input">
                             <input type="color" id="color-secundario" value="#4A90E2">
                             <span id="color-secundario-text">#4A90E2</span>
+                            <input type="text" id="color-secundario-texto" placeholder="O escribe el color">
+                        </div>
+                        <div class="paleta-colores" data-target="color-secundario">
+                            <div class="color-opcion" style="background: #0B2B40;" data-color="#0B2B40"></div>
+                            <div class="color-opcion" style="background: #1C6E8F;" data-color="#1C6E8F"></div>
+                            <div class="color-opcion" style="background: #F4A261;" data-color="#F4A261"></div>
+                            <div class="color-opcion" style="background: #2A9D8F;" data-color="#2A9D8F"></div>
+                            <div class="color-opcion" style="background: #4A4A4A;" data-color="#4A4A4A"></div>
+                            <div class="color-opcion" style="background: #F9F9F9;" data-color="#F9F9F9"></div>
                         </div>
                     </div>
                 </div>
@@ -354,6 +392,15 @@
                         <div class="color-input">
                             <input type="color" id="color-acento" value="#F77F00">
                             <span id="color-acento-text">#F77F00</span>
+                            <input type="text" id="color-acento-texto" placeholder="O escribe el color">
+                        </div>
+                        <div class="paleta-colores" data-target="color-acento">
+                            <div class="color-opcion" style="background: #0B2B40;" data-color="#0B2B40"></div>
+                            <div class="color-opcion" style="background: #1C6E8F;" data-color="#1C6E8F"></div>
+                            <div class="color-opcion" style="background: #F4A261;" data-color="#F4A261"></div>
+                            <div class="color-opcion" style="background: #2A9D8F;" data-color="#2A9D8F"></div>
+                            <div class="color-opcion" style="background: #4A4A4A;" data-color="#4A4A4A"></div>
+                            <div class="color-opcion" style="background: #F9F9F9;" data-color="#F9F9F9"></div>
                         </div>
                     </div>
                     <div class="form-group">
@@ -361,6 +408,15 @@
                         <div class="color-input">
                             <input type="color" id="color-texto" value="#0A1C2E">
                             <span id="color-texto-text">#0A1C2E</span>
+                            <input type="text" id="color-texto-texto" placeholder="O escribe el color">
+                        </div>
+                        <div class="paleta-colores" data-target="color-texto">
+                            <div class="color-opcion" style="background: #0B2B40;" data-color="#0B2B40"></div>
+                            <div class="color-opcion" style="background: #1C6E8F;" data-color="#1C6E8F"></div>
+                            <div class="color-opcion" style="background: #F4A261;" data-color="#F4A261"></div>
+                            <div class="color-opcion" style="background: #2A9D8F;" data-color="#2A9D8F"></div>
+                            <div class="color-opcion" style="background: #4A4A4A;" data-color="#4A4A4A"></div>
+                            <div class="color-opcion" style="background: #F9F9F9;" data-color="#F9F9F9"></div>
                         </div>
                     </div>
                 </div>
@@ -369,6 +425,15 @@
                     <div class="color-input">
                         <input type="color" id="color-fondo" value="#F0F8FF">
                         <span id="color-fondo-text">#F0F8FF</span>
+                        <input type="text" id="color-fondo-texto" placeholder="O escribe el color">
+                    </div>
+                    <div class="paleta-colores" data-target="color-fondo">
+                        <div class="color-opcion" style="background: #0B2B40;" data-color="#0B2B40"></div>
+                        <div class="color-opcion" style="background: #1C6E8F;" data-color="#1C6E8F"></div>
+                        <div class="color-opcion" style="background: #F4A261;" data-color="#F4A261"></div>
+                        <div class="color-opcion" style="background: #2A9D8F;" data-color="#2A9D8F"></div>
+                        <div class="color-opcion" style="background: #4A4A4A;" data-color="#4A4A4A"></div>
+                        <div class="color-opcion" style="background: #F9F9F9;" data-color="#F9F9F9"></div>
                     </div>
                 </div>
             </div>
@@ -401,13 +466,22 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>URL de la imagen de fondo</label>
-                    <input type="text" id="hero-imagen" placeholder="https://images.unsplash.com/photo-1498931299472-f7a63a5a1cfa?w=1600">
+                    <label>Imagen de fondo (Hero)</label>
+                    <div class="upload-area" id="uploadAreaHero">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #0B4F6C;"></i>
+                        <p>Toca o arrastra una imagen aquí</p>
+                        <input type="file" id="subirHero" accept="image/*" style="display: none;">
+                    </div>
+                    <div id="previewHero" class="preview-upload"></div>
                 </div>
                 <div class="form-group">
-                    <label>URL del video de fondo (opcional, .mp4)</label>
-                    <input type="text" id="hero-video" placeholder="https://ejemplo.com/video.mp4">
-                    <small>Si pones video, se usará en lugar de la imagen. Déjalo vacío para usar solo imagen.</small>
+                    <label>Video de fondo (opcional, .mp4)</label>
+                    <div class="upload-area" id="uploadAreaHeroVideo">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #0B4F6C;"></i>
+                        <p>Toca o arrastra un video aquí (se guardará pendiente para optimización)</p>
+                        <input type="file" id="subirHeroVideo" accept="video/mp4" style="display: none;">
+                    </div>
+                    <div id="previewHeroVideo" class="preview-upload"></div>
                 </div>
                 <div class="form-group">
                     <label>Opacidad del overlay (0 a 1)</label>
@@ -435,8 +509,13 @@
                     <textarea id="nosotros-historia" rows="4" placeholder="Cuéntanos la historia de tu negocio..."></textarea>
                 </div>
                 <div class="form-group">
-                    <label>URL de la imagen</label>
-                    <input type="text" id="nosotros-imagen" placeholder="https://images.unsplash.com/photo-1505842465776-3b4953ca4f44?w=800">
+                    <label>Imagen de la sección</label>
+                    <div class="upload-area" id="uploadAreaNosotros">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #0B4F6C;"></i>
+                        <p>Toca o arrastra una imagen aquí</p>
+                        <input type="file" id="subirNosotros" accept="image/*" style="display: none;">
+                    </div>
+                    <div id="previewNosotros" class="preview-upload"></div>
                 </div>
                 <div class="form-group">
                     <label>Valores (separados por coma)</label>
@@ -444,7 +523,7 @@
                 </div>
             </div>
 
-            <!-- PRODUCTOS -->
+            <!-- PRODUCTOS / SERVICIOS -->
             <div class="seccion-formulario">
                 <div class="seccion-titulo">
                     <i class="fas fa-box"></i>
@@ -524,91 +603,30 @@
             </div>
 
             <button type="button" class="btn-enviar" id="btnEnviar">
-                <i class="fas fa-paper-plane"></i> Enviar mi información
+                <i class="fas fa-paper-plane"></i> Guardar configuración
             </button>
         </div>
 
         <div class="mensaje-confirmacion" id="mensajeConfirmacion">
-            <h3><i class="fas fa-check-circle"></i> ¡Solicitud recibida!</h3>
-            <p>Gracias por confiar en nosotros para crear tu página web.</p>
-            <p>Hemos recibido toda tu información. En los próximos días nos pondremos en contacto contigo para agendar una videollamada y revisar tu página.</p>
-            <p><strong>¡Pronto tu negocio estará en línea!</strong></p>
+            <h3><i class="fas fa-check-circle"></i> ¡Configuración guardada!</h3>
+            <p>Los cambios se han aplicado correctamente.</p>
+            <p>La página pública se actualizará automáticamente.</p>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-conector.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();</script>
     <script>
-        const preguntasPorSeccion = {
-            marca: {
-                titulo: "💡 Ayuda: Datos de tu negocio",
-                preguntas: [
-                    { q: "¿Qué nombre poner a mi negocio?", a: "Pon el nombre real de tu negocio. Debe ser fácil de recordar y representar lo que haces." },
-                    { q: "¿Qué es el logo y qué pongo ahí?", a: "El logo es el ícono o texto que aparece arriba. Puedes poner un emoji seguido del nombre corto." },
-                    { q: "¿Para qué sirve el eslogan?", a: "Es una frase corta que resume lo que ofreces." }
-                ]
-            },
-            colores: {
-                titulo: "🎨 Ayuda: Colores de tu marca",
-                preguntas: [
-                    { q: "¿Qué colores elijo para mi página?", a: "Los de tu logo. Si no tienes logo, elige 2-3 que representen tu negocio." },
-                    { q: "¿Qué significa cada color?", a: "Rojo=energía, azul=confianza, verde=naturaleza, amarillo=alegría." }
-                ]
-            },
-            hero: {
-                titulo: "🖼️ Ayuda: Portada principal (Hero)",
-                preguntas: [
-                    { q: "¿Qué imagen pongo en el Hero?", a: "Una foto que represente tu negocio: tu local, tu producto estrella." },
-                    { q: "¿Qué texto escribo en el Hero?", a: "Frase corta que diga qué haces y para quién." },
-                    { q: "¿Qué video puedo poner?", a: "Un video corto (10-30 segundos) de calidad. Puedes obtenerlo de Pixabay, Coverr o Mixkit." }
-                ]
-            },
-            nosotros: {
-                titulo: "📖 Ayuda: Sobre Nosotros",
-                preguntas: [
-                    { q: "¿Qué escribo en 'Sobre Nosotros'?", a: "Quiénes son, cómo empezaron, qué los hace diferentes." },
-                    { q: "¿Qué foto pongo aquí?", a: "Tu equipo, tu local, o una escena que muestre tu trabajo real." }
-                ]
-            },
-            productos: {
-                titulo: "📦 Ayuda: Productos o Servicios",
-                preguntas: [
-                    { q: "¿Cuántos productos debo mostrar?", a: "Los más importantes. Entre 4 y 8 es ideal." },
-                    { q: "¿Qué información debe tener cada producto?", a: "Imagen clara, nombre, descripción breve, precio visible." }
-                ]
-            },
-            testimonios: {
-                titulo: "⭐ Ayuda: Testimonios",
-                preguntas: [
-                    { q: "¿Cómo consigo buenos testimonios?", a: "Pide a clientes felices una frase específica sobre su experiencia." },
-                    { q: "¿Qué debe tener un buen testimonio?", a: "Nombre, foto, frase concreta." }
-                ]
-            },
-            galeria: {
-                titulo: "📸 Ayuda: Galería",
-                preguntas: [
-                    { q: "¿Qué fotos pongo en la galería?", a: "Tu mejor trabajo: productos, equipo, espacio." },
-                    { q: "¿Cuántas fotos debo poner?", a: "Mínimo 4, máximo 12." }
-                ]
-            },
-            contacto: {
-                titulo: "📞 Ayuda: Contacto",
-                preguntas: [
-                    { q: "¿Qué información de contacto debo poner?", a: "Teléfono, WhatsApp, email, dirección, redes sociales." },
-                    { q: "¿Qué redes sociales debo incluir?", a: "Solo las que usas activamente." }
-                ]
-            },
-            general: {
-                titulo: "💡 Consejos generales",
-                preguntas: [
-                    { q: "¿Cómo hago que mi página se vea profesional?", a: "Fotos de calidad, texto claro, colores coherentes." },
-                    { q: "¿Qué errores evitar?", a: "Imágenes genéricas, textos muy largos, no mostrar precios." }
-                ]
-            }
-        };
-
+        // ============================================
+        // CREDENCIALES FIJAS
+        // ============================================
+        const SUPABASE_URL = 'https://nvrcqlxnvjvhznmxozhh.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_qCtRLmyJxBbYRcO7Suuqnw_mrmqspp6';
+        const BUCKET_NAME = 'cliente';
+        
+        let negocioIdActual = null;
+        let supabaseClient = null;
         let productos = [];
         let testimonios = [];
         let galeria = [];
@@ -616,57 +634,224 @@
         let testimonioId = 1;
         let galeriaId = 1;
 
-        function mostrarAyuda(seccionId) {
-            const seccion = preguntasPorSeccion[seccionId];
-            if (!seccion) return;
+        // ============================================
+        // FUNCIONES DE COLORES
+        // ============================================
+        function nombreAColor(nombre) {
+            const colores = {
+                'navy': '#0B2B40', 'blue': '#1C6E8F', 'orange': '#F4A261',
+                'green': '#2A9D8F', 'gray': '#4A4A4A', 'white': '#F9F9F9',
+                'black': '#1E1E24', 'red': '#C41E3A', 'yellow': '#FFD700'
+            };
+            return colores[nombre.toLowerCase()] || nombre;
+        }
+
+        function actualizarColorPreview() {
+            const primario = nombreAColor(document.getElementById('color-primario-texto').value || document.getElementById('color-primario').value);
+            document.getElementById('color-primario').value = primario;
+            document.getElementById('color-primario-text').textContent = primario;
             
-            let panel = document.getElementById('ayudaPanelGlobal');
-            let overlay = document.getElementById('ayudaOverlayGlobal');
+            const secundario = nombreAColor(document.getElementById('color-secundario-texto').value || document.getElementById('color-secundario').value);
+            document.getElementById('color-secundario').value = secundario;
+            document.getElementById('color-secundario-text').textContent = secundario;
             
-            if (!panel) {
-                panel = document.createElement('div');
-                panel.id = 'ayudaPanelGlobal';
-                panel.className = 'ayuda-panel';
-                document.body.appendChild(panel);
-                overlay = document.createElement('div');
-                overlay.id = 'ayudaOverlayGlobal';
-                overlay.className = 'overlay-ayuda';
-                document.body.appendChild(overlay);
-                overlay.addEventListener('click', cerrarAyuda);
-            }
+            const acento = nombreAColor(document.getElementById('color-acento-texto').value || document.getElementById('color-acento').value);
+            document.getElementById('color-acento').value = acento;
+            document.getElementById('color-acento-text').textContent = acento;
             
-            let html = `<div class="ayuda-header"><h4><i class="fas fa-question-circle"></i> ${seccion.titulo}</h4><button class="cerrar-ayuda" onclick="cerrarAyuda()">&times;</button></div><div class="ayuda-preguntas">`;
-            seccion.preguntas.forEach(p => {
-                html += `<div class="pregunta"><button class="pregunta-btn" onclick="toggleRespuesta(this)"><span>❓ ${p.q}</span><i class="fas fa-chevron-down"></i></button><div class="respuesta"><i class="fas fa-reply" style="margin-right: 8px; color: #F18F01;"></i> ${p.a}</div></div>`;
+            const texto = nombreAColor(document.getElementById('color-texto-texto').value || document.getElementById('color-texto').value);
+            document.getElementById('color-texto').value = texto;
+            document.getElementById('color-texto-text').textContent = texto;
+            
+            const fondo = nombreAColor(document.getElementById('color-fondo-texto').value || document.getElementById('color-fondo').value);
+            document.getElementById('color-fondo').value = fondo;
+            document.getElementById('color-fondo-text').textContent = fondo;
+        }
+
+        function initColorPalettes() {
+            document.querySelectorAll('.paleta-colores').forEach(palette => {
+                const targetId = palette.dataset.target;
+                palette.querySelectorAll('.color-opcion').forEach(opt => {
+                    opt.addEventListener('click', () => {
+                        document.getElementById(targetId).value = opt.dataset.color;
+                        document.getElementById(targetId + '-texto').value = '';
+                        actualizarColorPreview();
+                    });
+                });
             });
-            html += `</div><div class="ayuda-footer"><button class="btn-contactar" onclick="contactarAsesor()"><i class="fab fa-whatsapp"></i> Hablar con un asesor</button></div>`;
             
-            panel.innerHTML = html;
-            panel.classList.add('open');
-            overlay.classList.add('open');
+            const colorInputs = ['color-primario-texto', 'color-secundario-texto', 'color-acento-texto', 'color-texto-texto', 'color-fondo-texto'];
+            colorInputs.forEach(id => {
+                document.getElementById(id)?.addEventListener('input', actualizarColorPreview);
+            });
+            
+            const colorPickers = ['color-primario', 'color-secundario', 'color-acento', 'color-texto', 'color-fondo'];
+            colorPickers.forEach(id => {
+                document.getElementById(id)?.addEventListener('input', () => {
+                    document.getElementById(id + '-texto').value = '';
+                    actualizarColorPreview();
+                });
+            });
         }
 
-        function cerrarAyuda() {
-            const panel = document.getElementById('ayudaPanelGlobal');
-            const overlay = document.getElementById('ayudaOverlayGlobal');
-            if (panel) panel.classList.remove('open');
-            if (overlay) overlay.classList.remove('open');
+        // ============================================
+        // FUNCIONES DE SUBIDA A SUPABASE
+        // ============================================
+        async function comprimirYSubirImagen(file, carpeta) {
+            const options = {
+                maxSizeMB: 1,
+                maxWidthOrHeight: 1920,
+                useWebWorker: true,
+                fileType: 'image/webp'
+            };
+            
+            const compressedFile = await imageCompression(file, options);
+            const nombreArchivo = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.webp`;
+            const ruta = `${negocioIdActual}/${carpeta}/${nombreArchivo}`;
+            
+            const { data, error } = await supabaseClient.storage
+                .from(BUCKET_NAME)
+                .upload(ruta, compressedFile);
+            
+            if (error) throw error;
+            return nombreArchivo;
         }
 
-        function toggleRespuesta(btn) {
-            const respuesta = btn.nextElementSibling;
-            respuesta.classList.toggle('open');
-            btn.classList.toggle('open');
+        async function subirVideoPendiente(file) {
+            const nombreArchivo = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.mp4`;
+            const ruta = `${negocioIdActual}/hero/pendientes/${nombreArchivo}`;
+            
+            const { data, error } = await supabaseClient.storage
+                .from(BUCKET_NAME)
+                .upload(ruta, file);
+            
+            if (error) throw error;
+            return nombreArchivo;
         }
 
-        function contactarAsesor() {
-            window.open('https://wa.me/5358481702?text=Hola%2C%20necesito%20ayuda%20con%20mi%20p%C3%A1gina%20web', '_blank');
-            cerrarAyuda();
+        // ============================================
+        // INICIALIZAR UPLOADERS
+        // ============================================
+        function initUploadHero() {
+            const uploadArea = document.getElementById('uploadAreaHero');
+            const fileInput = document.getElementById('subirHero');
+            const previewDiv = document.getElementById('previewHero');
+            
+            if (!uploadArea || !fileInput) return;
+            
+            uploadArea.addEventListener('click', () => fileInput.click());
+            
+            fileInput.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                previewDiv.innerHTML = '<span class="spinner"></span> Subiendo y optimizando...';
+                
+                try {
+                    const nombreArchivo = await comprimirYSubirImagen(file, 'hero');
+                    document.getElementById('hero-imagen').value = nombreArchivo;
+                    previewDiv.innerHTML = `<span style="color: green;">✅ Imagen subida: ${nombreArchivo}</span>`;
+                } catch (error) {
+                    previewDiv.innerHTML = `<span style="color: red;">❌ Error: ${error.message}</span>`;
+                }
+                
+                fileInput.value = '';
+            });
         }
 
+        function initUploadHeroVideo() {
+            const uploadArea = document.getElementById('uploadAreaHeroVideo');
+            const fileInput = document.getElementById('subirHeroVideo');
+            const previewDiv = document.getElementById('previewHeroVideo');
+            
+            if (!uploadArea || !fileInput) return;
+            
+            uploadArea.addEventListener('click', () => fileInput.click());
+            
+            fileInput.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                previewDiv.innerHTML = '<span class="spinner"></span> Subiendo video (pendiente de optimización)...';
+                
+                try {
+                    const nombreArchivo = await subirVideoPendiente(file);
+                    document.getElementById('hero-video').value = `pendiente/${nombreArchivo}`;
+                    previewDiv.innerHTML = `<span style="color: green;">✅ Video subido (pendiente de optimización): ${nombreArchivo}</span>`;
+                } catch (error) {
+                    previewDiv.innerHTML = `<span style="color: red;">❌ Error: ${error.message}</span>`;
+                }
+                
+                fileInput.value = '';
+            });
+        }
+
+        function initUploadNosotros() {
+            const uploadArea = document.getElementById('uploadAreaNosotros');
+            const fileInput = document.getElementById('subirNosotros');
+            const previewDiv = document.getElementById('previewNosotros');
+            
+            if (!uploadArea || !fileInput) return;
+            
+            uploadArea.addEventListener('click', () => fileInput.click());
+            
+            fileInput.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                previewDiv.innerHTML = '<span class="spinner"></span> Subiendo y optimizando...';
+                
+                try {
+                    const nombreArchivo = await comprimirYSubirImagen(file, 'nosotros');
+                    document.getElementById('nosotros-imagen').value = nombreArchivo;
+                    previewDiv.innerHTML = `<span style="color: green;">✅ Imagen subida: ${nombreArchivo}</span>`;
+                } catch (error) {
+                    previewDiv.innerHTML = `<span style="color: red;">❌ Error: ${error.message}</span>`;
+                }
+                
+                fileInput.value = '';
+            });
+        }
+
+        // ============================================
+        // FUNCIONES DE PRODUCTOS CON SUBIDA AUTOMÁTICA
+        // ============================================
         function agregarProducto() {
-            productos.push({ id: productoId++, nombre: '', descripcion: '', precio: 0, imagen: 'https://images.unsplash.com/photo-1498931299472-f7a63a5a1cfa?w=600', caracteristicas: [], badgePermanente: '' });
+            const id = productoId++;
+            productos.push({ 
+                id: id, 
+                nombre: '', 
+                descripcion: '', 
+                precio: 0, 
+                imagen: '', 
+                caracteristicas: [], 
+                badgePermanente: '' 
+            });
             renderizarProductos();
+            
+            setTimeout(() => {
+                const uploadArea = document.getElementById(`uploadAreaProducto-${id}`);
+                const fileInput = document.getElementById(`subirProducto-${id}`);
+                if (uploadArea && fileInput) {
+                    uploadArea.addEventListener('click', () => fileInput.click());
+                    fileInput.addEventListener('change', async (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        
+                        const previewDiv = document.getElementById(`previewProducto-${id}`);
+                        if (previewDiv) previewDiv.innerHTML = '<span class="spinner"></span> Subiendo...';
+                        
+                        try {
+                            const nombreArchivo = await comprimirYSubirImagen(file, 'productos');
+                            const producto = productos.find(p => p.id === id);
+                            if (producto) producto.imagen = nombreArchivo;
+                            renderizarProductos();
+                        } catch (error) {
+                            if (previewDiv) previewDiv.innerHTML = `<span style="color: red;">❌ Error: ${error.message}</span>`;
+                        }
+                    });
+                }
+            }, 100);
         }
 
         function eliminarProducto(id) {
@@ -684,16 +869,24 @@
             container.innerHTML = productos.map(p => `
                 <div class="item-card">
                     <div class="item-header" onclick="toggleContenido(this)">
-                        <strong>📦 Producto ${p.id}</strong>
+                        <strong>📦 ${p.nombre || `Producto ${p.id}`}</strong>
                         <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarProducto(${p.id})">Eliminar</button>
                     </div>
                     <div class="item-contenido hidden">
                         <div class="form-group"><label>Nombre</label><input type="text" class="prod-nombre" value="${escapeHtml(p.nombre)}" onchange="actualizarProducto(${p.id}, 'nombre', this.value)"></div>
                         <div class="form-group"><label>Precio</label><input type="number" class="prod-precio" value="${p.precio}" onchange="actualizarProducto(${p.id}, 'precio', parseFloat(this.value))"></div>
                         <div class="form-group"><label>Descripción</label><textarea class="prod-descripcion" rows="2" onchange="actualizarProducto(${p.id}, 'descripcion', this.value)">${escapeHtml(p.descripcion)}</textarea></div>
-                        <div class="form-group"><label>URL de imagen</label><input type="text" class="prod-imagen" value="${p.imagen}" onchange="actualizarProducto(${p.id}, 'imagen', this.value)"></div>
                         <div class="form-group"><label>Características (separadas por coma)</label><input type="text" class="prod-caracteristicas" value="${p.caracteristicas.join(', ')}" onchange="actualizarProducto(${p.id}, 'caracteristicas', this.value.split(',').map(c => c.trim()).filter(c => c))"></div>
                         <div class="form-group"><label>Badge / Etiqueta</label><input type="text" class="prod-badge" value="${p.badgePermanente}" onchange="actualizarProducto(${p.id}, 'badgePermanente', this.value)"></div>
+                        <div class="form-group">
+                            <label>Imagen del producto</label>
+                            <div class="upload-area" id="uploadAreaProducto-${p.id}" style="margin-bottom: 0.5rem;">
+                                <i class="fas fa-cloud-upload-alt"></i> Toca para subir imagen
+                                <input type="file" id="subirProducto-${p.id}" accept="image/*" style="display: none;">
+                            </div>
+                            <div id="previewProducto-${p.id}" class="preview-upload"></div>
+                            ${p.imagen ? `<div><small>Imagen actual: ${p.imagen}</small></div>` : ''}
+                        </div>
                     </div>
                 </div>
             `).join('');
@@ -704,9 +897,44 @@
             if (index !== -1) productos[index][campo] = valor;
         }
 
+        // ============================================
+        // FUNCIONES DE TESTIMONIOS CON SUBIDA AUTOMÁTICA
+        // ============================================
         function agregarTestimonio() {
-            testimonios.push({ id: testimonioId++, nombre: '', lugar: '', texto: '', rating: 5, avatar: 'https://randomuser.me/api/portraits/women/44.jpg' });
+            const id = testimonioId++;
+            testimonios.push({ 
+                id: id, 
+                nombre: '', 
+                lugar: '', 
+                texto: '', 
+                rating: 5, 
+                avatar: '' 
+            });
             renderizarTestimonios();
+            
+            setTimeout(() => {
+                const uploadArea = document.getElementById(`uploadAreaTestimonio-${id}`);
+                const fileInput = document.getElementById(`subirTestimonio-${id}`);
+                if (uploadArea && fileInput) {
+                    uploadArea.addEventListener('click', () => fileInput.click());
+                    fileInput.addEventListener('change', async (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        
+                        const previewDiv = document.getElementById(`previewTestimonio-${id}`);
+                        if (previewDiv) previewDiv.innerHTML = '<span class="spinner"></span> Subiendo...';
+                        
+                        try {
+                            const nombreArchivo = await comprimirYSubirImagen(file, 'avatares');
+                            const testimonio = testimonios.find(t => t.id === id);
+                            if (testimonio) testimonio.avatar = nombreArchivo;
+                            renderizarTestimonios();
+                        } catch (error) {
+                            if (previewDiv) previewDiv.innerHTML = `<span style="color: red;">❌ Error: ${error.message}</span>`;
+                        }
+                    });
+                }
+            }, 100);
         }
 
         function eliminarTestimonio(id) {
@@ -724,7 +952,7 @@
             container.innerHTML = testimonios.map(t => `
                 <div class="item-card">
                     <div class="item-header" onclick="toggleContenido(this)">
-                        <strong>⭐ Testimonio ${t.id}</strong>
+                        <strong>⭐ ${t.nombre || `Testimonio ${t.id}`}</strong>
                         <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarTestimonio(${t.id})">Eliminar</button>
                     </div>
                     <div class="item-contenido hidden">
@@ -735,16 +963,59 @@
                         <div class="form-group"><label>Testimonio</label><textarea rows="2" onchange="testimonios.find(t2 => t2.id === ${t.id}).texto = this.value">${escapeHtml(t.texto)}</textarea></div>
                         <div class="form-row">
                             <div class="form-group"><label>Rating (1-5)</label><input type="number" min="1" max="5" value="${t.rating}" onchange="testimonios.find(t2 => t2.id === ${t.id}).rating = parseInt(this.value)"></div>
-                            <div class="form-group"><label>Avatar URL</label><input type="text" value="${t.avatar}" onchange="testimonios.find(t2 => t2.id === ${t.id}).avatar = this.value"></div>
+                            <div class="form-group">
+                                <label>Avatar</label>
+                                <div class="upload-area" id="uploadAreaTestimonio-${t.id}" style="margin-bottom: 0.5rem;">
+                                    <i class="fas fa-cloud-upload-alt"></i> Toca para subir avatar
+                                    <input type="file" id="subirTestimonio-${t.id}" accept="image/*" style="display: none;">
+                                </div>
+                                <div id="previewTestimonio-${t.id}" class="preview-upload"></div>
+                                ${t.avatar ? `<div><small>Avatar actual: ${t.avatar}</small></div>` : ''}
+                            </div>
                         </div>
                     </div>
                 </div>
             `).join('');
         }
 
+        // ============================================
+        // FUNCIONES DE GALERÍA CON SUBIDA AUTOMÁTICA
+        // ============================================
         function agregarGaleria() {
-            galeria.push({ id: galeriaId++, titulo: '', descripcion: '', fotos: ['https://images.unsplash.com/photo-1498931299472-f7a63a5a1cfa?w=600'] });
+            const id = galeriaId++;
+            galeria.push({ 
+                id: id, 
+                titulo: '', 
+                descripcion: '', 
+                fotos: [] 
+            });
             renderizarGaleria();
+            
+            setTimeout(() => {
+                const uploadArea = document.getElementById(`uploadAreaGaleria-${id}`);
+                const fileInput = document.getElementById(`subirGaleria-${id}`);
+                if (uploadArea && fileInput) {
+                    uploadArea.addEventListener('click', () => fileInput.click());
+                    fileInput.addEventListener('change', async (e) => {
+                        const files = Array.from(e.target.files);
+                        const previewDiv = document.getElementById(`previewGaleria-${id}`);
+                        
+                        for (const file of files) {
+                            if (previewDiv) previewDiv.innerHTML = '<span class="spinner"></span> Subiendo...';
+                            try {
+                                const nombreArchivo = await comprimirYSubirImagen(file, 'galeria');
+                                const galeriaItem = galeria.find(g => g.id === id);
+                                if (galeriaItem) {
+                                    galeriaItem.fotos.push(nombreArchivo);
+                                }
+                                renderizarGaleria();
+                            } catch (error) {
+                                if (previewDiv) previewDiv.innerHTML = `<span style="color: red;">❌ Error: ${error.message}</span>`;
+                            }
+                        }
+                    });
+                }
+            }, 100);
         }
 
         function eliminarGaleria(id) {
@@ -770,7 +1041,15 @@
                             <div class="form-group"><label>Título</label><input type="text" value="${escapeHtml(g.titulo)}" onchange="galeria.find(g2 => g2.id === ${g.id}).titulo = this.value"></div>
                             <div class="form-group"><label>Descripción</label><input type="text" value="${escapeHtml(g.descripcion)}" onchange="galeria.find(g2 => g2.id === ${g.id}).descripcion = this.value"></div>
                         </div>
-                        <div class="form-group"><label>URLs de imágenes (separadas por coma)</label><input type="text" value="${g.fotos.join(', ')}" onchange="galeria.find(g2 => g2.id === ${g.id}).fotos = this.value.split(',').map(f => f.trim()).filter(f => f)"></div>
+                        <div class="form-group">
+                            <label>Imágenes de la galería</label>
+                            <div class="upload-area" id="uploadAreaGaleria-${g.id}" style="margin-bottom: 0.5rem;">
+                                <i class="fas fa-cloud-upload-alt"></i> Toca para subir imágenes (múltiples)
+                                <input type="file" id="subirGaleria-${g.id}" accept="image/*" multiple style="display: none;">
+                            </div>
+                            <div id="previewGaleria-${g.id}" class="preview-upload"></div>
+                            ${g.fotos.length ? `<div><small>Imágenes: ${g.fotos.join(', ')}</small></div>` : ''}
+                        </div>
                     </div>
                 </div>
             `).join('');
@@ -786,18 +1065,85 @@
             return str.replace(/[&<>]/g, m => { if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m; });
         }
 
-        function actualizarColorPreview() {
-            document.getElementById('color-primario-text').textContent = document.getElementById('color-primario').value;
-            document.getElementById('color-secundario-text').textContent = document.getElementById('color-secundario').value;
-            document.getElementById('color-acento-text').textContent = document.getElementById('color-acento').value;
-            document.getElementById('color-texto-text').textContent = document.getElementById('color-texto').value;
-            document.getElementById('color-fondo-text').textContent = document.getElementById('color-fondo').value;
+        // ============================================
+        // CARGAR DATOS EXISTENTES (MODO EDICIÓN)
+        // ============================================
+        async function cargarDatosExistentes(id) {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('negocios')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+                
+                if (error) throw error;
+                
+                const config = data.config;
+                
+                document.getElementById('nombre-negocio').value = config.marca.nombre || '';
+                document.getElementById('logo-negocio').value = config.marca.logo || '';
+                document.getElementById('eslogan').value = config.marca.eslogan || '';
+                document.getElementById('contacto-email').value = config.contacto.email || '';
+                document.getElementById('contacto-telefono').value = config.contacto.telefono || '';
+                
+                if (config.marca.colores) {
+                    document.getElementById('color-primario').value = config.marca.colores.primario || '#1E3A5F';
+                    document.getElementById('color-secundario').value = config.marca.colores.secundario || '#4A90E2';
+                    document.getElementById('color-acento').value = config.marca.colores.acento || '#F77F00';
+                    document.getElementById('color-texto').value = config.marca.colores.texto || '#0A1C2E';
+                    document.getElementById('color-fondo').value = config.marca.colores.fondo || '#F0F8FF';
+                    actualizarColorPreview();
+                }
+                
+                document.getElementById('hero-superior').value = config.hero.texto_superior || '';
+                document.getElementById('hero-principal').value = config.hero.texto_principal || '';
+                document.getElementById('hero-inferior').value = config.hero.texto_inferior || '';
+                document.getElementById('hero-boton').value = config.hero.boton || 'Ver productos';
+                document.getElementById('hero-imagen').value = config.hero.imagen || '';
+                document.getElementById('hero-video').value = config.hero.video || '';
+                document.getElementById('hero-overlay').value = config.hero.overlay || 0.5;
+                
+                document.getElementById('nosotros-titulo').value = config.nosotros.titulo || 'Sobre Nosotros';
+                document.getElementById('nosotros-subtitulo').value = config.nosotros.subtitulo || 'Conócenos mejor';
+                document.getElementById('nosotros-historia').value = config.nosotros.historia || '';
+                document.getElementById('nosotros-imagen').value = config.nosotros.imagen || '';
+                document.getElementById('nosotros-valores').value = (config.nosotros.valores || []).join(', ');
+                
+                if (config.productos && config.productos.length) {
+                    productos = config.productos.map(p => ({ ...p, id: p.id || productoId++ }));
+                    renderizarProductos();
+                }
+                
+                if (config.testimonios && config.testimonios.length) {
+                    testimonios = config.testimonios.map(t => ({ ...t, id: t.id || testimonioId++ }));
+                    renderizarTestimonios();
+                }
+                
+                if (config.galeria && config.galeria.length) {
+                    galeria = config.galeria.map(g => ({ ...g, id: g.id || galeriaId++ }));
+                    renderizarGaleria();
+                }
+                
+                document.getElementById('contacto-direccion').value = config.contacto.direccion || '';
+                document.getElementById('contacto-whatsapp').value = config.contacto.whatsapp || '';
+                document.getElementById('contacto-mapa').value = config.contacto.mapa || '';
+                document.getElementById('red-facebook').value = config.contacto.redes?.facebook || '';
+                document.getElementById('red-instagram').value = config.contacto.redes?.instagram || '';
+                document.getElementById('footer-texto').value = config.footer?.texto || '';
+                
+            } catch (error) {
+                console.error('Error cargando datos:', error);
+                alert('Error al cargar los datos del negocio');
+            }
         }
 
-        async function enviarFormulario() {
+        // ============================================
+        // GUARDAR CONFIGURACIÓN
+        // ============================================
+        async function guardarConfiguracion() {
             const btn = document.getElementById('btnEnviar');
             const textoOriginal = btn.innerHTML;
-            btn.innerHTML = '<span class="spinner"></span> Enviando...';
+            btn.innerHTML = '<span class="spinner"></span> Guardando...';
             btn.disabled = true;
 
             const nombre = document.getElementById('nombre-negocio').value;
@@ -860,51 +1206,155 @@
             };
 
             try {
-                const resultado = await window.crearNegocio({
-                    cliente_nombre: nombre,
-                    cliente_email: email,
-                    cliente_telefono: telefono,
-                    config: config
-                });
-
-                console.log('✅ Negocio creado:', resultado);
-
+                if (negocioIdActual) {
+                    await supabaseClient
+                        .from('negocios')
+                        .update({ config: config, fecha_actualizacion: new Date() })
+                        .eq('id', negocioIdActual);
+                } else {
+                    const { data, error } = await supabaseClient
+                        .from('negocios')
+                        .insert([{
+                            cliente_nombre: nombre,
+                            cliente_email: email,
+                            cliente_telefono: telefono,
+                            config: config,
+                            estado: 'pendiente_revision'
+                        }])
+                        .select();
+                    if (error) throw error;
+                    negocioIdActual = data[0].id;
+                }
+                
                 document.getElementById('formularioCliente').style.display = 'none';
                 document.getElementById('mensajeConfirmacion').style.display = 'block';
-
+                
             } catch (error) {
                 console.error('Error:', error);
-                alert('❌ Error al enviar: ' + error.message);
+                alert('❌ Error al guardar: ' + error.message);
+            } finally {
                 btn.innerHTML = textoOriginal;
                 btn.disabled = false;
             }
         }
 
+        // ============================================
+        // INICIALIZACIÓN
+        // ============================================
         document.addEventListener('DOMContentLoaded', () => {
-            window.initSupabase();
-            agregarProducto();
-            agregarProducto();
-            agregarTestimonio();
-            agregarTestimonio();
-            agregarGaleria();
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            
+            if (id) {
+                negocioIdActual = id;
+                document.getElementById('negocioId').value = id;
+                cargarDatosExistentes(id);
+            } else {
+                agregarProducto();
+                agregarProducto();
+                agregarTestimonio();
+                agregarTestimonio();
+                agregarGaleria();
+            }
+            
+            initColorPalettes();
             actualizarColorPreview();
-
-            document.getElementById('color-primario')?.addEventListener('input', actualizarColorPreview);
-            document.getElementById('color-secundario')?.addEventListener('input', actualizarColorPreview);
-            document.getElementById('color-acento')?.addEventListener('input', actualizarColorPreview);
-            document.getElementById('color-texto')?.addEventListener('input', actualizarColorPreview);
-            document.getElementById('color-fondo')?.addEventListener('input', actualizarColorPreview);
-            document.getElementById('btnEnviar')?.addEventListener('click', enviarFormulario);
-
+            
+            document.getElementById('btnEnviar')?.addEventListener('click', guardarConfiguracion);
+            
+            // Inicializar uploaders después de tener el ID
+            const observer = new MutationObserver(() => {
+                if (negocioIdActual) {
+                    initUploadHero();
+                    initUploadHeroVideo();
+                    initUploadNosotros();
+                    observer.disconnect();
+                }
+            });
+            observer.observe(document.body, { attributes: true, childList: true, subtree: true });
+            
             document.querySelectorAll('.btn-ayuda').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const seccion = btn.dataset.seccion;
-                    if (seccion && preguntasPorSeccion[seccion]) mostrarAyuda(seccion);
-                    else mostrarAyuda('general');
+                    mostrarAyuda(seccion);
                 });
             });
         });
+
+        // ============================================
+        // AYUDA
+        // ============================================
+        const preguntasPorSeccion = {
+            marca: { titulo: "💡 Ayuda: Datos de tu negocio", preguntas: [
+                { q: "¿Qué nombre poner a mi negocio?", a: "Pon el nombre real de tu negocio." },
+                { q: "¿Qué es el logo y qué pongo ahí?", a: "Un emoji seguido del nombre corto." }
+            ]},
+            colores: { titulo: "🎨 Ayuda: Colores", preguntas: [
+                { q: "¿Qué colores elijo?", a: "Los de tu logo o 2-3 que representen tu negocio." }
+            ]},
+            hero: { titulo: "🖼️ Ayuda: Portada", preguntas: [
+                { q: "¿Qué imagen pongo?", a: "Una foto que represente tu negocio." },
+                { q: "¿Qué video puedo poner?", a: "Un video corto (10-30 segundos) en formato MP4. Se optimizará manualmente." }
+            ]},
+            nosotros: { titulo: "📖 Ayuda: Sobre Nosotros", preguntas: [
+                { q: "¿Qué escribo?", a: "Quiénes son, cómo empezaron." }
+            ]},
+            productos: { titulo: "📦 Ayuda: Productos", preguntas: [
+                { q: "¿Cómo subo la imagen?", a: "Toca el área de subida y selecciona la imagen." }
+            ]},
+            general: { titulo: "💡 Consejos", preguntas: [
+                { q: "¿Cómo hago mi página profesional?", a: "Fotos de calidad, texto claro." }
+            ]}
+        };
+
+        function mostrarAyuda(seccionId) {
+            const seccion = preguntasPorSeccion[seccionId] || preguntasPorSeccion.general;
+            let panel = document.getElementById('ayudaPanelGlobal');
+            let overlay = document.getElementById('ayudaOverlayGlobal');
+            
+            if (!panel) {
+                panel = document.createElement('div');
+                panel.id = 'ayudaPanelGlobal';
+                panel.className = 'ayuda-panel';
+                document.body.appendChild(panel);
+                overlay = document.createElement('div');
+                overlay.id = 'ayudaOverlayGlobal';
+                overlay.className = 'overlay-ayuda';
+                document.body.appendChild(overlay);
+                overlay.addEventListener('click', cerrarAyuda);
+            }
+            
+            let html = `<div class="ayuda-header"><h4><i class="fas fa-question-circle"></i> ${seccion.titulo}</h4><button class="cerrar-ayuda" onclick="cerrarAyuda()">&times;</button></div><div class="ayuda-preguntas">`;
+            seccion.preguntas.forEach(p => {
+                html += `<div class="pregunta"><button class="pregunta-btn" onclick="toggleRespuesta(this)"><span>❓ ${p.q}</span><i class="fas fa-chevron-down"></i></button><div class="respuesta">${p.a}</div></div>`;
+            });
+            html += `<div class="ayuda-footer"><button class="btn-contactar" onclick="contactarAsesor()"><i class="fab fa-whatsapp"></i> Hablar con un asesor</button></div>`;
+            
+            panel.innerHTML = html;
+            panel.classList.add('open');
+            overlay.classList.add('open');
+        }
+
+        function cerrarAyuda() {
+            const panel = document.getElementById('ayudaPanelGlobal');
+            const overlay = document.getElementById('ayudaOverlayGlobal');
+            if (panel) panel.classList.remove('open');
+            if (overlay) overlay.classList.remove('open');
+        }
+
+        function toggleRespuesta(btn) {
+            const respuesta = btn.nextElementSibling;
+            respuesta.classList.toggle('open');
+            btn.classList.toggle('open');
+        }
+
+        function contactarAsesor() {
+            window.open('https://wa.me/5358481702?text=Hola%2C%20necesito%20ayuda%20con%20mi%20p%C3%A1gina%20web', '_blank');
+            cerrarAyuda();
+        }
     </script>
 </body>
     </html>

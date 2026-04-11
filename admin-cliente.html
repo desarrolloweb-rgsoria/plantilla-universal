@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Control - Mi Negocio</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -14,7 +12,7 @@
             background: #f5f5f5;
             padding: 2rem;
         }
-        .container { max-width: 1400px; margin: 0 auto; }
+        .container { max-width: 1200px; margin: 0 auto; }
         .login-form, .panel-principal {
             background: white;
             border-radius: 20px;
@@ -42,7 +40,6 @@
             transition: all 0.2s;
         }
         button:hover { background: #1a6d8f; transform: scale(1.02); }
-        button:active { transform: scale(0.98); }
         .btn-eliminar { background: #dc3545; }
         .btn-eliminar:hover { background: #bb2d3b; }
         .btn-agregar { background: #28a745; margin-bottom: 1rem; }
@@ -60,9 +57,6 @@
             margin-bottom: 1rem;
             padding-bottom: 0.5rem;
             border-bottom: 2px solid #F4A261;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
         }
         .form-row {
             display: grid;
@@ -113,7 +107,6 @@
         .color-input { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
         .color-input input[type="color"] { width: 60px; height: 50px; border-radius: 12px; cursor: pointer; }
         .color-input span { font-family: monospace; background: #f5f5f5; padding: 0.3rem 0.8rem; border-radius: 8px; }
-        .color-input input[type="text"] { width: 150px; }
         .paleta-colores { display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap; }
         .color-opcion { width: 35px; height: 35px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: all 0.2s; }
         .color-opcion:hover { transform: scale(1.1); border-color: #333; }
@@ -121,15 +114,14 @@
         .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; cursor: pointer; flex-wrap: wrap; gap: 0.5rem; }
         .item-contenido { margin-top: 1rem; }
         .hidden { display: none; }
-        .ql-editor { min-height: 150px; }
     </style>
 </head>
 <body>
     <div class="container">
         <div id="loginPanel" class="login-form">
             <h1>🔐 Acceso a tu panel</h1>
-            <div class="form-group"><label>ID de cliente (ej: RGS-7823)</label><input type="text" id="clienteId" placeholder="RGS-0000"></div>
-            <div class="form-group"><label>Contraseña</label><input type="password" id="password" placeholder="contraseña"></div>
+            <div class="form-group"><label>ID de cliente (ej: RGS-7823)</label><input type="text" id="clienteId" placeholder="RGS-0000" value="RGS-1000"></div>
+            <div class="form-group"><label>Contraseña</label><input type="password" id="password" placeholder="contraseña" value="admin"></div>
             <div class="form-group"><label>URL de Supabase</label><input type="text" id="supabaseUrl" value="https://nvrcqlxnvjvhznmxozhh.supabase.co"></div>
             <div class="form-group"><label>Clave anónima</label><input type="text" id="supabaseKey" value="sb_publishable_qCtRLmyJxBbYRcO7Suuqnw_mrmqspp6"></div>
             <button onclick="login()">Ingresar</button>
@@ -138,88 +130,88 @@
         <div id="adminPanel" style="display: none;">
             <button class="logout-btn" onclick="logout()">🚪 Cerrar sesión</button>
             <h1>📋 Panel de Control</h1>
-            <p>Edita todos los aspectos de tu página web. Los cambios se aplican al instante.</p>
+            <p>Edita todos los aspectos de tu página web.</p>
             
-            <!-- SECCIÓN CONFIGURACIÓN -->
             <div class="seccion-card">
-                <div class="seccion-titulo"><i class="fas fa-sliders-h"></i> Configuración de la página</div>
+                <div class="seccion-titulo">🎨 Configuración</div>
                 
-                <!-- Colores -->
-                <h3>🎨 Colores de tu marca</h3>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Color principal</label>
-                        <div class="color-input"><input type="color" id="color-primario" value="#1E3A5F"><span id="color-primario-text">#1E3A5F</span><input type="text" id="color-primario-texto" placeholder="O escribe el color"></div>
-                        <div class="paleta-colores" data-target="color-primario"><div class="color-opcion" style="background:#0B2B40;" data-color="#0B2B40"></div><div class="color-opcion" style="background:#1C6E8F;" data-color="#1C6E8F"></div><div class="color-opcion" style="background:#F4A261;" data-color="#F4A261"></div></div>
+                        <div class="color-input">
+                            <input type="color" id="color-primario" value="#1E3A5F">
+                            <span id="color-primario-text">#1E3A5F</span>
+                            <input type="text" id="color-primario-texto" placeholder="O escribe el color">
+                        </div>
+                        <div class="paleta-colores" data-target="color-primario">
+                            <div class="color-opcion" style="background:#0B2B40;" data-color="#0B2B40"></div>
+                            <div class="color-opcion" style="background:#1C6E8F;" data-color="#1C6E8F"></div>
+                            <div class="color-opcion" style="background:#F4A261;" data-color="#F4A261"></div>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>Color secundario</label>
-                        <div class="color-input"><input type="color" id="color-secundario" value="#4A90E2"><span id="color-secundario-text">#4A90E2</span><input type="text" id="color-secundario-texto" placeholder="O escribe el color"></div>
-                        <div class="paleta-colores" data-target="color-secundario"><div class="color-opcion" style="background:#0B2B40;" data-color="#0B2B40"></div><div class="color-opcion" style="background:#1C6E8F;" data-color="#1C6E8F"></div><div class="color-opcion" style="background:#F4A261;" data-color="#F4A261"></div></div>
+                        <div class="color-input">
+                            <input type="color" id="color-secundario" value="#4A90E2">
+                            <span id="color-secundario-text">#4A90E2</span>
+                            <input type="text" id="color-secundario-texto" placeholder="O escribe el color">
+                        </div>
+                        <div class="paleta-colores" data-target="color-secundario">
+                            <div class="color-opcion" style="background:#0B2B40;" data-color="#0B2B40"></div>
+                            <div class="color-opcion" style="background:#1C6E8F;" data-color="#1C6E8F"></div>
+                            <div class="color-opcion" style="background:#F4A261;" data-color="#F4A261"></div>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- Hero -->
-                <h3>🖼️ Portada principal (Hero)</h3>
-                <div class="form-row">
-                    <div class="form-group"><label>Texto superior</label><input type="text" id="hero-superior" placeholder="BIENVENIDOS A"></div>
-                    <div class="form-group"><label>Texto principal</label><input type="text" id="hero-principal" placeholder="Mi Negocio"></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group"><label>Texto inferior</label><input type="text" id="hero-inferior" placeholder="Calidad • Confianza"></div>
-                    <div class="form-group"><label>Texto del botón</label><input type="text" id="hero-boton" value="Ver productos"></div>
-                </div>
+                <div class="form-group"><label>Texto superior del Hero</label><input type="text" id="hero-superior" placeholder="BIENVENIDOS A"></div>
+                <div class="form-group"><label>Texto principal del Hero</label><input type="text" id="hero-principal" placeholder="Mi Negocio"></div>
+                <div class="form-group"><label>Texto inferior del Hero</label><input type="text" id="hero-inferior" placeholder="Calidad • Confianza"></div>
+                <div class="form-group"><label>Texto del botón del Hero</label><input type="text" id="hero-boton" value="Ver productos"></div>
                 <div class="form-group">
-                    <label>Imagen de fondo</label>
-                    <div class="upload-area" id="uploadAreaHero"><i class="fas fa-cloud-upload-alt"></i> Toca para subir imagen<input type="file" id="subirHero" accept="image/*" style="display: none;"></div>
+                    <label>Imagen de fondo del Hero</label>
+                    <div class="upload-area" id="uploadAreaHero">
+                        <i class="fas fa-cloud-upload-alt"></i> Toca para subir imagen
+                        <input type="file" id="subirHero" accept="image/*" style="display: none;">
+                    </div>
                     <div id="previewHero" class="preview-upload"></div>
                     <input type="hidden" id="hero-imagen" value="">
                 </div>
                 <div class="form-group"><label>Opacidad del overlay (0 a 1)</label><input type="number" id="hero-overlay" step="0.1" min="0" max="1" value="0.5"></div>
                 
-                <!-- Sobre Nosotros -->
-                <h3>📖 Sobre Nosotros</h3>
-                <div class="form-group"><label>Título</label><input type="text" id="nosotros-titulo" value="Sobre Nosotros"></div>
-                <div class="form-group"><label>Subtítulo</label><input type="text" id="nosotros-subtitulo" value="Conócenos mejor"></div>
-                <div class="form-group"><label>Historia</label><textarea id="nosotros-historia" rows="4"></textarea></div>
+                <div class="form-group"><label>Historia de la empresa</label><textarea id="nosotros-historia" rows="4"></textarea></div>
                 <div class="form-group">
-                    <label>Imagen</label>
-                    <div class="upload-area" id="uploadAreaNosotros"><i class="fas fa-cloud-upload-alt"></i> Toca para subir imagen<input type="file" id="subirNosotros" accept="image/*" style="display: none;"></div>
+                    <label>Imagen de la sección Nosotros</label>
+                    <div class="upload-area" id="uploadAreaNosotros">
+                        <i class="fas fa-cloud-upload-alt"></i> Toca para subir imagen
+                        <input type="file" id="subirNosotros" accept="image/*" style="display: none;">
+                    </div>
                     <div id="previewNosotros" class="preview-upload"></div>
                     <input type="hidden" id="nosotros-imagen" value="">
                 </div>
                 <div class="form-group"><label>Valores (separados por coma)</label><input type="text" id="nosotros-valores" placeholder="Calidad, Confianza, Compromiso"></div>
                 
-                <!-- Contacto -->
-                <h3>📞 Contacto</h3>
                 <div class="form-group"><label>Dirección</label><input type="text" id="contacto-direccion"></div>
-                <div class="form-row">
-                    <div class="form-group"><label>WhatsApp</label><input type="text" id="contacto-whatsapp"></div>
-                    <div class="form-group"><label>Mapa (URL embed)</label><input type="text" id="contacto-mapa"></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group"><label>Facebook</label><input type="text" id="red-facebook"></div>
-                    <div class="form-group"><label>Instagram</label><input type="text" id="red-instagram"></div>
-                </div>
-                
-                <!-- Footer -->
-                <h3>📄 Pie de página</h3>
+                <div class="form-group"><label>WhatsApp</label><input type="text" id="contacto-whatsapp"></div>
+                <div class="form-group"><label>Facebook</label><input type="text" id="red-facebook"></div>
+                <div class="form-group"><label>Instagram</label><input type="text" id="red-instagram"></div>
                 <div class="form-group"><label>Texto del footer</label><input type="text" id="footer-texto"></div>
             </div>
             
-            <!-- SECCIÓN CONTENIDO -->
             <div class="seccion-card">
-                <div class="seccion-titulo"><i class="fas fa-edit"></i> Contenido editable</div>
-                
-                <h3>📦 Productos / Servicios</h3>
+                <div class="seccion-titulo">📦 Productos</div>
                 <button class="btn-agregar" onclick="agregarProducto()"><i class="fas fa-plus"></i> Agregar producto</button>
                 <div id="productos-list"></div>
-                
-                <h3>⭐ Testimonios</h3>
+            </div>
+            
+            <div class="seccion-card">
+                <div class="seccion-titulo">⭐ Testimonios</div>
                 <button class="btn-agregar" onclick="agregarTestimonio()"><i class="fas fa-plus"></i> Agregar testimonio</button>
                 <div id="testimonios-list"></div>
-                
-                <h3>📸 Galería</h3>
+            </div>
+            
+            <div class="seccion-card">
+                <div class="seccion-titulo">📸 Galería</div>
                 <button class="btn-agregar" onclick="agregarGaleria()"><i class="fas fa-plus"></i> Agregar categoría</button>
                 <div id="galeria-list"></div>
             </div>
@@ -240,13 +232,12 @@
         let supabaseUrl = '', supabaseKey = '', supabaseClient = null;
         let productos = [], testimonios = [], galeria = [];
         let productoId = 1, testimonioId = 1, galeriaId = 1;
-        let nosotrosEditor = null;
 
         // ============================================
         // FUNCIONES DE COLOR
         // ============================================
         function nombreAColor(nombre) {
-            const colores = { 'navy': '#0B2B40', 'blue': '#1C6E8F', 'orange': '#F4A261', 'green': '#2A9D8F', 'gray': '#4A4A4A', 'white': '#F9F9F9', 'black': '#1E1E24', 'red': '#C41E3A', 'yellow': '#FFD700' };
+            const colores = { 'navy': '#0B2B40', 'blue': '#1C6E8F', 'orange': '#F4A261' };
             return colores[nombre.toLowerCase()] || nombre;
         }
 
@@ -257,15 +248,6 @@
             const secundario = nombreAColor(document.getElementById('color-secundario-texto').value || document.getElementById('color-secundario').value);
             document.getElementById('color-secundario').value = secundario;
             document.getElementById('color-secundario-text').textContent = secundario;
-            const acento = nombreAColor(document.getElementById('color-acento-texto').value || document.getElementById('color-acento').value);
-            document.getElementById('color-acento').value = acento;
-            document.getElementById('color-acento-text').textContent = acento;
-            const texto = nombreAColor(document.getElementById('color-texto-texto').value || document.getElementById('color-texto').value);
-            document.getElementById('color-texto').value = texto;
-            document.getElementById('color-texto-text').textContent = texto;
-            const fondo = nombreAColor(document.getElementById('color-fondo-texto').value || document.getElementById('color-fondo').value);
-            document.getElementById('color-fondo').value = fondo;
-            document.getElementById('color-fondo-text').textContent = fondo;
         }
 
         function initColorPalettes() {
@@ -279,12 +261,16 @@
                     });
                 });
             });
-            ['color-primario', 'color-secundario', 'color-acento', 'color-texto', 'color-fondo'].forEach(id => {
-                document.getElementById(id)?.addEventListener('input', () => { document.getElementById(id + '-texto').value = ''; actualizarColorPreview(); });
+            document.getElementById('color-primario')?.addEventListener('input', () => {
+                document.getElementById('color-primario-texto').value = '';
+                actualizarColorPreview();
             });
-            ['color-primario-texto', 'color-secundario-texto', 'color-acento-texto', 'color-texto-texto', 'color-fondo-texto'].forEach(id => {
-                document.getElementById(id)?.addEventListener('input', actualizarColorPreview);
+            document.getElementById('color-secundario')?.addEventListener('input', () => {
+                document.getElementById('color-secundario-texto').value = '';
+                actualizarColorPreview();
             });
+            document.getElementById('color-primario-texto')?.addEventListener('input', actualizarColorPreview);
+            document.getElementById('color-secundario-texto')?.addEventListener('input', actualizarColorPreview);
         }
 
         // ============================================
@@ -292,7 +278,7 @@
         // ============================================
         async function subirImagen(file, carpeta) {
             const extension = file.name.split('.').pop();
-            const nombreArchivo = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${extension}`;
+            const nombreArchivo = `${Date.now()}.${extension}`;
             const ruta = `${clienteData.uuid}/${carpeta}/${nombreArchivo}`;
             const { error } = await supabaseClient.storage.from('cliente').upload(ruta, file);
             if (error) throw error;
@@ -300,7 +286,6 @@
         }
 
         function initUploaders() {
-            // Hero imagen
             const heroUpload = document.getElementById('uploadAreaHero');
             const heroInput = document.getElementById('subirHero');
             if (heroUpload) heroUpload.addEventListener('click', () => heroInput.click());
@@ -313,11 +298,12 @@
                     const nombre = await subirImagen(file, 'hero');
                     document.getElementById('hero-imagen').value = nombre;
                     preview.innerHTML = `<span style="color: green;">✅ Imagen subida: ${nombre}</span>`;
-                } catch (err) { preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`; }
+                } catch (err) {
+                    preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
+                }
                 heroInput.value = '';
             });
 
-            // Nosotros imagen
             const nosotrosUpload = document.getElementById('uploadAreaNosotros');
             const nosotrosInput = document.getElementById('subirNosotros');
             if (nosotrosUpload) nosotrosUpload.addEventListener('click', () => nosotrosInput.click());
@@ -330,7 +316,9 @@
                     const nombre = await subirImagen(file, 'nosotros');
                     document.getElementById('nosotros-imagen').value = nombre;
                     preview.innerHTML = `<span style="color: green;">✅ Imagen subida: ${nombre}</span>`;
-                } catch (err) { preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`; }
+                } catch (err) {
+                    preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
+                }
                 nosotrosInput.value = '';
             });
         }
@@ -357,7 +345,9 @@
                             const prod = productos.find(p => p.id === id);
                             if (prod) prod.imagen = nombre;
                             renderizarProductos();
-                        } catch (err) { if (preview) preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`; }
+                        } catch (err) {
+                            if (preview) preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
+                        }
                     });
                 }
             }, 100);
@@ -371,12 +361,18 @@
         function renderizarProductos() {
             const container = document.getElementById('productos-list');
             if (!container) return;
-            if (productos.length === 0) { container.innerHTML = '<p>No hay productos. Agrega uno.</p>'; return; }
+            if (productos.length === 0) {
+                container.innerHTML = '<p>No hay productos. Agrega uno.</p>';
+                return;
+            }
             container.innerHTML = productos.map(p => `
                 <div class="item-card">
                     <div class="item-header" onclick="toggleContenido(this)">
                         <strong>📦 ${p.nombre || `Producto ${p.id}`}</strong>
-                        <div><button class="btn-subir-imagen" onclick="event.stopPropagation(); document.getElementById('file-input-${p.id}').click()"><i class="fas fa-upload"></i> Subir imagen</button><button class="btn-eliminar" onclick="event.stopPropagation(); eliminarProducto(${p.id})">Eliminar</button></div>
+                        <div>
+                            <button class="btn-subir-imagen" onclick="event.stopPropagation(); document.getElementById('file-input-${p.id}').click()" style="background:#F4A261; margin-right:0.5rem;"><i class="fas fa-upload"></i> Subir imagen</button>
+                            <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarProducto(${p.id})">Eliminar</button>
+                        </div>
                     </div>
                     <div class="item-contenido hidden">
                         <div class="form-group"><label>Nombre</label><input type="text" class="prod-nombre" value="${escapeHtml(p.nombre)}" onchange="actualizarProducto(${p.id}, 'nombre', this.value)"></div>
@@ -386,65 +382,19 @@
                         <div class="form-group"><label>Badge</label><input type="text" class="prod-badge" value="${p.badgePermanente}" onchange="actualizarProducto(${p.id}, 'badgePermanente', this.value)"></div>
                         <div class="upload-area" id="uploadAreaProducto-${p.id}" style="margin-top:0.5rem;"><i class="fas fa-cloud-upload-alt"></i> Toca para subir imagen<input type="file" id="subirProducto-${p.id}" accept="image/*" style="display: none;"></div>
                         <div id="previewProducto-${p.id}" class="preview-upload"></div>
-                        <div id="preview-producto-${p.id}"></div>
                     </div>
                     <input type="file" id="file-input-${p.id}" accept="image/*" style="display: none;" onchange="document.getElementById('subirProducto-${p.id}').files = this.files; document.getElementById('subirProducto-${p.id}').dispatchEvent(new Event('change'))">
                 </div>
             `).join('');
-            productos.forEach(p => previewProducto(p.id));
         }
 
         function actualizarProducto(id, campo, valor) {
             const index = productos.findIndex(p => p.id === id);
             if (index !== -1) productos[index][campo] = valor;
-            previewProducto(id);
-        }
-
-        function previewProducto(id) {
-            const prod = productos.find(p => p.id === id);
-            if (!prod) return;
-            const previewDiv = document.getElementById(`preview-producto-${id}`);
-            if (!previewDiv) return;
-            
-            let imgHtml = '';
-            if (prod.imagen && supabaseClient && clienteData) {
-                const url = `${supabaseUrl}/storage/v1/object/public/cliente/${clienteData.uuid}/productos/${prod.imagen}`;
-                imgHtml = `<img src="${url}" style="width:100%; height:150px; object-fit:cover;" onerror="this.src='https://via.placeholder.com/300'">`;
-            } else {
-                imgHtml = `<div style="width:100%; height:150px; background:#f0f0f0; display:flex; align-items:center; justify-content:center;">Sin imagen</div>`;
-            }
-            
-            let badgeHtml = '';
-            if (prod.badgePermanente) {
-                badgeHtml = `<span style="position:absolute; top:10px; left:10px; background:#F4A261; color:white; padding:0.2rem 0.5rem; border-radius:50px; font-size:0.7rem;">${escapeHtml(prod.badgePermanente)}</span>`;
-            }
-            
-            let featuresHtml = '';
-            if (prod.caracteristicas && prod.caracteristicas.length) {
-                featuresHtml = `<div style="display:flex; flex-wrap:wrap; gap:0.3rem; margin-top:0.5rem;">`;
-                prod.caracteristicas.forEach(c => { featuresHtml += `<span style="background:#f0f0f0; padding:0.2rem 0.5rem; border-radius:50px; font-size:0.7rem;">${escapeHtml(c)}</span>`; });
-                featuresHtml += `</div>`;
-            }
-            
-            previewDiv.innerHTML = `
-                <div style="position:relative; background:white; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.1); max-width:300px; margin-top:0.5rem;">
-                    ${badgeHtml}
-                    ${imgHtml}
-                    <div class="content">
-                        <h4 style="margin:0 0 0.5rem 0;">${escapeHtml(prod.nombre || 'Producto sin nombre')}</h4>
-                        <p style="font-size:0.8rem; color:#666;">${escapeHtml(prod.descripcion || 'Sin descripción')}</p>
-                        ${featuresHtml}
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
-                            <span class="precio">$${prod.precio || 0} <small>desde</small></span>
-                            <button style="background:#0B4F6C; color:white; border:none; padding:0.3rem 0.8rem; border-radius:50px;">Solicitar</button>
-                        </div>
-                    </div>
-                </div>
-            `;
         }
 
         // ============================================
-        // TESTIMONIOS (simplificado)
+        // TESTIMONIOS
         // ============================================
         function agregarTestimonio() {
             const id = testimonioId++;
@@ -465,7 +415,9 @@
                             const test = testimonios.find(t => t.id === id);
                             if (test) test.avatar = nombre;
                             renderizarTestimonios();
-                        } catch (err) { if (preview) preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`; }
+                        } catch (err) {
+                            if (preview) preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
+                        }
                     });
                 }
             }, 100);
@@ -479,64 +431,43 @@
         function renderizarTestimonios() {
             const container = document.getElementById('testimonios-list');
             if (!container) return;
-            if (testimonios.length === 0) { container.innerHTML = '<p>No hay testimonios. Agrega uno.</p>'; return; }
+            if (testimonios.length === 0) {
+                container.innerHTML = '<p>No hay testimonios. Agrega uno.</p>';
+                return;
+            }
             container.innerHTML = testimonios.map(t => `
                 <div class="item-card">
                     <div class="item-header" onclick="toggleContenido(this)">
                         <strong>⭐ ${t.nombre || `Testimonio ${t.id}`}</strong>
-                        <div><button class="btn-subir-imagen" onclick="event.stopPropagation(); document.getElementById('file-input-test-${t.id}').click()"><i class="fas fa-upload"></i> Subir avatar</button><button class="btn-eliminar" onclick="event.stopPropagation(); eliminarTestimonio(${t.id})">Eliminar</button></div>
+                        <div>
+                            <button class="btn-subir-imagen" onclick="event.stopPropagation(); document.getElementById('file-input-test-${t.id}').click()" style="background:#F4A261; margin-right:0.5rem;"><i class="fas fa-upload"></i> Subir avatar</button>
+                            <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarTestimonio(${t.id})">Eliminar</button>
+                        </div>
                     </div>
                     <div class="item-contenido hidden">
-                        <div class="form-row"><div class="form-group"><label>Nombre</label><input type="text" class="test-nombre" value="${escapeHtml(t.nombre)}" onchange="actualizarTestimonio(${t.id}, 'nombre', this.value)"></div><div class="form-group"><label>Lugar</label><input type="text" class="test-lugar" value="${escapeHtml(t.lugar)}" onchange="actualizarTestimonio(${t.id}, 'lugar', this.value)"></div></div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Nombre</label><input type="text" class="test-nombre" value="${escapeHtml(t.nombre)}" onchange="actualizarTestimonio(${t.id}, 'nombre', this.value)"></div>
+                            <div class="form-group"><label>Lugar</label><input type="text" class="test-lugar" value="${escapeHtml(t.lugar)}" onchange="actualizarTestimonio(${t.id}, 'lugar', this.value)"></div>
+                        </div>
                         <div class="form-group"><label>Testimonio</label><textarea class="test-texto" rows="2" onchange="actualizarTestimonio(${t.id}, 'texto', this.value)">${escapeHtml(t.texto)}</textarea></div>
-                        <div class="form-row"><div class="form-group"><label>Rating (1-5)</label><input type="number" class="test-rating" min="1" max="5" value="${t.rating}" onchange="actualizarTestimonio(${t.id}, 'rating', parseInt(this.value))"></div></div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Rating (1-5)</label><input type="number" class="test-rating" min="1" max="5" value="${t.rating}" onchange="actualizarTestimonio(${t.id}, 'rating', parseInt(this.value))"></div>
+                        </div>
                         <div class="upload-area" id="uploadAreaTestimonio-${t.id}" style="margin-top:0.5rem;"><i class="fas fa-cloud-upload-alt"></i> Toca para subir avatar<input type="file" id="subirTestimonio-${t.id}" accept="image/*" style="display: none;"></div>
                         <div id="previewTestimonio-${t.id}" class="preview-upload"></div>
-                        <div id="preview-testimonio-${t.id}"></div>
                     </div>
                     <input type="file" id="file-input-test-${t.id}" accept="image/*" style="display: none;" onchange="document.getElementById('subirTestimonio-${t.id}').files = this.files; document.getElementById('subirTestimonio-${t.id}').dispatchEvent(new Event('change'))">
                 </div>
             `).join('');
-            testimonios.forEach(t => previewTestimonio(t.id));
         }
 
         function actualizarTestimonio(id, campo, valor) {
             const index = testimonios.findIndex(t => t.id === id);
             if (index !== -1) testimonios[index][campo] = valor;
-            previewTestimonio(id);
-        }
-
-        function previewTestimonio(id) {
-            const test = testimonios.find(t => t.id === id);
-            if (!test) return;
-            const previewDiv = document.getElementById(`preview-testimonio-${id}`);
-            if (!previewDiv) return;
-            
-            let avatarHtml = '';
-            if (test.avatar && supabaseClient && clienteData) {
-                const url = `${supabaseUrl}/storage/v1/object/public/cliente/${clienteData.uuid}/avatares/${test.avatar}`;
-                avatarHtml = `<img src="${url}" style="width:50px; height:50px; border-radius:50%; object-fit:cover;" onerror="this.src='https://randomuser.me/api/portraits/lego/1.jpg'">`;
-            } else {
-                avatarHtml = `<div style="width:50px; height:50px; border-radius:50%; background:#f0f0f0; display:flex; align-items:center; justify-content:center;">👤</div>`;
-            }
-            
-            previewDiv.innerHTML = `
-                <div style="background:white; border-radius:12px; padding:1rem; box-shadow:0 2px 8px rgba(0,0,0,0.1); max-width:300px; margin-top:0.5rem;">
-                    <div style="display:flex; align-items:center; gap:1rem;">
-                        ${avatarHtml}
-                        <div>
-                            <strong>${escapeHtml(test.nombre || 'Anónimo')}</strong>
-                            ${test.lugar ? `<div><small>${escapeHtml(test.lugar)}</small></div>` : ''}
-                            <div style="color:#FFD700;">${'★'.repeat(test.rating || 5)}${'☆'.repeat(5 - (test.rating || 5))}</div>
-                        </div>
-                    </div>
-                    <p style="margin-top:0.5rem; font-style:italic;">"${escapeHtml(test.texto || 'Sin testimonio')}"</p>
-                </div>
-            `;
         }
 
         // ============================================
-        // GALERÍA (simplificado)
+        // GALERÍA
         // ============================================
         function agregarGaleria() {
             const id = galeriaId++;
@@ -557,7 +488,9 @@
                                 const gal = galeria.find(g => g.id === id);
                                 if (gal) gal.fotos.push(nombre);
                                 renderizarGaleria();
-                            } catch (err) { if (preview) preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`; }
+                            } catch (err) {
+                                if (preview) preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
+                            }
                         }
                     });
                 }
@@ -572,7 +505,10 @@
         function renderizarGaleria() {
             const container = document.getElementById('galeria-list');
             if (!container) return;
-            if (galeria.length === 0) { container.innerHTML = '<p>No hay categorías. Agrega una.</p>'; return; }
+            if (galeria.length === 0) {
+                container.innerHTML = '<p>No hay categorías. Agrega una.</p>';
+                return;
+            }
             container.innerHTML = galeria.map(g => `
                 <div class="item-card">
                     <div class="item-header" onclick="toggleContenido(this)">
@@ -580,55 +516,28 @@
                         <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarGaleria(${g.id})">Eliminar</button>
                     </div>
                     <div class="item-contenido hidden">
-                        <div class="form-row"><div class="form-group"><label>Título</label><input type="text" class="gal-titulo" value="${escapeHtml(g.titulo)}" onchange="actualizarGaleria(${g.id}, 'titulo', this.value)"></div><div class="form-group"><label>Descripción</label><input type="text" class="gal-descripcion" value="${escapeHtml(g.descripcion)}" onchange="actualizarGaleria(${g.id}, 'descripcion', this.value)"></div></div>
+                        <div class="form-row">
+                            <div class="form-group"><label>Título</label><input type="text" class="gal-titulo" value="${escapeHtml(g.titulo)}" onchange="actualizarGaleria(${g.id}, 'titulo', this.value)"></div>
+                            <div class="form-group"><label>Descripción</label><input type="text" class="gal-descripcion" value="${escapeHtml(g.descripcion)}" onchange="actualizarGaleria(${g.id}, 'descripcion', this.value)"></div>
+                        </div>
                         <div class="upload-area" id="uploadAreaGaleria-${g.id}" style="margin-top:0.5rem;"><i class="fas fa-cloud-upload-alt"></i> Toca para subir imágenes (múltiples)<input type="file" id="subirGaleria-${g.id}" accept="image/*" multiple style="display: none;"></div>
                         <div id="previewGaleria-${g.id}" class="preview-upload"></div>
-                        <div id="preview-galeria-${g.id}"></div>
                         ${g.fotos.length ? `<div><small>Imágenes: ${g.fotos.join(', ')}</small></div>` : ''}
                     </div>
                 </div>
             `).join('');
-            galeria.forEach(g => previewGaleria(g.id));
         }
 
         function actualizarGaleria(id, campo, valor) {
             const index = galeria.findIndex(g => g.id === id);
             if (index !== -1) galeria[index][campo] = valor;
-            previewGaleria(id);
-        }
-
-        function previewGaleria(id) {
-            const gal = galeria.find(g => g.id === id);
-            if (!gal) return;
-            const previewDiv = document.getElementById(`preview-galeria-${id}`);
-            if (!previewDiv) return;
-            
-            let fotosHtml = '';
-            if (gal.fotos && gal.fotos.length) {
-                fotosHtml = `<div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.5rem;">`;
-                gal.fotos.forEach(foto => {
-                    const url = `${supabaseUrl}/storage/v1/object/public/cliente/${clienteData.uuid}/galeria/${foto}`;
-                    fotosHtml += `<img src="${url}" style="width:80px; height:80px; object-fit:cover; border-radius:8px;" onerror="this.src='https://via.placeholder.com/80'">`;
-                });
-                fotosHtml += `</div>`;
-            } else {
-                fotosHtml = `<p style="color:#999;">Sin imágenes</p>`;
-            }
-            
-            previewDiv.innerHTML = `
-                <div style="margin-top:0.5rem;">
-                    <strong>${escapeHtml(gal.titulo || 'Sin título')}</strong>
-                    ${gal.descripcion ? `<p style="font-size:0.8rem; color:#666;">${escapeHtml(gal.descripcion)}</p>` : ''}
-                    ${fotosHtml}
-                </div>
-            `;
         }
 
         function toggleContenido(header) { const contenido = header.nextElementSibling; contenido.classList.toggle('hidden'); }
         function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => { if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m; }); }
 
         // ============================================
-        // LOGIN Y CARGA DE DATOS
+        // LOGIN
         // ============================================
         async function login() {
             const idPublico = document.getElementById('clienteId').value;
@@ -647,28 +556,22 @@
                 if (config.marca?.colores) {
                     document.getElementById('color-primario').value = config.marca.colores.primario || '#1E3A5F';
                     document.getElementById('color-secundario').value = config.marca.colores.secundario || '#4A90E2';
-                    document.getElementById('color-acento').value = config.marca.colores.acento || '#F77F00';
-                    document.getElementById('color-texto').value = config.marca.colores.texto || '#0A1C2E';
-                    document.getElementById('color-fondo').value = config.marca.colores.fondo || '#F0F8FF';
                     actualizarColorPreview();
                 }
-                document.getElementById('hero-superior').value = config.hero?.texto_superior || '';
-                document.getElementById('hero-principal').value = config.hero?.texto_principal || '';
-                document.getElementById('hero-inferior').value = config.hero?.texto_inferior || '';
-                document.getElementById('hero-boton').value = config.hero?.boton || 'Ver productos';
-                document.getElementById('hero-imagen').value = config.hero?.imagen || '';
-                document.getElementById('hero-overlay').value = config.hero?.overlay || 0.5;
-                document.getElementById('nosotros-titulo').value = config.nosotros?.titulo || 'Sobre Nosotros';
-                document.getElementById('nosotros-subtitulo').value = config.nosotros?.subtitulo || 'Conócenos mejor';
-                document.getElementById('nosotros-historia').value = config.nosotros?.historia || '';
-                document.getElementById('nosotros-imagen').value = config.nosotros?.imagen || '';
-                document.getElementById('nosotros-valores').value = (config.nosotros?.valores || []).join(', ');
-                document.getElementById('contacto-direccion').value = config.contacto?.direccion || '';
-                document.getElementById('contacto-whatsapp').value = config.contacto?.whatsapp || '';
-                document.getElementById('contacto-mapa').value = config.contacto?.mapa || '';
-                document.getElementById('red-facebook').value = config.contacto?.redes?.facebook || '';
-                document.getElementById('red-instagram').value = config.contacto?.redes?.instagram || '';
-                document.getElementById('footer-texto').value = config.footer?.texto || '';
+                if (document.getElementById('hero-superior')) document.getElementById('hero-superior').value = config.hero?.texto_superior || '';
+                if (document.getElementById('hero-principal')) document.getElementById('hero-principal').value = config.hero?.texto_principal || '';
+                if (document.getElementById('hero-inferior')) document.getElementById('hero-inferior').value = config.hero?.texto_inferior || '';
+                if (document.getElementById('hero-boton')) document.getElementById('hero-boton').value = config.hero?.boton || 'Ver productos';
+                if (document.getElementById('hero-imagen')) document.getElementById('hero-imagen').value = config.hero?.imagen || '';
+                if (document.getElementById('hero-overlay')) document.getElementById('hero-overlay').value = config.hero?.overlay || 0.5;
+                if (document.getElementById('nosotros-historia')) document.getElementById('nosotros-historia').value = config.nosotros?.historia || '';
+                if (document.getElementById('nosotros-imagen')) document.getElementById('nosotros-imagen').value = config.nosotros?.imagen || '';
+                if (document.getElementById('nosotros-valores')) document.getElementById('nosotros-valores').value = (config.nosotros?.valores || []).join(', ');
+                if (document.getElementById('contacto-direccion')) document.getElementById('contacto-direccion').value = config.contacto?.direccion || '';
+                if (document.getElementById('contacto-whatsapp')) document.getElementById('contacto-whatsapp').value = config.contacto?.whatsapp || '';
+                if (document.getElementById('red-facebook')) document.getElementById('red-facebook').value = config.contacto?.redes?.facebook || '';
+                if (document.getElementById('red-instagram')) document.getElementById('red-instagram').value = config.contacto?.redes?.instagram || '';
+                if (document.getElementById('footer-texto')) document.getElementById('footer-texto').value = config.footer?.texto || '';
                 
                 if (config.productos && config.productos.length) {
                     productos = config.productos.map(p => ({ ...p, id: p.id || productoId++ }));
@@ -689,11 +592,6 @@
                 initColorPalettes();
                 initUploaders();
                 
-                if (!nosotrosEditor && document.getElementById('nosotrosHistoriaEditor')) {
-                    nosotrosEditor = new Quill('#nosotrosHistoriaEditor', { theme: 'snow', placeholder: 'Escribe la historia de tu negocio...' });
-                }
-                if (nosotrosEditor && config.nosotros?.historia) nosotrosEditor.root.innerHTML = config.nosotros.historia;
-                
             } catch (error) { alert('Error: ' + error.message); }
         }
 
@@ -712,32 +610,6 @@
             btn.innerHTML = '<span class="spinner"></span> Guardando...';
             btn.disabled = true;
             
-            const productosParaGuardar = productos.map(p => ({
-                id: p.id,
-                nombre: p.nombre,
-                descripcion: p.descripcion,
-                precio: p.precio,
-                imagen: p.imagen,
-                caracteristicas: p.caracteristicas,
-                badgePermanente: p.badgePermanente
-            }));
-            
-            const testimoniosParaGuardar = testimonios.map(t => ({
-                id: t.id,
-                nombre: t.nombre,
-                lugar: t.lugar,
-                texto: t.texto,
-                rating: t.rating,
-                avatar: t.avatar
-            }));
-            
-            const galeriaParaGuardar = galeria.map(g => ({
-                id: g.id,
-                titulo: g.titulo,
-                descripcion: g.descripcion,
-                fotos: g.fotos
-            }));
-            
             const config = {
                 marca: { 
                     nombre: clienteData.nombre, 
@@ -746,9 +618,9 @@
                     colores: {
                         primario: document.getElementById('color-primario').value,
                         secundario: document.getElementById('color-secundario').value,
-                        acento: document.getElementById('color-acento').value,
-                        texto: document.getElementById('color-texto').value,
-                        fondo: document.getElementById('color-fondo').value
+                        acento: '#F77F00',
+                        texto: '#0A1C2E',
+                        fondo: '#F0F8FF'
                     }
                 },
                 hero: {
@@ -761,21 +633,21 @@
                     overlay: parseFloat(document.getElementById('hero-overlay').value)
                 },
                 nosotros: {
-                    titulo: document.getElementById('nosotros-titulo').value,
-                    subtitulo: document.getElementById('nosotros-subtitulo').value,
-                    historia: nosotrosEditor ? nosotrosEditor.root.innerHTML : '',
+                    titulo: 'Sobre Nosotros',
+                    subtitulo: 'Conócenos mejor',
+                    historia: document.getElementById('nosotros-historia').value,
                     imagen: document.getElementById('nosotros-imagen').value,
                     valores: (document.getElementById('nosotros-valores').value || '').split(',').map(v => v.trim())
                 },
-                productos: productosParaGuardar,
-                testimonios: testimoniosParaGuardar,
-                galeria: galeriaParaGuardar,
+                productos: productos,
+                testimonios: testimonios,
+                galeria: galeria,
                 contacto: {
                     direccion: document.getElementById('contacto-direccion').value,
                     telefono: clienteData.telefono,
                     email: clienteData.email,
                     whatsapp: document.getElementById('contacto-whatsapp').value,
-                    mapa: document.getElementById('contacto-mapa').value,
+                    mapa: '',
                     redes: { 
                         facebook: document.getElementById('red-facebook').value, 
                         instagram: document.getElementById('red-instagram').value 
@@ -806,4 +678,4 @@
         }
     </script>
 </body>
-                            </html>
+    </html>

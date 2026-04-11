@@ -131,6 +131,17 @@
             cargarCliente();
         }
 
+        function getImagenUrl(nombreArchivo, carpeta = '') {
+            if (!nombreArchivo) return '';
+            if (nombreArchivo.includes('/')) return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/${clienteUUID}/${nombreArchivo}`;
+            if (carpeta) return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/${clienteUUID}/${carpeta}/${nombreArchivo}`;
+            return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/${clienteUUID}/${nombreArchivo}`;
+        }
+
+        function mostrarMensajeRevision() {
+            document.body.innerHTML = `<div style="text-align:center; padding:4rem"><div style="background:white; border-radius:24px; padding:2rem; max-width:600px; margin:0 auto;"><h1 style="color:#0B4F6C;">⏳ Página en revisión</h1><p>Tu página está siendo revisada por nuestro equipo.</p><a href="https://wa.me/5358481702" style="background:#25D366; color:white; padding:0.8rem 1.5rem; border-radius:50px; text-decoration:none; display:inline-block; margin-top:1rem;"><i class="fab fa-whatsapp"></i> ¿Dudas? Escríbenos</a></div></div>`;
+        }
+
         async function cargarCliente() {
             try {
                 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -153,10 +164,10 @@
                 aplicarColores(cliente.config);
                 renderizarHero(cliente.config);
                 renderizarNosotros(cliente.config);
-                await renderizarProductos();
-                await renderizarServicios();
-                await renderizarTestimonios();
-                await renderizarGaleria();
+                renderizarProductos(cliente.config);
+                renderizarServicios(cliente.config);
+                renderizarTestimonios(cliente.config);
+                renderizarGaleria(cliente.config);
                 renderizarContacto(cliente.config);
                 renderizarFooter(cliente.config);
                 
@@ -167,17 +178,6 @@
                 console.error('Error:', error);
                 mostrarMensajeRevision();
             }
-        }
-
-        function getImagenUrl(nombreArchivo, carpeta = '') {
-            if (!nombreArchivo) return '';
-            if (nombreArchivo.includes('/')) return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/${clienteUUID}/${nombreArchivo}`;
-            if (carpeta) return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/${clienteUUID}/${carpeta}/${nombreArchivo}`;
-            return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/${clienteUUID}/${nombreArchivo}`;
-        }
-
-        function mostrarMensajeRevision() {
-            document.body.innerHTML = `<div style="text-align:center; padding:4rem"><div style="background:white; border-radius:24px; padding:2rem; max-width:600px; margin:0 auto;"><h1 style="color:#0B4F6C;">⏳ Página en revisión</h1><p>Tu página está siendo revisada por nuestro equipo.</p><a href="https://wa.me/5358481702" style="background:#25D366; color:white; padding:0.8rem 1.5rem; border-radius:50px; text-decoration:none; display:inline-block; margin-top:1rem;"><i class="fab fa-whatsapp"></i> ¿Dudas? Escríbenos</a></div></div>`;
         }
 
         function aplicarColores(config) {
@@ -200,16 +200,7 @@
             const hero = config.hero || {};
             const heroMedia = document.getElementById('heroMedia');
             heroMedia.innerHTML = '';
-            if (hero.video && hero.video.trim()) {
-                const video = document.createElement('video');
-                video.autoplay = true; video.muted = true; video.loop = true; video.playsinline = true;
-                video.style.cssText = 'position: absolute; top: 50%; left: 50%; min-width: 100%; min-height: 100%; transform: translate(-50%, -50%); object-fit: cover; z-index: 0;';
-                const source = document.createElement('source');
-                source.src = getImagenUrl(hero.video, '');
-                source.type = 'video/mp4';
-                video.appendChild(source);
-                heroMedia.appendChild(video);
-            } else if (hero.imagen && hero.imagen.trim()) {
+            if (hero.imagen && hero.imagen.trim()) {
                 heroMedia.style.backgroundImage = `url(${getImagenUrl(hero.imagen, 'hero')})`;
                 heroMedia.style.backgroundSize = 'cover';
                 heroMedia.style.backgroundPosition = 'center';
@@ -236,43 +227,43 @@
             document.getElementById('nosotros-contenido').innerHTML = `<div class="nosotros-historia">${escapeHtml(nosotros.historia || '')}</div>${valoresHtml}`;
         }
 
-        async function renderizarProductos() {
-            try {
-                const productos = await window.getProductosPorCliente(clienteUUID, SUPABASE_URL, SUPABASE_ANON_KEY);
-                const grid = document.getElementById('productos-grid');
-                if (!productos.length) { grid.innerHTML = '<p style="text-align:center">No hay productos disponibles</p>'; return; }
-                grid.innerHTML = productos.map(p => `
-                    <article class="producto-card"><div class="producto-img"><img src="${getImagenUrl(p.imagen, 'productos')}" alt="${escapeHtml(p.nombre)}" loading="lazy">${p.badge_permanente ? `<div class="producto-badge">${escapeHtml(p.badge_permanente)}</div>` : ''}</div><div class="producto-content"><h3>${escapeHtml(p.nombre)}</h3><p class="producto-desc">${escapeHtml(p.descripcion || '')}</p><div class="producto-features">${(p.caracteristicas || []).map(c => `<span>${escapeHtml(c)}</span>`).join('')}</div><div class="producto-footer"><span class="precio">$${p.precio} <small>desde</small></span><button class="btn-solicitar" onclick="alert('Contáctanos por WhatsApp')">Solicitar</button></div></div></article>
-                `).join('');
-            } catch (error) { console.error(error); }
+        function renderizarProductos(config) {
+            const productos = config.productos || [];
+            const grid = document.getElementById('productos-grid');
+            if (!productos.length) { grid.innerHTML = '<p style="text-align:center">No hay productos disponibles</p>'; return; }
+            grid.innerHTML = productos.map(p => `
+                <article class="producto-card"><div class="producto-img"><img src="${getImagenUrl(p.imagen, 'productos')}" alt="${escapeHtml(p.nombre)}" loading="lazy">${p.badgePermanente ? `<div class="producto-badge">${escapeHtml(p.badgePermanente)}</div>` : ''}</div><div class="producto-content"><h3>${escapeHtml(p.nombre)}</h3><p class="producto-desc">${escapeHtml(p.descripcion || '')}</p><div class="producto-features">${(p.caracteristicas || []).map(c => `<span>${escapeHtml(c)}</span>`).join('')}</div><div class="producto-footer"><span class="precio">$${p.precio} <small>desde</small></span><button class="btn-solicitar" onclick="alert('Contáctanos por WhatsApp')">Solicitar</button></div></div></article>
+            `).join('');
         }
 
-        async function renderizarServicios() {
-            try {
-                const servicios = await window.getServiciosPorCliente(clienteUUID, SUPABASE_URL, SUPABASE_ANON_KEY);
-                const grid = document.getElementById('servicios-grid');
-                if (!servicios.length) { grid.innerHTML = '<p style="text-align:center">No hay servicios disponibles</p>'; return; }
-                grid.innerHTML = servicios.map(s => `<article class="servicio-card"><div class="servicio-icono">${s.icono || '<i class="fas fa-star"></i>'}</div><h3>${escapeHtml(s.nombre)}</h3><p class="servicio-desc">${escapeHtml(s.descripcion || '')}</p><span class="servicio-horario"><i class="fas fa-clock"></i> ${escapeHtml(s.horario || 'Siempre disponible')}</span></article>`).join('');
-            } catch (error) { console.error(error); }
+        function renderizarServicios(config) {
+            const servicios = config.servicios || [];
+            const grid = document.getElementById('servicios-grid');
+            if (!servicios.length) { grid.innerHTML = '<p style="text-align:center">No hay servicios disponibles</p>'; return; }
+            grid.innerHTML = servicios.map(s => `<article class="servicio-card"><div class="servicio-icono">${s.icono || '<i class="fas fa-star"></i>'}</div><h3>${escapeHtml(s.nombre)}</h3><p class="servicio-desc">${escapeHtml(s.descripcion || '')}</p><span class="servicio-horario"><i class="fas fa-clock"></i> ${escapeHtml(s.horario || 'Siempre disponible')}</span></article>`).join('');
         }
 
-        async function renderizarTestimonios() {
-            try {
-                const testimonios = await window.getTestimoniosPorCliente(clienteUUID, SUPABASE_URL, SUPABASE_ANON_KEY);
-                const grid = document.getElementById('testimonios-grid');
-                if (!testimonios.length) { grid.innerHTML = '<p style="text-align:center">No hay testimonios aún</p>'; return; }
-                grid.innerHTML = testimonios.map(t => `<div class="testimonio-card"><div class="testimonio-texto">"${escapeHtml(t.texto)}"</div><div class="testimonio-autor"><img class="testimonio-avatar" src="${getImagenUrl(t.avatar, 'avatares')}" onerror="this.src='https://randomuser.me/api/portraits/lego/1.jpg'" alt="${escapeHtml(t.nombre)}"><div class="testimonio-info"><h4>${escapeHtml(t.nombre)}</h4><div class="testimonio-rating">${'★'.repeat(t.rating)}${'☆'.repeat(5-t.rating)}</div><small>${escapeHtml(t.lugar || '')}</small></div></div></div>`).join('');
-            } catch (error) { console.error(error); }
+        function renderizarTestimonios(config) {
+            const testimonios = config.testimonios || [];
+            const grid = document.getElementById('testimonios-grid');
+            if (!testimonios.length) { grid.innerHTML = '<p style="text-align:center">No hay testimonios aún</p>'; return; }
+            grid.innerHTML = testimonios.map(t => `<div class="testimonio-card"><div class="testimonio-texto">"${escapeHtml(t.texto)}"</div><div class="testimonio-autor"><img class="testimonio-avatar" src="${getImagenUrl(t.avatar, 'avatares')}" onerror="this.src='https://randomuser.me/api/portraits/lego/1.jpg'" alt="${escapeHtml(t.nombre)}"><div class="testimonio-info"><h4>${escapeHtml(t.nombre)}</h4><div class="testimonio-rating">${'★'.repeat(t.rating)}${'☆'.repeat(5-t.rating)}</div><small>${escapeHtml(t.lugar || '')}</small></div></div></div>`).join('');
         }
 
-        async function renderizarGaleria() {
-            try {
-                const galeria = await window.getGaleriaPorCliente(clienteUUID, SUPABASE_URL, SUPABASE_ANON_KEY);
-                const grid = document.getElementById('galeria-grid');
-                if (!galeria.length) { grid.innerHTML = '<p style="text-align:center">No hay imágenes en la galería</p>'; return; }
-                galeriaItems = galeria;
-                grid.innerHTML = galeria.map((item, idx) => `<div class="galeria-item" onclick="abrirModalGaleria(${idx})"><img src="${getImagenUrl(item.imagen_url, 'galeria')}" alt="${escapeHtml(item.titulo)}" loading="lazy"><div class="galeria-overlay"><h3>${escapeHtml(item.titulo || item.categoria)}</h3><button class="btn-ver-mas">Ver más</button></div></div>`).join('');
-            } catch (error) { console.error(error); }
+        function renderizarGaleria(config) {
+            const galeria = config.galeria || [];
+            const grid = document.getElementById('galeria-grid');
+            if (!galeria.length || !galeria[0]?.fotos?.length) { grid.innerHTML = '<p style="text-align:center">No hay imágenes en la galería</p>'; return; }
+            const todasLasFotos = [];
+            galeria.forEach(categoria => {
+                if (categoria.fotos && categoria.fotos.length) {
+                    categoria.fotos.forEach(foto => {
+                        todasLasFotos.push({ titulo: categoria.titulo, descripcion: categoria.descripcion, imagen: foto });
+                    });
+                }
+            });
+            galeriaItems = todasLasFotos;
+            grid.innerHTML = todasLasFotos.map((item, idx) => `<div class="galeria-item" onclick="abrirModalGaleria(${idx})"><img src="${getImagenUrl(item.imagen, 'galeria')}" alt="${escapeHtml(item.titulo)}" loading="lazy"><div class="galeria-overlay"><h3>${escapeHtml(item.titulo)}</h3><button class="btn-ver-mas">Ver más</button></div></div>`).join('');
         }
 
         function renderizarContacto(config) {
@@ -315,7 +306,7 @@
             document.getElementById('hero-boton').onclick = () => window.cambiarSeccion('productos');
         }
 
-        function abrirModalGaleria(index) { const item = galeriaItems[index]; if (!item) return; document.getElementById('modal-imagen').src = getImagenUrl(item.imagen_url, 'galeria'); document.getElementById('modal-titulo').textContent = item.titulo || item.categoria; document.getElementById('modal-descripcion').textContent = item.descripcion || ''; document.getElementById('modal-galeria').style.display = 'block'; }
+        function abrirModalGaleria(index) { const item = galeriaItems[index]; if (!item) return; document.getElementById('modal-imagen').src = getImagenUrl(item.imagen, 'galeria'); document.getElementById('modal-titulo').textContent = item.titulo; document.getElementById('modal-descripcion').textContent = item.descripcion || ''; document.getElementById('modal-galeria').style.display = 'block'; }
         function cerrarModalGaleria() { document.getElementById('modal-galeria').style.display = 'none'; }
         function cambiarImagenGaleria(direccion) { }
         window.abrirModalGaleria = abrirModalGaleria; window.cambiarImagenGaleria = cambiarImagenGaleria;
@@ -323,4 +314,4 @@
         document.getElementById('modal-galeria')?.addEventListener('click', (e) => { if (e.target === document.getElementById('modal-galeria')) cerrarModalGaleria(); });
     </script>
 </body>
-    </html>
+                                                    </html>

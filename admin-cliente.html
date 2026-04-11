@@ -297,11 +297,13 @@
                     <label>Imagen de fondo</label>
                     <div class="upload-area" id="uploadAreaHero"><i class="fas fa-cloud-upload-alt"></i> Toca para subir imagen<input type="file" id="subirHero" accept="image/*" style="display: none;"></div>
                     <div id="previewHero" class="preview-upload"></div>
+                    <input type="hidden" id="hero-imagen" value="">
                 </div>
                 <div class="form-group">
                     <label>Video de fondo (MP4)</label>
                     <div class="upload-area" id="uploadAreaHeroVideo"><i class="fas fa-cloud-upload-alt"></i> Toca para subir video<input type="file" id="subirHeroVideo" accept="video/mp4" style="display: none;"></div>
                     <div id="previewHeroVideo" class="preview-upload"></div>
+                    <input type="hidden" id="hero-video" value="">
                 </div>
                 <div class="form-group"><label>Opacidad del overlay (0 a 1)</label><input type="number" id="hero-overlay" step="0.1" min="0" max="1" value="0.5"></div>
                 
@@ -314,6 +316,7 @@
                     <label>Imagen</label>
                     <div class="upload-area" id="uploadAreaNosotros"><i class="fas fa-cloud-upload-alt"></i> Toca para subir imagen<input type="file" id="subirNosotros" accept="image/*" style="display: none;"></div>
                     <div id="previewNosotros" class="preview-upload"></div>
+                    <input type="hidden" id="nosotros-imagen" value="">
                 </div>
                 <div class="form-group"><label>Valores (separados por coma)</label><input type="text" id="nosotros-valores" placeholder="Calidad, Confianza, Compromiso"></div>
                 
@@ -508,10 +511,10 @@
         // FUNCIONES DE PRODUCTOS
         // ============================================
         function agregarProducto() {
-            productos.push({ id: productoId++, nombre: '', descripcion: '', precio: 0, imagen: '', caracteristicas: [], badgePermanente: '' });
+            const id = productoId++;
+            productos.push({ id: id, nombre: '', descripcion: '', precio: 0, imagen: '', caracteristicas: [], badgePermanente: '' });
             renderizarProductos();
             setTimeout(() => {
-                const id = productos[productos.length-1].id;
                 const uploadArea = document.getElementById(`uploadAreaProducto-${id}`);
                 const fileInput = document.getElementById(`subirProducto-${id}`);
                 if (uploadArea && fileInput) {
@@ -571,10 +574,10 @@
         // FUNCIONES DE TESTIMONIOS
         // ============================================
         function agregarTestimonio() {
-            testimonios.push({ id: testimonioId++, nombre: '', lugar: '', texto: '', rating: 5, avatar: '' });
+            const id = testimonioId++;
+            testimonios.push({ id: id, nombre: '', lugar: '', texto: '', rating: 5, avatar: '' });
             renderizarTestimonios();
             setTimeout(() => {
-                const id = testimonios[testimonios.length-1].id;
                 const uploadArea = document.getElementById(`uploadAreaTestimonio-${id}`);
                 const fileInput = document.getElementById(`subirTestimonio-${id}`);
                 if (uploadArea && fileInput) {
@@ -631,10 +634,10 @@
         // FUNCIONES DE GALERÍA
         // ============================================
         function agregarGaleria() {
-            galeria.push({ id: galeriaId++, titulo: '', descripcion: '', fotos: [] });
+            const id = galeriaId++;
+            galeria.push({ id: id, titulo: '', descripcion: '', fotos: [] });
             renderizarGaleria();
             setTimeout(() => {
-                const id = galeria[galeria.length-1].id;
                 const uploadArea = document.getElementById(`uploadAreaGaleria-${id}`);
                 const fileInput = document.getElementById(`subirGaleria-${id}`);
                 if (uploadArea && fileInput) {
@@ -710,7 +713,7 @@
                 clienteData = cliente;
                 
                 // Cargar datos del config
-                const config = cliente.config;
+                const config = cliente.config || {};
                 if (config.marca?.colores) {
                     document.getElementById('color-primario').value = config.marca.colores.primario || '#1E3A5F';
                     document.getElementById('color-secundario').value = config.marca.colores.secundario || '#4A90E2';
@@ -850,4 +853,4 @@
         }
     </script>
 </body>
-    </html>
+                                </html>

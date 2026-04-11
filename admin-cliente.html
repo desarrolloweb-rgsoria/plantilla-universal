@@ -140,11 +140,7 @@
             max-width: 300px;
             margin-top: 0.5rem;
         }
-        .producto-preview-card img {
-            width: 100%;
-            height: 150px;
-            object-fit: cover;
-        }
+        .producto-preview-card img { width: 100%; height: 150px; object-fit: cover; }
         .producto-preview-card .content { padding: 1rem; }
         .producto-preview-card h4 { margin: 0 0 0.5rem 0; }
         .precio { color: #F4A261; font-weight: bold; }
@@ -157,40 +153,11 @@
             max-width: 300px;
             margin-top: 0.5rem;
         }
-        .testimonio-preview .avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            object-fit: cover;
-            background: #f0f0f0;
-        }
-        .galeria-preview {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 0.5rem;
-        }
-        .galeria-preview img {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-        .contacto-preview {
-            background: white;
-            border-radius: 12px;
-            padding: 1rem;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-top: 0.5rem;
-        }
-        .footer-preview {
-            background: #0B2B40;
-            color: white;
-            padding: 1rem;
-            border-radius: 12px;
-            text-align: center;
-            margin-top: 0.5rem;
-        }
+        .testimonio-preview .avatar { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #f0f0f0; }
+        .galeria-preview { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.5rem; }
+        .galeria-preview img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; }
+        .contacto-preview { background: white; border-radius: 12px; padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-top: 0.5rem; }
+        .footer-preview { background: #0B2B40; color: white; padding: 1rem; border-radius: 12px; text-align: center; margin-top: 0.5rem; }
     </style>
 </head>
 <body>
@@ -330,14 +297,26 @@
         // ============================================
         const SUPABASE_URL = 'https://nvrcqlxnvjvhznmxozhh.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_qCtRLmyJxBbYRcO7Suuqnw_mrmqspp6';
+        const BUCKET_NAME = 'cliente';
         const CLIENTE_ID_PUBLICO = 'RGS-1000';
         const CLIENTE_UUID = '20640a4e-ebeb-4149-b937-ecc34fa3038a';
         
-        let clienteData = null;
         let supabaseClient = null;
         let productos = [], testimonios = [], galeria = [];
         let productoId = 1, testimonioId = 1, galeriaId = 1;
         let nosotrosEditor = null;
+
+        // ============================================
+        // FUNCIÓN DE SUBIDA (que ya funcionaba)
+        // ============================================
+        async function subirImagen(file, carpeta) {
+            const extension = file.name.split('.').pop();
+            const nombreArchivo = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${extension}`;
+            const ruta = `${CLIENTE_UUID}/${carpeta}/${nombreArchivo}`;
+            const { error } = await supabaseClient.storage.from(BUCKET_NAME).upload(ruta, file);
+            if (error) throw error;
+            return nombreArchivo;
+        }
 
         // ============================================
         // PREVISUALIZACIONES
@@ -355,8 +334,8 @@
             document.getElementById('heroPreviewBoton').textContent = boton;
             
             const imagen = document.getElementById('hero-imagen').value;
-            if (imagen && supabaseClient && clienteData) {
-                const url = `${SUPABASE_URL}/storage/v1/object/public/cliente/${CLIENTE_UUID}/hero/${imagen}`;
+            if (imagen) {
+                const url = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/${CLIENTE_UUID}/hero/${imagen}`;
                 document.getElementById('heroPreview').style.backgroundImage = `url(${url})`;
                 document.getElementById('heroPreview').style.backgroundSize = 'cover';
                 document.getElementById('heroPreview').style.backgroundPosition = 'center';
@@ -413,8 +392,8 @@
             if (!previewDiv) return;
             
             let imgHtml = '';
-            if (prod.imagen && supabaseClient && clienteData) {
-                const url = `${SUPABASE_URL}/storage/v1/object/public/cliente/${CLIENTE_UUID}/productos/${prod.imagen}`;
+            if (prod.imagen) {
+                const url = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/${CLIENTE_UUID}/productos/${prod.imagen}`;
                 imgHtml = `<img src="${url}" style="width:100%; height:150px; object-fit:cover;" onerror="this.src='https://via.placeholder.com/300'">`;
             } else {
                 imgHtml = `<div style="width:100%; height:150px; background:#f0f0f0; display:flex; align-items:center; justify-content:center;">Sin imagen</div>`;
@@ -456,8 +435,8 @@
             if (!previewDiv) return;
             
             let avatarHtml = '';
-            if (test.avatar && supabaseClient && clienteData) {
-                const url = `${SUPABASE_URL}/storage/v1/object/public/cliente/${CLIENTE_UUID}/avatares/${test.avatar}`;
+            if (test.avatar) {
+                const url = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/${CLIENTE_UUID}/avatares/${test.avatar}`;
                 avatarHtml = `<img src="${url}" class="avatar" onerror="this.src='https://randomuser.me/api/portraits/lego/1.jpg'">`;
             } else {
                 avatarHtml = `<div class="avatar" style="background:#f0f0f0; display:flex; align-items:center; justify-content:center;">👤</div>`;
@@ -488,7 +467,7 @@
             if (gal.fotos && gal.fotos.length) {
                 fotosHtml = `<div class="galeria-preview">`;
                 gal.fotos.forEach(foto => {
-                    const url = `${SUPABASE_URL}/storage/v1/object/public/cliente/${CLIENTE_UUID}/galeria/${foto}`;
+                    const url = `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/${CLIENTE_UUID}/galeria/${foto}`;
                     fotosHtml += `<img src="${url}" onerror="this.src='https://via.placeholder.com/80'">`;
                 });
                 fotosHtml += `</div>`;
@@ -551,18 +530,10 @@
         }
 
         // ============================================
-        // FUNCIONES DE SUBIDA
+        // UPLOADERS
         // ============================================
-        async function subirImagen(file, carpeta) {
-            const extension = file.name.split('.').pop();
-            const nombreArchivo = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${extension}`;
-            const ruta = `${CLIENTE_UUID}/${carpeta}/${nombreArchivo}`;
-            const { error } = await supabaseClient.storage.from('cliente').upload(ruta, file);
-            if (error) throw error;
-            return nombreArchivo;
-        }
-
         function initUploaders() {
+            // Hero imagen
             const heroUpload = document.getElementById('uploadAreaHero');
             const heroInput = document.getElementById('subirHero');
             if (heroUpload) heroUpload.addEventListener('click', () => heroInput.click());
@@ -576,10 +547,14 @@
                     document.getElementById('hero-imagen').value = nombre;
                     preview.innerHTML = `<span style="color: green;">✅ Imagen subida: ${nombre}</span>`;
                     previewHero();
-                } catch (err) { preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`; }
+                } catch (err) { 
+                    preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
+                    console.error(err);
+                }
                 heroInput.value = '';
             });
 
+            // Nosotros imagen
             const nosotrosUpload = document.getElementById('uploadAreaNosotros');
             const nosotrosInput = document.getElementById('subirNosotros');
             if (nosotrosUpload) nosotrosUpload.addEventListener('click', () => nosotrosInput.click());
@@ -592,7 +567,10 @@
                     const nombre = await subirImagen(file, 'nosotros');
                     document.getElementById('nosotros-imagen').value = nombre;
                     preview.innerHTML = `<span style="color: green;">✅ Imagen subida: ${nombre}</span>`;
-                } catch (err) { preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`; }
+                } catch (err) { 
+                    preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
+                    console.error(err);
+                }
                 nosotrosInput.value = '';
             });
         }
@@ -619,7 +597,9 @@
                             const prod = productos.find(p => p.id === id);
                             if (prod) prod.imagen = nombre;
                             renderizarProductos();
-                        } catch (err) { if (preview) preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`; }
+                        } catch (err) { 
+                            if (preview) preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
+                        }
                     });
                 }
             }, 100);
@@ -684,7 +664,9 @@
                             const test = testimonios.find(t => t.id === id);
                             if (test) test.avatar = nombre;
                             renderizarTestimonios();
-                        } catch (err) { if (preview) preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`; }
+                        } catch (err) { 
+                            if (preview) preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
+                        }
                     });
                 }
             }, 100);
@@ -747,7 +729,9 @@
                                 const gal = galeria.find(g => g.id === id);
                                 if (gal) gal.fotos.push(nombre);
                                 renderizarGaleria();
-                            } catch (err) { if (preview) preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`; }
+                            } catch (err) { 
+                                if (preview) preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
+                            }
                         }
                     });
                 }
@@ -798,7 +782,6 @@
             
             // Cargar datos del cliente desde Supabase
             const cliente = await window.getClientePorIdPublico(CLIENTE_ID_PUBLICO, SUPABASE_URL, SUPABASE_ANON_KEY);
-            clienteData = cliente;
             const config = cliente.config || {};
             
             if (config.marca?.colores) {
@@ -893,7 +876,7 @@
             
             const config = {
                 marca: { 
-                    nombre: clienteData.nombre, 
+                    nombre: 'RGSoria\'s Solutions', 
                     logo: '', 
                     eslogan: '', 
                     colores: {
@@ -925,8 +908,8 @@
                 galeria: galeriaParaGuardar,
                 contacto: {
                     direccion: document.getElementById('contacto-direccion').value,
-                    telefono: clienteData.telefono,
-                    email: clienteData.email,
+                    telefono: '+5358481702',
+                    email: 'desarrollador.rgsoria@gmail.com',
                     whatsapp: document.getElementById('contacto-whatsapp').value,
                     mapa: document.getElementById('contacto-mapa').value,
                     redes: { 
@@ -962,4 +945,4 @@
         init();
     </script>
 </body>
-                    </html>
+    </html>

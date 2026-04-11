@@ -1,7 +1,3 @@
-// ============================================
-// supabase-conector.js
-// ============================================
-
 let miClienteSupabase = null;
 
 function initSupabase(url, key) {
@@ -12,18 +8,15 @@ function initSupabase(url, key) {
 }
 
 // ============================================
-// CLIENTES (nueva tabla unificada)
+// CLIENTES (tabla: cliente)
 // ============================================
 
 async function crearCliente(datos, supabaseUrl, supabaseKey) {
     const client = initSupabase(supabaseUrl, supabaseKey);
-    
-    // Generar ID público RGS-XXXX
     const numero = Math.floor(Math.random() * 9000 + 1000);
     const idPublico = `RGS-${numero}`;
-    
     const { data, error } = await client
-        .from('clientes')
+        .from('cliente')
         .insert([{
             id_publico: idPublico,
             nombre: datos.nombre,
@@ -41,7 +34,7 @@ async function crearCliente(datos, supabaseUrl, supabaseKey) {
 async function getClientePorIdPublico(idPublico, supabaseUrl, supabaseKey) {
     const client = initSupabase(supabaseUrl, supabaseKey);
     const { data, error } = await client
-        .from('clientes')
+        .from('cliente')
         .select('*')
         .eq('id_publico', idPublico)
         .single();
@@ -52,7 +45,7 @@ async function getClientePorIdPublico(idPublico, supabaseUrl, supabaseKey) {
 async function getClientePorUUID(uuid, supabaseUrl, supabaseKey) {
     const client = initSupabase(supabaseUrl, supabaseKey);
     const { data, error } = await client
-        .from('clientes')
+        .from('cliente')
         .select('*')
         .eq('uuid', uuid)
         .single();
@@ -63,7 +56,7 @@ async function getClientePorUUID(uuid, supabaseUrl, supabaseKey) {
 async function getTodosClientes(supabaseUrl, supabaseKey) {
     const client = initSupabase(supabaseUrl, supabaseKey);
     const { data, error } = await client
-        .from('clientes')
+        .from('cliente')
         .select('*')
         .order('fecha_creacion', { ascending: false });
     if (error) throw error;
@@ -73,7 +66,7 @@ async function getTodosClientes(supabaseUrl, supabaseKey) {
 async function actualizarCliente(idPublico, updates, supabaseUrl, supabaseKey) {
     const client = initSupabase(supabaseUrl, supabaseKey);
     const { data, error } = await client
-        .from('clientes')
+        .from('cliente')
         .update({ ...updates, fecha_actualizacion: new Date() })
         .eq('id_publico', idPublico)
         .select();
@@ -88,7 +81,7 @@ async function publicarCliente(idPublico, supabaseUrl, supabaseKey) {
 async function loginCliente(idPublico, password, supabaseUrl, supabaseKey) {
     const client = initSupabase(supabaseUrl, supabaseKey);
     const { data, error } = await client
-        .from('clientes')
+        .from('cliente')
         .select('*')
         .eq('id_publico', idPublico)
         .single();

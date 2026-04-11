@@ -15,13 +15,12 @@
             padding: 2rem;
         }
         .container { max-width: 1400px; margin: 0 auto; }
-        .login-form, .panel-principal {
+        .panel-principal {
             background: white;
             border-radius: 20px;
             padding: 2rem;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
-        .login-form { max-width: 400px; margin: 0 auto; }
         .form-group { margin-bottom: 1rem; }
         label { font-weight: 600; display: block; margin-bottom: 0.3rem; }
         input, select, textarea {
@@ -114,7 +113,6 @@
             padding: 1rem;
             margin-top: 1rem;
         }
-        .logout-btn { background: #dc3545; margin-bottom: 1rem; }
         .mensaje {
             margin-top: 1rem;
             padding: 1rem;
@@ -197,17 +195,7 @@
 </head>
 <body>
     <div class="container">
-        <div id="loginPanel" class="login-form">
-            <h1>🔐 Acceso a tu panel</h1>
-            <div class="form-group"><label>ID de cliente (ej: RGS-7823)</label><input type="text" id="clienteId" placeholder="RGS-0000"></div>
-            <div class="form-group"><label>Contraseña</label><input type="password" id="password" placeholder="contraseña"></div>
-            <div class="form-group"><label>URL de Supabase</label><input type="text" id="supabaseUrl" value="https://nvrcqlxnvjvhznmxozhh.supabase.co"></div>
-            <div class="form-group"><label>Clave anónima</label><input type="text" id="supabaseKey" value="sb_publishable_qCtRLmyJxBbYRcO7Suuqnw_mrmqspp6"></div>
-            <button onclick="login()">Ingresar</button>
-        </div>
-
-        <div id="adminPanel" style="display: none;">
-            <button class="logout-btn" onclick="logout()">🚪 Cerrar sesión</button>
+        <div id="adminPanel" class="panel-principal">
             <h1>📋 Panel de Control</h1>
             <p>Edita todos los aspectos de tu página web. Los cambios se aplican al instante.</p>
             
@@ -337,8 +325,16 @@
     <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();</script>
     <script>
+        // ============================================
+        // DATOS FIJOS DEL CLIENTE DE PRUEBA
+        // ============================================
+        const SUPABASE_URL = 'https://nvrcqlxnvjvhznmxozhh.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_qCtRLmyJxBbYRcO7Suuqnw_mrmqspp6';
+        const CLIENTE_ID_PUBLICO = 'RGS-1000';
+        const CLIENTE_UUID = '20640a4e-ebeb-4149-b937-ecc34fa3038a';
+        
         let clienteData = null;
-        let supabaseUrl = '', supabaseKey = '', supabaseClient = null;
+        let supabaseClient = null;
         let productos = [], testimonios = [], galeria = [];
         let productoId = 1, testimonioId = 1, galeriaId = 1;
         let nosotrosEditor = null;
@@ -360,7 +356,7 @@
             
             const imagen = document.getElementById('hero-imagen').value;
             if (imagen && supabaseClient && clienteData) {
-                const url = `${supabaseUrl}/storage/v1/object/public/cliente/${clienteData.uuid}/hero/${imagen}`;
+                const url = `${SUPABASE_URL}/storage/v1/object/public/cliente/${CLIENTE_UUID}/hero/${imagen}`;
                 document.getElementById('heroPreview').style.backgroundImage = `url(${url})`;
                 document.getElementById('heroPreview').style.backgroundSize = 'cover';
                 document.getElementById('heroPreview').style.backgroundPosition = 'center';
@@ -418,7 +414,7 @@
             
             let imgHtml = '';
             if (prod.imagen && supabaseClient && clienteData) {
-                const url = `${supabaseUrl}/storage/v1/object/public/cliente/${clienteData.uuid}/productos/${prod.imagen}`;
+                const url = `${SUPABASE_URL}/storage/v1/object/public/cliente/${CLIENTE_UUID}/productos/${prod.imagen}`;
                 imgHtml = `<img src="${url}" style="width:100%; height:150px; object-fit:cover;" onerror="this.src='https://via.placeholder.com/300'">`;
             } else {
                 imgHtml = `<div style="width:100%; height:150px; background:#f0f0f0; display:flex; align-items:center; justify-content:center;">Sin imagen</div>`;
@@ -461,7 +457,7 @@
             
             let avatarHtml = '';
             if (test.avatar && supabaseClient && clienteData) {
-                const url = `${supabaseUrl}/storage/v1/object/public/cliente/${clienteData.uuid}/avatares/${test.avatar}`;
+                const url = `${SUPABASE_URL}/storage/v1/object/public/cliente/${CLIENTE_UUID}/avatares/${test.avatar}`;
                 avatarHtml = `<img src="${url}" class="avatar" onerror="this.src='https://randomuser.me/api/portraits/lego/1.jpg'">`;
             } else {
                 avatarHtml = `<div class="avatar" style="background:#f0f0f0; display:flex; align-items:center; justify-content:center;">👤</div>`;
@@ -492,7 +488,7 @@
             if (gal.fotos && gal.fotos.length) {
                 fotosHtml = `<div class="galeria-preview">`;
                 gal.fotos.forEach(foto => {
-                    const url = `${supabaseUrl}/storage/v1/object/public/cliente/${clienteData.uuid}/galeria/${foto}`;
+                    const url = `${SUPABASE_URL}/storage/v1/object/public/cliente/${CLIENTE_UUID}/galeria/${foto}`;
                     fotosHtml += `<img src="${url}" onerror="this.src='https://via.placeholder.com/80'">`;
                 });
                 fotosHtml += `</div>`;
@@ -555,12 +551,12 @@
         }
 
         // ============================================
-        // FUNCIONES DE SUBIDA (SIN COMPRESIÓN)
+        // FUNCIONES DE SUBIDA
         // ============================================
         async function subirImagen(file, carpeta) {
             const extension = file.name.split('.').pop();
             const nombreArchivo = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${extension}`;
-            const ruta = `${clienteData.uuid}/${carpeta}/${nombreArchivo}`;
+            const ruta = `${CLIENTE_UUID}/${carpeta}/${nombreArchivo}`;
             const { error } = await supabaseClient.storage.from('cliente').upload(ruta, file);
             if (error) throw error;
             return nombreArchivo;
@@ -795,84 +791,73 @@
         function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => { if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m; }); }
 
         // ============================================
-        // LOGIN
+        // INICIALIZACIÓN
         // ============================================
-        async function login() {
-            const idPublico = document.getElementById('clienteId').value;
-            const password = document.getElementById('password').value;
-            supabaseUrl = document.getElementById('supabaseUrl').value;
-            supabaseKey = document.getElementById('supabaseKey').value;
-            if (!idPublico || !password) { alert('Ingresa ID y contraseña'); return; }
-            try {
-                supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-                const cliente = await window.loginCliente(idPublico, password, supabaseUrl, supabaseKey);
-                clienteData = cliente;
-                const config = cliente.config || {};
-                
-                if (config.marca?.colores) {
-                    document.getElementById('color-primario').value = config.marca.colores.primario || '#1E3A5F';
-                    document.getElementById('color-secundario').value = config.marca.colores.secundario || '#4A90E2';
-                    document.getElementById('color-acento').value = config.marca.colores.acento || '#F77F00';
-                    document.getElementById('color-texto').value = config.marca.colores.texto || '#0A1C2E';
-                    document.getElementById('color-fondo').value = config.marca.colores.fondo || '#F0F8FF';
-                    actualizarColorPreview();
-                }
-                document.getElementById('hero-superior').value = config.hero?.texto_superior || '';
-                document.getElementById('hero-principal').value = config.hero?.texto_principal || '';
-                document.getElementById('hero-inferior').value = config.hero?.texto_inferior || '';
-                document.getElementById('hero-boton').value = config.hero?.boton || 'Ver productos';
-                document.getElementById('hero-imagen').value = config.hero?.imagen || '';
-                document.getElementById('hero-overlay').value = config.hero?.overlay || 0.5;
-                document.getElementById('nosotros-titulo').value = config.nosotros?.titulo || 'Sobre Nosotros';
-                document.getElementById('nosotros-subtitulo').value = config.nosotros?.subtitulo || 'Conócenos mejor';
-                document.getElementById('nosotros-historia').value = config.nosotros?.historia || '';
-                document.getElementById('nosotros-imagen').value = config.nosotros?.imagen || '';
-                document.getElementById('nosotros-valores').value = (config.nosotros?.valores || []).join(', ');
-                document.getElementById('contacto-direccion').value = config.contacto?.direccion || '';
-                document.getElementById('contacto-whatsapp').value = config.contacto?.whatsapp || '';
-                document.getElementById('contacto-mapa').value = config.contacto?.mapa || '';
-                document.getElementById('red-facebook').value = config.contacto?.redes?.facebook || '';
-                document.getElementById('red-instagram').value = config.contacto?.redes?.instagram || '';
-                document.getElementById('footer-texto').value = config.footer?.texto || '';
-                
-                // Cargar productos, testimonios, galería desde config
-                if (config.productos && config.productos.length) {
-                    productos = config.productos.map(p => ({ ...p, id: p.id || productoId++ }));
-                }
-                if (config.testimonios && config.testimonios.length) {
-                    testimonios = config.testimonios.map(t => ({ ...t, id: t.id || testimonioId++ }));
-                }
-                if (config.galeria && config.galeria.length) {
-                    galeria = config.galeria.map(g => ({ ...g, id: g.id || galeriaId++ }));
-                }
-                
-                renderizarProductos();
-                renderizarTestimonios();
-                renderizarGaleria();
-                
-                document.getElementById('loginPanel').style.display = 'none';
-                document.getElementById('adminPanel').style.display = 'block';
-                initColorPalettes();
-                initUploaders();
-                
-                if (!nosotrosEditor && document.getElementById('nosotrosHistoriaEditor')) {
-                    nosotrosEditor = new Quill('#nosotrosHistoriaEditor', { theme: 'snow', placeholder: 'Escribe la historia de tu negocio...' });
-                    nosotrosEditor.on('text-change', () => previewNosotros());
-                }
-                if (nosotrosEditor && config.nosotros?.historia) nosotrosEditor.root.innerHTML = config.nosotros.historia;
-                
-                previewHero();
-                previewNosotros();
-                previewContacto();
-                previewFooter();
-                
-            } catch (error) { alert('Error: ' + error.message); }
+        async function init() {
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            
+            // Cargar datos del cliente desde Supabase
+            const cliente = await window.getClientePorIdPublico(CLIENTE_ID_PUBLICO, SUPABASE_URL, SUPABASE_ANON_KEY);
+            clienteData = cliente;
+            const config = cliente.config || {};
+            
+            if (config.marca?.colores) {
+                document.getElementById('color-primario').value = config.marca.colores.primario || '#1E3A5F';
+                document.getElementById('color-secundario').value = config.marca.colores.secundario || '#4A90E2';
+                document.getElementById('color-acento').value = config.marca.colores.acento || '#F77F00';
+                document.getElementById('color-texto').value = config.marca.colores.texto || '#0A1C2E';
+                document.getElementById('color-fondo').value = config.marca.colores.fondo || '#F0F8FF';
+                actualizarColorPreview();
+            }
+            document.getElementById('hero-superior').value = config.hero?.texto_superior || '';
+            document.getElementById('hero-principal').value = config.hero?.texto_principal || '';
+            document.getElementById('hero-inferior').value = config.hero?.texto_inferior || '';
+            document.getElementById('hero-boton').value = config.hero?.boton || 'Ver productos';
+            document.getElementById('hero-imagen').value = config.hero?.imagen || '';
+            document.getElementById('hero-overlay').value = config.hero?.overlay || 0.5;
+            document.getElementById('nosotros-titulo').value = config.nosotros?.titulo || 'Sobre Nosotros';
+            document.getElementById('nosotros-subtitulo').value = config.nosotros?.subtitulo || 'Conócenos mejor';
+            document.getElementById('nosotros-historia').value = config.nosotros?.historia || '';
+            document.getElementById('nosotros-imagen').value = config.nosotros?.imagen || '';
+            document.getElementById('nosotros-valores').value = (config.nosotros?.valores || []).join(', ');
+            document.getElementById('contacto-direccion').value = config.contacto?.direccion || '';
+            document.getElementById('contacto-whatsapp').value = config.contacto?.whatsapp || '';
+            document.getElementById('contacto-mapa').value = config.contacto?.mapa || '';
+            document.getElementById('red-facebook').value = config.contacto?.redes?.facebook || '';
+            document.getElementById('red-instagram').value = config.contacto?.redes?.instagram || '';
+            document.getElementById('footer-texto').value = config.footer?.texto || '';
+            
+            if (config.productos && config.productos.length) {
+                productos = config.productos.map(p => ({ ...p, id: p.id || productoId++ }));
+            }
+            if (config.testimonios && config.testimonios.length) {
+                testimonios = config.testimonios.map(t => ({ ...t, id: t.id || testimonioId++ }));
+            }
+            if (config.galeria && config.galeria.length) {
+                galeria = config.galeria.map(g => ({ ...g, id: g.id || galeriaId++ }));
+            }
+            
+            renderizarProductos();
+            renderizarTestimonios();
+            renderizarGaleria();
+            
+            initColorPalettes();
+            initUploaders();
+            
+            if (!nosotrosEditor && document.getElementById('nosotrosHistoriaEditor')) {
+                nosotrosEditor = new Quill('#nosotrosHistoriaEditor', { theme: 'snow', placeholder: 'Escribe la historia de tu negocio...' });
+                nosotrosEditor.on('text-change', () => previewNosotros());
+            }
+            if (nosotrosEditor && config.nosotros?.historia) nosotrosEditor.root.innerHTML = config.nosotros.historia;
+            
+            previewHero();
+            previewNosotros();
+            previewContacto();
+            previewFooter();
         }
 
-        function logout() { document.getElementById('loginPanel').style.display = 'block'; document.getElementById('adminPanel').style.display = 'none'; clienteData = null; }
-
         // ============================================
-        // GUARDAR TODO (SOLO EN CONFIG)
+        // GUARDAR TODO
         // ============================================
         async function guardarTodo() {
             const btn = document.getElementById('btnGuardar');
@@ -953,7 +938,7 @@
             };
             
             try {
-                await window.actualizarCliente(clienteData.id_publico, { config: config }, supabaseUrl, supabaseKey);
+                await window.actualizarCliente(CLIENTE_ID_PUBLICO, { config: config }, SUPABASE_URL, SUPABASE_ANON_KEY);
                 
                 const mensajeDiv = document.getElementById('mensaje');
                 mensajeDiv.textContent = '✅ Todos los cambios guardados correctamente';
@@ -972,6 +957,9 @@
                 btn.disabled = false; 
             }
         }
+        
+        // Iniciar
+        init();
     </script>
 </body>
-    </html>
+                    </html>

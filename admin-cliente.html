@@ -434,7 +434,7 @@
         }
 
         // ============================================
-        // FUNCIONES DE SUBIDA
+        // FUNCIONES DE SUBIDA (USANDO supabaseClient GLOBAL)
         // ============================================
         async function comprimirYSubirImagen(file, carpeta) {
             const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true, fileType: 'image/webp' };
@@ -468,7 +468,10 @@
                     const nombre = await comprimirYSubirImagen(file, 'hero');
                     document.getElementById('hero-imagen').value = nombre;
                     preview.innerHTML = `<span style="color: green;">✅ Imagen subida: ${nombre}</span>`;
-                } catch (err) { preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`; }
+                } catch (err) {
+                    console.error('Error:', err);
+                    preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
+                }
                 heroInput.value = '';
             });
 
@@ -485,7 +488,10 @@
                     const nombre = await subirVideoPendiente(file);
                     document.getElementById('hero-video').value = nombre;
                     preview.innerHTML = `<span style="color: green;">✅ Video subido (pendiente de optimización): ${nombre}</span>`;
-                } catch (err) { preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`; }
+                } catch (err) {
+                    console.error('Error:', err);
+                    preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
+                }
                 heroVideoInput.value = '';
             });
 
@@ -502,7 +508,10 @@
                     const nombre = await comprimirYSubirImagen(file, 'nosotros');
                     document.getElementById('nosotros-imagen').value = nombre;
                     preview.innerHTML = `<span style="color: green;">✅ Imagen subida: ${nombre}</span>`;
-                } catch (err) { preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`; }
+                } catch (err) {
+                    console.error('Error:', err);
+                    preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
+                }
                 nosotrosInput.value = '';
             });
         }
@@ -529,7 +538,9 @@
                             const prod = productos.find(p => p.id === id);
                             if (prod) prod.imagen = nombre;
                             renderizarProductos();
-                        } catch (err) { if (preview) preview.innerHTML = `<span style="color: red;">❌ Error</span>`; }
+                        } catch (err) {
+                            if (preview) preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
+                        }
                     });
                 }
             }, 100);
@@ -592,7 +603,9 @@
                             const test = testimonios.find(t => t.id === id);
                             if (test) test.avatar = nombre;
                             renderizarTestimonios();
-                        } catch (err) { if (preview) preview.innerHTML = `<span style="color: red;">❌ Error</span>`; }
+                        } catch (err) {
+                            if (preview) preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
+                        }
                     });
                 }
             }, 100);
@@ -652,7 +665,9 @@
                                 const gal = galeria.find(g => g.id === id);
                                 if (gal) gal.fotos.push(nombre);
                                 renderizarGaleria();
-                            } catch (err) { if (preview) preview.innerHTML = `<span style="color: red;">❌ Error</span>`; }
+                            } catch (err) {
+                                if (preview) preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
+                            }
                         }
                     });
                 }
@@ -708,6 +723,7 @@
             if (!idPublico || !password) { alert('Ingresa ID y contraseña'); return; }
             
             try {
+                // Crear cliente Supabase solo una vez
                 supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
                 const cliente = await window.loginCliente(idPublico, password, supabaseUrl, supabaseKey);
                 clienteData = cliente;

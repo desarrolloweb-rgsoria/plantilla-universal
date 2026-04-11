@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Control - Mi Negocio</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -13,7 +14,7 @@
             background: #f5f5f5;
             padding: 2rem;
         }
-        .container { max-width: 1200px; margin: 0 auto; }
+        .container { max-width: 1400px; margin: 0 auto; }
         .login-form, .panel-principal {
             background: white;
             border-radius: 20px;
@@ -70,6 +71,19 @@
             margin-bottom: 1rem;
         }
         @media (max-width: 768px) { .form-row { grid-template-columns: 1fr; } }
+        .editor-preview {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .editor-preview .editor, .editor-preview .preview {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid #e0e0e0;
+        }
+        .preview h4 { margin-bottom: 0.5rem; color: #0B4F6C; }
         .upload-area {
             border: 2px dashed #0B4F6C;
             border-radius: 12px;
@@ -120,6 +134,23 @@
         .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; cursor: pointer; flex-wrap: wrap; gap: 0.5rem; }
         .item-contenido { margin-top: 1rem; }
         .hidden { display: none; }
+        .producto-preview-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            max-width: 300px;
+            margin-top: 0.5rem;
+        }
+        .producto-preview-card img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+        .producto-preview-card .content { padding: 1rem; }
+        .producto-preview-card h4 { margin: 0 0 0.5rem 0; }
+        .precio { color: #F4A261; font-weight: bold; }
+        .ql-editor { min-height: 150px; }
     </style>
 </head>
 <body>
@@ -165,15 +196,15 @@
                 <div class="form-group"><label>Color de fondo</label><div class="color-input"><input type="color" id="color-fondo" value="#F0F8FF"><span id="color-fondo-text">#F0F8FF</span><input type="text" id="color-fondo-texto" placeholder="O escribe el color"></div>
                 <div class="paleta-colores" data-target="color-fondo"><div class="color-opcion" style="background:#0B2B40;" data-color="#0B2B40"></div><div class="color-opcion" style="background:#1C6E8F;" data-color="#1C6E8F"></div><div class="color-opcion" style="background:#F4A261;" data-color="#F4A261"></div><div class="color-opcion" style="background:#2A9D8F;" data-color="#2A9D8F"></div><div class="color-opcion" style="background:#4A4A4A;" data-color="#4A4A4A"></div><div class="color-opcion" style="background:#F9F9F9;" data-color="#F9F9F9"></div></div></div>
                 
-                <!-- Hero -->
+                <!-- Hero con previsualización -->
                 <h3>🖼️ Portada principal (Hero)</h3>
                 <div class="form-row">
-                    <div class="form-group"><label>Texto superior</label><input type="text" id="hero-superior" placeholder="BIENVENIDOS A"></div>
-                    <div class="form-group"><label>Texto principal</label><input type="text" id="hero-principal" placeholder="Mi Negocio"></div>
+                    <div class="form-group"><label>Texto superior</label><input type="text" id="hero-superior" placeholder="BIENVENIDOS A" oninput="previewHero()"></div>
+                    <div class="form-group"><label>Texto principal</label><input type="text" id="hero-principal" placeholder="Mi Negocio" oninput="previewHero()"></div>
                 </div>
                 <div class="form-row">
-                    <div class="form-group"><label>Texto inferior</label><input type="text" id="hero-inferior" placeholder="Calidad • Confianza"></div>
-                    <div class="form-group"><label>Texto del botón</label><input type="text" id="hero-boton" value="Ver productos"></div>
+                    <div class="form-group"><label>Texto inferior</label><input type="text" id="hero-inferior" placeholder="Calidad • Confianza" oninput="previewHero()"></div>
+                    <div class="form-group"><label>Texto del botón</label><input type="text" id="hero-boton" value="Ver productos" oninput="previewHero()"></div>
                 </div>
                 <div class="form-group">
                     <label>Imagen de fondo</label>
@@ -181,26 +212,40 @@
                     <div id="previewHero" class="preview-upload"></div>
                     <input type="hidden" id="hero-imagen" value="">
                 </div>
-                <div class="form-group">
-                    <label>Video de fondo (MP4)</label>
-                    <div class="upload-area" id="uploadAreaHeroVideo"><i class="fas fa-cloud-upload-alt"></i> Toca para subir video<input type="file" id="subirHeroVideo" accept="video/mp4" style="display: none;"></div>
-                    <div id="previewHeroVideo" class="preview-upload"></div>
-                    <input type="hidden" id="hero-video" value="">
-                </div>
-                <div class="form-group"><label>Opacidad del overlay (0 a 1)</label><input type="number" id="hero-overlay" step="0.1" min="0" max="1" value="0.5"></div>
+                <div class="form-group"><label>Opacidad del overlay (0 a 1)</label><input type="number" id="hero-overlay" step="0.1" min="0" max="1" value="0.5" oninput="previewHero()"></div>
                 
-                <!-- Sobre Nosotros -->
+                <!-- Previsualización del Hero -->
+                <div style="background:#e0e0e0; border-radius:12px; padding:1rem; margin-top:1rem;">
+                    <h4>📱 Vista previa del Hero</h4>
+                    <div id="heroPreview" style="background-size:cover; background-position:center; padding:2rem; text-align:center; border-radius:12px; color:white; text-shadow:0 0 5px black; min-height:200px; display:flex; flex-direction:column; justify-content:center;">
+                        <div id="heroPreviewSuperior" style="font-size:1rem; text-transform:uppercase;">BIENVENIDOS A</div>
+                        <div id="heroPreviewPrincipal" style="font-size:2rem; font-weight:bold;">Mi Negocio</div>
+                        <div id="heroPreviewInferior" style="font-size:0.9rem;">Calidad • Confianza</div>
+                        <button id="heroPreviewBoton" style="margin-top:1rem; padding:0.5rem 1rem; border:none; border-radius:50px; cursor:default; background:#F4A261; color:#0B2B40;">Ver productos</button>
+                    </div>
+                </div>
+                
+                <!-- Sobre Nosotros con editor enriquecido -->
                 <h3>📖 Sobre Nosotros</h3>
-                <div class="form-group"><label>Título</label><input type="text" id="nosotros-titulo" value="Sobre Nosotros"></div>
-                <div class="form-group"><label>Subtítulo</label><input type="text" id="nosotros-subtitulo" value="Conócenos mejor"></div>
-                <div class="form-group"><label>Historia</label><textarea id="nosotros-historia" rows="4"></textarea></div>
+                <div class="form-group"><label>Título</label><input type="text" id="nosotros-titulo" value="Sobre Nosotros" oninput="previewNosotros()"></div>
+                <div class="form-group"><label>Subtítulo</label><input type="text" id="nosotros-subtitulo" value="Conócenos mejor" oninput="previewNosotros()"></div>
+                <div class="editor-preview">
+                    <div class="editor">
+                        <label>Historia (editor enriquecido)</label>
+                        <div id="nosotrosHistoriaEditor" style="height: 200px;"></div>
+                    </div>
+                    <div class="preview">
+                        <h4>Vista previa</h4>
+                        <div id="nosotrosPreview" style="border:1px solid #ddd; padding:1rem; border-radius:8px; background:white; max-height:300px; overflow:auto;"></div>
+                    </div>
+                </div>
                 <div class="form-group">
                     <label>Imagen</label>
                     <div class="upload-area" id="uploadAreaNosotros"><i class="fas fa-cloud-upload-alt"></i> Toca para subir imagen<input type="file" id="subirNosotros" accept="image/*" style="display: none;"></div>
                     <div id="previewNosotros" class="preview-upload"></div>
                     <input type="hidden" id="nosotros-imagen" value="">
                 </div>
-                <div class="form-group"><label>Valores (separados por coma)</label><input type="text" id="nosotros-valores" placeholder="Calidad, Confianza, Compromiso"></div>
+                <div class="form-group"><label>Valores (separados por coma)</label><input type="text" id="nosotros-valores" placeholder="Calidad, Confianza, Compromiso" oninput="previewNosotros()"></div>
                 
                 <!-- Contacto -->
                 <h3>📞 Contacto</h3>
@@ -252,7 +297,99 @@
         let supabaseUrl = '', supabaseKey = '', supabaseClient = null;
         let productos = [], testimonios = [], galeria = [];
         let productoId = 1, testimonioId = 1, galeriaId = 1;
+        let nosotrosEditor = null;
 
+        // ============================================
+        // PREVISUALIZACIONES
+        // ============================================
+        function previewHero() {
+            const superior = document.getElementById('hero-superior').value || 'BIENVENIDOS A';
+            const principal = document.getElementById('hero-principal').value || 'Mi Negocio';
+            const inferior = document.getElementById('hero-inferior').value || 'Calidad • Confianza';
+            const boton = document.getElementById('hero-boton').value || 'Ver productos';
+            const overlay = parseFloat(document.getElementById('hero-overlay').value) || 0.5;
+            
+            document.getElementById('heroPreviewSuperior').textContent = superior;
+            document.getElementById('heroPreviewPrincipal').textContent = principal;
+            document.getElementById('heroPreviewInferior').textContent = inferior;
+            document.getElementById('heroPreviewBoton').textContent = boton;
+            
+            const imagen = document.getElementById('hero-imagen').value;
+            if (imagen && supabaseClient && clienteData) {
+                const url = `${supabaseUrl}/storage/v1/object/public/cliente/${clienteData.uuid}/hero/${imagen}`;
+                document.getElementById('heroPreview').style.backgroundImage = `url(${url})`;
+                document.getElementById('heroPreview').style.backgroundSize = 'cover';
+                document.getElementById('heroPreview').style.backgroundPosition = 'center';
+            }
+            document.getElementById('heroPreview').style.backgroundColor = `rgba(0,0,0,${overlay})`;
+            document.getElementById('heroPreview').style.backgroundBlendMode = 'overlay';
+        }
+        
+        function previewNosotros() {
+            if (!nosotrosEditor) return;
+            const titulo = document.getElementById('nosotros-titulo').value || 'Sobre Nosotros';
+            const subtitulo = document.getElementById('nosotros-subtitulo').value || '';
+            const historia = nosotrosEditor.root.innerHTML;
+            const valores = document.getElementById('nosotros-valores').value || '';
+            const valoresArray = valores.split(',').map(v => v.trim()).filter(v => v);
+            
+            let html = `<h3>${escapeHtml(titulo)}</h3>`;
+            if (subtitulo) html += `<p style="color:#666;">${escapeHtml(subtitulo)}</p>`;
+            html += `<div>${historia}</div>`;
+            if (valoresArray.length) {
+                html += `<div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:1rem;">`;
+                valoresArray.forEach(v => { html += `<span style="background:#f0f0f0; padding:0.3rem 0.8rem; border-radius:50px;">✓ ${escapeHtml(v)}</span>`; });
+                html += `</div>`;
+            }
+            document.getElementById('nosotrosPreview').innerHTML = html;
+        }
+        
+        function previewProducto(id) {
+            const prod = productos.find(p => p.id === id);
+            if (!prod) return;
+            const previewDiv = document.getElementById(`preview-producto-${id}`);
+            if (!previewDiv) return;
+            
+            let imgHtml = '';
+            if (prod.imagen && supabaseClient && clienteData) {
+                const url = `${supabaseUrl}/storage/v1/object/public/cliente/${clienteData.uuid}/productos/${prod.imagen}`;
+                imgHtml = `<img src="${url}" style="width:100%; height:150px; object-fit:cover;" onerror="this.src='https://via.placeholder.com/300'">`;
+            } else {
+                imgHtml = `<div style="width:100%; height:150px; background:#f0f0f0; display:flex; align-items:center; justify-content:center;">Sin imagen</div>`;
+            }
+            
+            let badgeHtml = '';
+            if (prod.badgePermanente) {
+                badgeHtml = `<span style="position:absolute; top:10px; left:10px; background:#F4A261; color:white; padding:0.2rem 0.5rem; border-radius:50px; font-size:0.7rem;">${escapeHtml(prod.badgePermanente)}</span>`;
+            }
+            
+            let featuresHtml = '';
+            if (prod.caracteristicas && prod.caracteristicas.length) {
+                featuresHtml = `<div style="display:flex; flex-wrap:wrap; gap:0.3rem; margin-top:0.5rem;">`;
+                prod.caracteristicas.forEach(c => { featuresHtml += `<span style="background:#f0f0f0; padding:0.2rem 0.5rem; border-radius:50px; font-size:0.7rem;">${escapeHtml(c)}</span>`; });
+                featuresHtml += `</div>`;
+            }
+            
+            previewDiv.innerHTML = `
+                <div style="position:relative; background:white; border-radius:12px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.1); max-width:300px; margin-top:0.5rem;">
+                    ${badgeHtml}
+                    ${imgHtml}
+                    <div class="content">
+                        <h4 style="margin:0 0 0.5rem 0;">${escapeHtml(prod.nombre || 'Producto sin nombre')}</h4>
+                        <p style="font-size:0.8rem; color:#666;">${escapeHtml(prod.descripcion || 'Sin descripción')}</p>
+                        ${featuresHtml}
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
+                            <span class="precio">$${prod.precio || 0} <small>desde</small></span>
+                            <button style="background:#0B4F6C; color:white; border:none; padding:0.3rem 0.8rem; border-radius:50px;">Solicitar</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============================================
+        // FUNCIONES DE COLOR
+        // ============================================
         function nombreAColor(nombre) {
             const colores = { 'navy': '#0B2B40', 'blue': '#1C6E8F', 'orange': '#F4A261', 'green': '#2A9D8F', 'gray': '#4A4A4A', 'white': '#F9F9F9', 'black': '#1E1E24', 'red': '#C41E3A', 'yellow': '#FFD700' };
             return colores[nombre.toLowerCase()] || nombre;
@@ -295,12 +432,14 @@
             });
         }
 
-        async function comprimirYSubirImagen(file, carpeta) {
-            const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true, fileType: 'image/webp' };
-            const compressedFile = await imageCompression(file, options);
-            const nombreArchivo = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.webp`;
+        // ============================================
+        // FUNCIONES DE SUBIDA (SIN COMPRESIÓN)
+        // ============================================
+        async function subirImagen(file, carpeta) {
+            const extension = file.name.split('.').pop();
+            const nombreArchivo = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${extension}`;
             const ruta = `${clienteData.uuid}/${carpeta}/${nombreArchivo}`;
-            const { error } = await supabaseClient.storage.from('cliente').upload(ruta, compressedFile);
+            const { error } = await supabaseClient.storage.from('cliente').upload(ruta, file);
             if (error) throw error;
             return nombreArchivo;
         }
@@ -315,9 +454,10 @@
                 const preview = document.getElementById('previewHero');
                 preview.innerHTML = '<span class="spinner"></span> Subiendo...';
                 try {
-                    const nombre = await comprimirYSubirImagen(file, 'hero');
+                    const nombre = await subirImagen(file, 'hero');
                     document.getElementById('hero-imagen').value = nombre;
                     preview.innerHTML = `<span style="color: green;">✅ Imagen subida: ${nombre}</span>`;
+                    previewHero();
                 } catch (err) { preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`; }
                 heroInput.value = '';
             });
@@ -331,7 +471,7 @@
                 const preview = document.getElementById('previewNosotros');
                 preview.innerHTML = '<span class="spinner"></span> Subiendo...';
                 try {
-                    const nombre = await comprimirYSubirImagen(file, 'nosotros');
+                    const nombre = await subirImagen(file, 'nosotros');
                     document.getElementById('nosotros-imagen').value = nombre;
                     preview.innerHTML = `<span style="color: green;">✅ Imagen subida: ${nombre}</span>`;
                 } catch (err) { preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`; }
@@ -339,10 +479,32 @@
             });
         }
 
+        // ============================================
+        // PRODUCTOS CON PREVISUALIZACIÓN
+        // ============================================
         function agregarProducto() {
             const id = productoId++;
             productos.push({ id: id, nombre: '', descripcion: '', precio: 0, imagen: '', caracteristicas: [], badgePermanente: '' });
             renderizarProductos();
+            setTimeout(() => {
+                const uploadArea = document.getElementById(`uploadAreaProducto-${id}`);
+                const fileInput = document.getElementById(`subirProducto-${id}`);
+                if (uploadArea && fileInput) {
+                    uploadArea.addEventListener('click', () => fileInput.click());
+                    fileInput.addEventListener('change', async (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        const preview = document.getElementById(`previewProducto-${id}`);
+                        if (preview) preview.innerHTML = '<span class="spinner"></span> Subiendo...';
+                        try {
+                            const nombre = await subirImagen(file, 'productos');
+                            const prod = productos.find(p => p.id === id);
+                            if (prod) prod.imagen = nombre;
+                            renderizarProductos();
+                        } catch (err) { if (preview) preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`; }
+                    });
+                }
+            }, 100);
         }
 
         function eliminarProducto(id) {
@@ -358,26 +520,33 @@
                 <div class="item-card">
                     <div class="item-header" onclick="toggleContenido(this)">
                         <strong>📦 ${p.nombre || `Producto ${p.id}`}</strong>
-                        <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarProducto(${p.id})">Eliminar</button>
+                        <div><button class="btn-subir-imagen" onclick="event.stopPropagation(); document.getElementById('file-input-${p.id}').click()"><i class="fas fa-upload"></i> Subir imagen</button><button class="btn-eliminar" onclick="event.stopPropagation(); eliminarProducto(${p.id})">Eliminar</button></div>
                     </div>
                     <div class="item-contenido hidden">
-                        <div class="form-group"><label>Nombre</label><input type="text" class="prod-nombre" value="${escapeHtml(p.nombre)}" onchange="actualizarProducto(${p.id}, 'nombre', this.value)"></div>
-                        <div class="form-group"><label>Precio</label><input type="number" class="prod-precio" value="${p.precio}" onchange="actualizarProducto(${p.id}, 'precio', parseFloat(this.value))"></div>
-                        <div class="form-group"><label>Descripción</label><textarea class="prod-descripcion" rows="2" onchange="actualizarProducto(${p.id}, 'descripcion', this.value)">${escapeHtml(p.descripcion)}</textarea></div>
-                        <div class="form-group"><label>Características (separadas por coma)</label><input type="text" class="prod-caracteristicas" value="${p.caracteristicas.join(', ')}" onchange="actualizarProducto(${p.id}, 'caracteristicas', this.value.split(',').map(c=>c.trim()).filter(c=>c))"></div>
-                        <div class="form-group"><label>Badge</label><input type="text" class="prod-badge" value="${p.badgePermanente}" onchange="actualizarProducto(${p.id}, 'badgePermanente', this.value)"></div>
+                        <div class="form-group"><label>Nombre</label><input type="text" class="prod-nombre" value="${escapeHtml(p.nombre)}" onchange="actualizarProductoConPreview(${p.id}, 'nombre', this.value)"></div>
+                        <div class="form-group"><label>Precio</label><input type="number" class="prod-precio" value="${p.precio}" onchange="actualizarProductoConPreview(${p.id}, 'precio', parseFloat(this.value))"></div>
+                        <div class="form-group"><label>Descripción</label><textarea class="prod-descripcion" rows="2" onchange="actualizarProductoConPreview(${p.id}, 'descripcion', this.value)">${escapeHtml(p.descripcion)}</textarea></div>
+                        <div class="form-group"><label>Características (separadas por coma)</label><input type="text" class="prod-caracteristicas" value="${p.caracteristicas.join(', ')}" onchange="actualizarProductoConPreview(${p.id}, 'caracteristicas', this.value.split(',').map(c=>c.trim()).filter(c=>c))"></div>
+                        <div class="form-group"><label>Badge</label><input type="text" class="prod-badge" value="${p.badgePermanente}" onchange="actualizarProductoConPreview(${p.id}, 'badgePermanente', this.value)"></div>
                         <div class="upload-area" id="uploadAreaProducto-${p.id}" style="margin-top:0.5rem;"><i class="fas fa-cloud-upload-alt"></i> Toca para subir imagen<input type="file" id="subirProducto-${p.id}" accept="image/*" style="display: none;"></div>
                         <div id="previewProducto-${p.id}" class="preview-upload"></div>
+                        <div id="preview-producto-${p.id}"></div>
                     </div>
+                    <input type="file" id="file-input-${p.id}" accept="image/*" style="display: none;" onchange="document.getElementById('subirProducto-${p.id}').files = this.files; document.getElementById('subirProducto-${p.id}').dispatchEvent(new Event('change'))">
                 </div>
             `).join('');
+            productos.forEach(p => previewProducto(p.id));
         }
 
-        function actualizarProducto(id, campo, valor) {
+        function actualizarProductoConPreview(id, campo, valor) {
             const index = productos.findIndex(p => p.id === id);
             if (index !== -1) productos[index][campo] = valor;
+            previewProducto(id);
         }
 
+        // ============================================
+        // TESTIMONIOS Y GALERÍA (simplificados)
+        // ============================================
         function agregarTestimonio() {
             const id = testimonioId++;
             testimonios.push({ id: id, nombre: '', lugar: '', texto: '', rating: 5, avatar: '' });
@@ -442,6 +611,9 @@
         function toggleContenido(header) { const contenido = header.nextElementSibling; contenido.classList.toggle('hidden'); }
         function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => { if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m; }); }
 
+        // ============================================
+        // LOGIN
+        // ============================================
         async function login() {
             const idPublico = document.getElementById('clienteId').value;
             const password = document.getElementById('password').value;
@@ -466,7 +638,6 @@
                 document.getElementById('hero-inferior').value = config.hero?.texto_inferior || '';
                 document.getElementById('hero-boton').value = config.hero?.boton || 'Ver productos';
                 document.getElementById('hero-imagen').value = config.hero?.imagen || '';
-                document.getElementById('hero-video').value = config.hero?.video || '';
                 document.getElementById('hero-overlay').value = config.hero?.overlay || 0.5;
                 document.getElementById('nosotros-titulo').value = config.nosotros?.titulo || 'Sobre Nosotros';
                 document.getElementById('nosotros-subtitulo').value = config.nosotros?.subtitulo || 'Conócenos mejor';
@@ -496,11 +667,23 @@
                 initColorPalettes();
                 initUploaders();
                 
+                // Inicializar editor Quill
+                if (!nosotrosEditor) {
+                    nosotrosEditor = new Quill('#nosotrosHistoriaEditor', { theme: 'snow', placeholder: 'Escribe la historia de tu negocio...' });
+                    nosotrosEditor.on('text-change', () => previewNosotros());
+                }
+                if (config.nosotros?.historia) nosotrosEditor.root.innerHTML = config.nosotros.historia;
+                previewHero();
+                previewNosotros();
+                
             } catch (error) { alert('Error: ' + error.message); }
         }
 
         function logout() { document.getElementById('loginPanel').style.display = 'block'; document.getElementById('adminPanel').style.display = 'none'; clienteData = null; }
 
+        // ============================================
+        // GUARDAR TODO
+        // ============================================
         async function guardarTodo() {
             const btn = document.getElementById('btnGuardar');
             const textoOriginal = btn.innerHTML;
@@ -521,13 +704,13 @@
                     texto_inferior: document.getElementById('hero-inferior').value,
                     boton: document.getElementById('hero-boton').value,
                     imagen: document.getElementById('hero-imagen').value,
-                    video: document.getElementById('hero-video').value,
+                    video: '',
                     overlay: parseFloat(document.getElementById('hero-overlay').value)
                 },
                 nosotros: {
                     titulo: document.getElementById('nosotros-titulo').value,
                     subtitulo: document.getElementById('nosotros-subtitulo').value,
-                    historia: document.getElementById('nosotros-historia').value,
+                    historia: nosotrosEditor ? nosotrosEditor.root.innerHTML : '',
                     imagen: document.getElementById('nosotros-imagen').value,
                     valores: (document.getElementById('nosotros-valores').value || '').split(',').map(v => v.trim())
                 },

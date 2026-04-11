@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SuperAdmin - Gestionar solicitudes</title>
+    <title>SuperAdmin - Gestionar clientes</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -30,7 +30,6 @@
             margin: 0.2rem;
         }
         button:hover { background: #1a6d8f; transform: scale(1.02); }
-        button:active { transform: scale(0.98); }
         .solicitud-card {
             background: white;
             border-radius: 16px;
@@ -49,36 +48,14 @@
         .badge { padding: 0.3rem 0.8rem; border-radius: 50px; font-size: 0.8rem; font-weight: 600; }
         .badge-pendiente { background: #ffc107; color: #333; }
         .badge-publicado { background: #28a745; color: white; }
-        .ver-json, .acciones { margin-top: 1rem; }
-        pre { background: #f4f4f4; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.8rem; }
+        .acciones { margin-top: 1rem; }
         .logout-btn { background: #dc3545; margin-bottom: 1rem; }
-        .logout-btn:hover { background: #bb2d3b; }
-        .mensaje-toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #28a745;
-            color: white;
-            padding: 1rem;
-            border-radius: 12px;
-            z-index: 9999;
-            animation: fadeOut 3s ease forwards;
-        }
-        @keyframes fadeOut {
-            0% { opacity: 1; }
-            70% { opacity: 1; }
-            100% { opacity: 0; visibility: hidden; }
-        }
         .btn-whatsapp { background: #25D366; }
-        .btn-whatsapp:hover { background: #128C7E; }
         .btn-call { background: #34B7F1; }
-        .btn-call:hover { background: #1e88e5; }
         .btn-email { background: #EA4335; }
-        .btn-email:hover { background: #c5221f; }
         .btn-publish { background: #28a745; }
-        .btn-publish:hover { background: #218838; }
+        .btn-edit { background: #F4A261; color: #0B2B40; }
         .btn-view { background: #17a2b8; }
-        .btn-view:hover { background: #138496; }
         .spinner {
             display: inline-block;
             width: 14px;
@@ -91,39 +68,23 @@
             vertical-align: middle;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        a.button {
-            text-decoration: none;
-            display: inline-block;
-        }
     </style>
 </head>
 <body>
     <div class="container" id="app">
         <div id="loginPanel" class="login-form">
             <h1>🔐 Acceso SuperAdmin</h1>
-            <div class="form-group">
-                <label>Usuario</label>
-                <input type="text" id="loginUser" placeholder="Admin" value="Admin">
-            </div>
-            <div class="form-group">
-                <label>Contraseña</label>
-                <input type="password" id="loginPass" placeholder="admin" value="admin">
-            </div>
+            <div class="form-group"><label>Usuario</label><input type="text" id="loginUser" value="Admin"></div>
+            <div class="form-group"><label>Contraseña</label><input type="password" id="loginPass" value="admin"></div>
+            <div class="form-group"><label>URL de Supabase</label><input type="text" id="supabaseUrl" value="https://nvrcqlxnvjvhznmxozhh.supabase.co"></div>
+            <div class="form-group"><label>Clave anónima</label><input type="text" id="supabaseKey" value="sb_publishable_qCtRLmyJxBbYRcO7Suuqnw_mrmqspp6"></div>
             <button onclick="login()">Ingresar</button>
         </div>
 
         <div id="adminPanel" style="display: none;">
             <button class="logout-btn" onclick="logout()">🚪 Cerrar sesión</button>
-            <h1>📋 Solicitudes de clientes</h1>
-            <div id="solicitudesList"></div>
-        </div>
-    </div>
-
-    <div id="modalJson" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000;">
-        <div style="background:white; border-radius:16px; padding:2rem; max-width:800px; width:90%; max-height:80vh; overflow-y:auto;">
-            <h3>Configuración completa del cliente</h3>
-            <pre id="jsonContent"></pre>
-            <button onclick="cerrarModal()">Cerrar</button>
+            <h1>📋 Clientes registrados</h1>
+            <div id="clientesList"></div>
         </div>
     </div>
 
@@ -132,18 +93,22 @@
     <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();</script>
     <script>
-        let negociosList = [];
-        const BASE_URL = window.location.origin + window.location.pathname.replace('panel-superadmin.html', '');
+        let clientes = [];
+        let supabaseUrl = '';
+        let supabaseKey = '';
 
-        function login() {
+        async function login() {
             const user = document.getElementById('loginUser').value;
             const pass = document.getElementById('loginPass').value;
+            supabaseUrl = document.getElementById('supabaseUrl').value;
+            supabaseKey = document.getElementById('supabaseKey').value;
+            
             if (user === 'Admin' && pass === 'admin') {
                 document.getElementById('loginPanel').style.display = 'none';
                 document.getElementById('adminPanel').style.display = 'block';
-                cargarSolicitudes();
+                await cargarClientes();
             } else {
-                alert('Usuario o contraseña incorrectos');
+                alert('Credenciales incorrectas');
             }
         }
 
@@ -152,123 +117,48 @@
             document.getElementById('adminPanel').style.display = 'none';
         }
 
-        async function cargarSolicitudes() {
-            console.log('📡 Cargando solicitudes...');
+        async function cargarClientes() {
             try {
-                window.initSupabase();
-                const { data, error } = await window.initSupabase()
-                    .from('negocios')
-                    .select('*')
-                    .in('estado', ['pendiente_revision', 'publicado'])
-                    .order('fecha_creacion', { ascending: false });
-                if (error) throw error;
-                negociosList = data || [];
-                renderizarSolicitudes();
+                clientes = await window.getTodosClientes(supabaseUrl, supabaseKey);
+                renderizarClientes();
             } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('solicitudesList').innerHTML = '<p>Error cargando solicitudes</p>';
+                document.getElementById('clientesList').innerHTML = '<p>Error cargando clientes</p>';
             }
         }
 
-        function renderizarSolicitudes() {
-            const container = document.getElementById('solicitudesList');
-            if (!negociosList.length) {
-                container.innerHTML = '<p>✅ No hay solicitudes pendientes</p>';
-                return;
-            }
-
-            container.innerHTML = negociosList.map(n => `
+        function renderizarClientes() {
+            const container = document.getElementById('clientesList');
+            if (!clientes.length) { container.innerHTML = '<p>No hay clientes registrados</p>'; return; }
+            
+            container.innerHTML = clientes.map(c => `
                 <div class="solicitud-card">
                     <div class="solicitud-header">
-                        <div>
-                            <strong>${escapeHtml(n.cliente_nombre)}</strong><br>
-                            <small>${escapeHtml(n.cliente_email)} | ${escapeHtml(n.cliente_telefono)}</small>
-                        </div>
-                        <div>
-                            <span class="badge ${n.estado === 'pendiente_revision' ? 'badge-pendiente' : 'badge-publicado'}">
-                                ${n.estado === 'pendiente_revision' ? '📝 Pendiente revisión' : '✅ Publicado'}
-                            </span>
-                        </div>
-                    </div>
-                    <div class="ver-json">
-                        <button onclick="verJSON('${n.id}')">👁️ Ver JSON completo</button>
+                        <div><strong>${escapeHtml(c.nombre)}</strong><br><small>ID: ${c.id_publico} | ${c.email} | ${c.telefono || 'Sin teléfono'}</small></div>
+                        <div><span class="badge ${c.estado === 'pendiente_revision' ? 'badge-pendiente' : 'badge-publicado'}">${c.estado === 'pendiente_revision' ? '📝 Pendiente' : '✅ Publicado'}</span></div>
                     </div>
                     <div class="acciones">
-                        <a href="https://wa.me/${n.cliente_telefono.replace(/[^0-9]/g, '')}?text=Hola%20${encodeURIComponent(n.cliente_nombre)}%2C%20vi%20tu%20solicitud%20de%20p%C3%A1gina%20web%20y%20queremos%20agendar%20una%20videollamada%20para%20revisarla%20contigo." target="_blank" class="button">
-                            <button class="btn-whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp</button>
-                        </a>
-                        <a href="tel:${n.cliente_telefono}" class="button">
-                            <button class="btn-call"><i class="fas fa-phone"></i> Llamar</button>
-                        </a>
-                        <a href="mailto:${n.cliente_email}?subject=Tu%20p%C3%A1gina%20web%20-%20Agendar%20videollamada&body=Hola%20${encodeURIComponent(n.cliente_nombre)}%2C%20vi%20tu%20solicitud%20y%20queremos%20agendar%20una%20videollamada%20para%20mostrarte%20las%20mejoras%20y%20publicar%20tu%20p%C3%A1gina." class="button">
-                            <button class="btn-email"><i class="fas fa-envelope"></i> Correo</button>
-                        </a>
-                        ${n.estado === 'pendiente_revision' ? `
-                            <button class="btn-publish" onclick="publicarPagina('${n.id}')">
-                                <i class="fas fa-globe"></i> Publicar página
-                            </button>
-                        ` : `
-                            <a href="${BASE_URL}index.html?id=${n.id}" target="_blank" class="button">
-                                <button class="btn-view"><i class="fas fa-eye"></i> Ver página</button>
-                            </a>
-                        `}
+                        <a href="https://wa.me/${c.telefono?.replace(/[^0-9]/g, '') || ''}" target="_blank"><button class="btn-whatsapp"><i class="fab fa-whatsapp"></i> WhatsApp</button></a>
+                        <a href="tel:${c.telefono || ''}"><button class="btn-call"><i class="fas fa-phone"></i> Llamar</button></a>
+                        <a href="mailto:${c.email}"><button class="btn-email"><i class="fas fa-envelope"></i> Correo</button></a>
+                        <a href="admin-cliente.html?id=${c.id_publico}" target="_blank"><button class="btn-edit"><i class="fas fa-edit"></i> Editar configuración</button></a>
+                        ${c.estado === 'pendiente_revision' ? 
+                            `<button class="btn-publish" onclick="publicarCliente('${c.id_publico}')"><i class="fas fa-globe"></i> Publicar página</button>` : 
+                            `<a href="index.html?uuid=${c.uuid}" target="_blank"><button class="btn-view"><i class="fas fa-eye"></i> Ver página</button></a>`}
                     </div>
                 </div>
             `).join('');
         }
 
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/[&<>]/g, m => {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                return m;
-            });
-        }
+        function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => { if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m; }); }
 
-        async function verJSON(id) {
+        async function publicarCliente(idPublico) {
+            if (!confirm('¿Publicar este cliente?')) return;
             try {
-                const negocio = await window.getNegocio(id);
-                const modal = document.getElementById('modalJson');
-                const content = document.getElementById('jsonContent');
-                content.textContent = JSON.stringify(negocio.config, null, 2);
-                modal.style.display = 'flex';
+                await window.publicarCliente(idPublico, supabaseUrl, supabaseKey);
+                await cargarClientes();
+                alert('✅ Cliente publicado');
             } catch (error) {
-                mostrarToast('Error cargando JSON: ' + error.message, 'error');
-            }
-        }
-
-        function cerrarModal() {
-            document.getElementById('modalJson').style.display = 'none';
-        }
-
-        function mostrarToast(mensaje, tipo = 'success') {
-            const toast = document.createElement('div');
-            toast.className = 'mensaje-toast';
-            toast.style.backgroundColor = tipo === 'error' ? '#dc3545' : '#28a745';
-            toast.textContent = mensaje;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
-
-        async function publicarPagina(id) {
-            if (!confirm('¿Publicar esta página? El cliente podrá verla inmediatamente.')) return;
-            
-            const btn = event.target;
-            const textoOriginal = btn.innerHTML;
-            btn.innerHTML = '<span class="spinner"></span> Publicando...';
-            btn.disabled = true;
-            
-            try {
-                await window.publicarNegocio(id);
-                mostrarToast('✅ Página publicada correctamente');
-                cargarSolicitudes();
-            } catch (error) {
-                mostrarToast('❌ Error: ' + error.message, 'error');
-            } finally {
-                btn.innerHTML = textoOriginal;
-                btn.disabled = false;
+                alert('❌ Error: ' + error.message);
             }
         }
     </script>

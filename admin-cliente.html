@@ -615,72 +615,79 @@
         // LOGIN
         // ============================================
         async function login() {
-            const idPublico = document.getElementById('clienteId').value;
-            const password = document.getElementById('password').value;
-            supabaseUrl = document.getElementById('supabaseUrl').value;
-            supabaseKey = document.getElementById('supabaseKey').value;
-            if (!idPublico || !password) { alert('Ingresa ID y contraseña'); return; }
-            try {
-                supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-                const cliente = await window.loginCliente(idPublico, password, supabaseUrl, supabaseKey);
-                clienteData = cliente;
-                const config = cliente.config || {};
-                if (config.marca?.colores) {
-                    document.getElementById('color-primario').value = config.marca.colores.primario || '#1E3A5F';
-                    document.getElementById('color-secundario').value = config.marca.colores.secundario || '#4A90E2';
-                    document.getElementById('color-acento').value = config.marca.colores.acento || '#F77F00';
-                    document.getElementById('color-texto').value = config.marca.colores.texto || '#0A1C2E';
-                    document.getElementById('color-fondo').value = config.marca.colores.fondo || '#F0F8FF';
-                    actualizarColorPreview();
-                }
-                document.getElementById('hero-superior').value = config.hero?.texto_superior || '';
-                document.getElementById('hero-principal').value = config.hero?.texto_principal || '';
-                document.getElementById('hero-inferior').value = config.hero?.texto_inferior || '';
-                document.getElementById('hero-boton').value = config.hero?.boton || 'Ver productos';
-                document.getElementById('hero-imagen').value = config.hero?.imagen || '';
-                document.getElementById('hero-overlay').value = config.hero?.overlay || 0.5;
-                document.getElementById('nosotros-titulo').value = config.nosotros?.titulo || 'Sobre Nosotros';
-                document.getElementById('nosotros-subtitulo').value = config.nosotros?.subtitulo || 'Conócenos mejor';
-                document.getElementById('nosotros-historia').value = config.nosotros?.historia || '';
-                document.getElementById('nosotros-imagen').value = config.nosotros?.imagen || '';
-                document.getElementById('nosotros-valores').value = (config.nosotros?.valores || []).join(', ');
-                document.getElementById('contacto-direccion').value = config.contacto?.direccion || '';
-                document.getElementById('contacto-whatsapp').value = config.contacto?.whatsapp || '';
-                document.getElementById('contacto-mapa').value = config.contacto?.mapa || '';
-                document.getElementById('red-facebook').value = config.contacto?.redes?.facebook || '';
-                document.getElementById('red-instagram').value = config.contacto?.redes?.instagram || '';
-                document.getElementById('footer-texto').value = config.footer?.texto || '';
-                
-                const prods = await window.getProductosPorCliente(cliente.uuid, supabaseUrl, supabaseKey);
-                if (prods.length) productos = prods.map(p => ({ ...p, id: p.id }));
-                const tests = await window.getTestimoniosPorCliente(cliente.uuid, supabaseUrl, supabaseKey);
-                if (tests.length) testimonios = tests.map(t => ({ ...t, id: t.id }));
-                const gals = await window.getGaleriaPorCliente(cliente.uuid, supabaseUrl, supabaseKey);
-                if (gals.length) galeria = gals.map(g => ({ ...g, id: g.id, fotos: g.imagen_url ? [g.imagen_url] : [] }));
-                
-                renderizarProductos();
-                renderizarTestimonios();
-                renderizarGaleria();
-                
-                document.getElementById('loginPanel').style.display = 'none';
-                document.getElementById('adminPanel').style.display = 'block';
-                initColorPalettes();
-                initUploaders();
-                
-                // Inicializar editor Quill
-                if (!nosotrosEditor) {
-                    nosotrosEditor = new Quill('#nosotrosHistoriaEditor', { theme: 'snow', placeholder: 'Escribe la historia de tu negocio...' });
-                    nosotrosEditor.on('text-change', () => previewNosotros());
-                }
-                if (config.nosotros?.historia) nosotrosEditor.root.innerHTML = config.nosotros.historia;
-                previewHero();
-                previewNosotros();
-                
-            } catch (error) { alert('Error: ' + error.message); }
+    const idPublico = document.getElementById('clienteId').value;
+    const password = document.getElementById('password').value;
+    supabaseUrl = document.getElementById('supabaseUrl').value;
+    supabaseKey = document.getElementById('supabaseKey').value;
+    if (!idPublico || !password) { alert('Ingresa ID y contraseña'); return; }
+    try {
+        supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        const cliente = await window.loginCliente(idPublico, password, supabaseUrl, supabaseKey);
+        clienteData = cliente;
+        const config = cliente.config || {};
+        
+        // Colores
+        if (config.marca?.colores) {
+            document.getElementById('color-primario').value = config.marca.colores.primario || '#1E3A5F';
+            document.getElementById('color-secundario').value = config.marca.colores.secundario || '#4A90E2';
+            document.getElementById('color-acento').value = config.marca.colores.acento || '#F77F00';
+            document.getElementById('color-texto').value = config.marca.colores.texto || '#0A1C2E';
+            document.getElementById('color-fondo').value = config.marca.colores.fondo || '#F0F8FF';
+            actualizarColorPreview();
         }
-
-        function logout() { document.getElementById('loginPanel').style.display = 'block'; document.getElementById('adminPanel').style.display = 'none'; clienteData = null; }
-
+        
+        // Hero - solo si existen
+        if (document.getElementById('hero-superior')) document.getElementById('hero-superior').value = config.hero?.texto_superior || '';
+        if (document.getElementById('hero-principal')) document.getElementById('hero-principal').value = config.hero?.texto_principal || '';
+        if (document.getElementById('hero-inferior')) document.getElementById('hero-inferior').value = config.hero?.texto_inferior || '';
+        if (document.getElementById('hero-boton')) document.getElementById('hero-boton').value = config.hero?.boton || 'Ver productos';
+        if (document.getElementById('hero-imagen')) document.getElementById('hero-imagen').value = config.hero?.imagen || '';
+        if (document.getElementById('hero-overlay')) document.getElementById('hero-overlay').value = config.hero?.overlay || 0.5;
+        
+        // Nosotros
+        if (document.getElementById('nosotros-titulo')) document.getElementById('nosotros-titulo').value = config.nosotros?.titulo || 'Sobre Nosotros';
+        if (document.getElementById('nosotros-subtitulo')) document.getElementById('nosotros-subtitulo').value = config.nosotros?.subtitulo || 'Conócenos mejor';
+        if (document.getElementById('nosotros-historia')) document.getElementById('nosotros-historia').value = config.nosotros?.historia || '';
+        if (document.getElementById('nosotros-imagen')) document.getElementById('nosotros-imagen').value = config.nosotros?.imagen || '';
+        if (document.getElementById('nosotros-valores')) document.getElementById('nosotros-valores').value = (config.nosotros?.valores || []).join(', ');
+        
+        // Contacto
+        if (document.getElementById('contacto-direccion')) document.getElementById('contacto-direccion').value = config.contacto?.direccion || '';
+        if (document.getElementById('contacto-whatsapp')) document.getElementById('contacto-whatsapp').value = config.contacto?.whatsapp || '';
+        if (document.getElementById('contacto-mapa')) document.getElementById('contacto-mapa').value = config.contacto?.mapa || '';
+        if (document.getElementById('red-facebook')) document.getElementById('red-facebook').value = config.contacto?.redes?.facebook || '';
+        if (document.getElementById('red-instagram')) document.getElementById('red-instagram').value = config.contacto?.redes?.instagram || '';
+        if (document.getElementById('footer-texto')) document.getElementById('footer-texto').value = config.footer?.texto || '';
+        
+        // Cargar productos, testimonios, galería
+        const prods = await window.getProductosPorCliente(cliente.uuid, supabaseUrl, supabaseKey);
+        if (prods.length) productos = prods.map(p => ({ ...p, id: p.id }));
+        const tests = await window.getTestimoniosPorCliente(cliente.uuid, supabaseUrl, supabaseKey);
+        if (tests.length) testimonios = tests.map(t => ({ ...t, id: t.id }));
+        const gals = await window.getGaleriaPorCliente(cliente.uuid, supabaseUrl, supabaseKey);
+        if (gals.length) galeria = gals.map(g => ({ ...g, id: g.id, fotos: g.imagen_url ? [g.imagen_url] : [] }));
+        
+        renderizarProductos();
+        renderizarTestimonios();
+        renderizarGaleria();
+        
+        document.getElementById('loginPanel').style.display = 'none';
+        document.getElementById('adminPanel').style.display = 'block';
+        initColorPalettes();
+        initUploaders();
+        
+        // Inicializar editor Quill
+        if (!nosotrosEditor && document.getElementById('nosotrosHistoriaEditor')) {
+            nosotrosEditor = new Quill('#nosotrosHistoriaEditor', { theme: 'snow', placeholder: 'Escribe la historia de tu negocio...' });
+            nosotrosEditor.on('text-change', () => previewNosotros());
+        }
+        if (nosotrosEditor && config.nosotros?.historia) nosotrosEditor.root.innerHTML = config.nosotros.historia;
+        previewHero();
+        previewNosotros();
+        
+    } catch (error) { alert('Error: ' + error.message); }
+        }
+        
         // ============================================
         // GUARDAR TODO
         // ============================================

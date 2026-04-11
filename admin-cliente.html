@@ -434,22 +434,51 @@
         }
 
         // ============================================
-        // FUNCIONES DE SUBIDA (USANDO supabaseClient GLOBAL)
+        // FUNCIONES DE SUBIDA CON LOGS
         // ============================================
         async function comprimirYSubirImagen(file, carpeta) {
-            const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true, fileType: 'image/webp' };
+            const options = {
+                maxSizeMB: 1,
+                maxWidthOrHeight: 1920,
+                useWebWorker: true,
+                fileType: 'image/webp'
+            };
+            
+            console.log('📊 Iniciando compresión...');
+            console.log('  - Archivo original:', file.name, (file.size / 1024).toFixed(2), 'KB', file.type);
+            
             const compressedFile = await imageCompression(file, options);
+            
+            console.log('  - Comprimido:', (compressedFile.size / 1024).toFixed(2), 'KB', compressedFile.type);
+            
             const nombreArchivo = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.webp`;
             const ruta = `${clienteData.uuid}/${carpeta}/${nombreArchivo}`;
-            const { error } = await supabaseClient.storage.from('cliente').upload(ruta, compressedFile);
-            if (error) throw error;
+            
+            console.log('  - Subiendo a:', ruta);
+            
+            const { error } = await supabaseClient.storage
+                .from('cliente')
+                .upload(ruta, compressedFile);
+            
+            if (error) {
+                console.error('❌ Error en upload:', error);
+                throw error;
+            }
+            
+            console.log('✅ Subida exitosa:', nombreArchivo);
             return nombreArchivo;
         }
 
         async function subirVideoPendiente(file) {
             const nombreArchivo = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.mp4`;
             const ruta = `${clienteData.uuid}/hero/pendientes/${nombreArchivo}`;
-            const { error } = await supabaseClient.storage.from('cliente').upload(ruta, file);
+            
+            console.log('🎬 Subiendo video:', nombreArchivo);
+            
+            const { error } = await supabaseClient.storage
+                .from('cliente')
+                .upload(ruta, file);
+            
             if (error) throw error;
             return `pendientes/${nombreArchivo}`;
         }
@@ -458,62 +487,86 @@
             // Hero imagen
             const heroUpload = document.getElementById('uploadAreaHero');
             const heroInput = document.getElementById('subirHero');
-            if (heroUpload) heroUpload.addEventListener('click', () => heroInput.click());
-            heroInput?.addEventListener('change', async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const preview = document.getElementById('previewHero');
-                preview.innerHTML = '<span class="spinner"></span> Subiendo...';
-                try {
-                    const nombre = await comprimirYSubirImagen(file, 'hero');
-                    document.getElementById('hero-imagen').value = nombre;
-                    preview.innerHTML = `<span style="color: green;">✅ Imagen subida: ${nombre}</span>`;
-                } catch (err) {
-                    console.error('Error:', err);
-                    preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
-                }
-                heroInput.value = '';
-            });
+            if (heroUpload) {
+                heroUpload.addEventListener('click', () => heroInput.click());
+            }
+            if (heroInput) {
+                heroInput.addEventListener('change', async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    
+                    console.log('📁 Hero - Archivo seleccionado:', file.name, (file.size / 1024).toFixed(2), 'KB');
+                    
+                    const preview = document.getElementById('previewHero');
+                    preview.innerHTML = '<span class="spinner"></span> Subiendo...';
+                    
+                    try {
+                        const nombre = await comprimirYSubirImagen(file, 'hero');
+                        document.getElementById('hero-imagen').value = nombre;
+                        preview.innerHTML = `<span style="color: green;">✅ Imagen subida: ${nombre}</span>`;
+                    } catch (err) {
+                        console.error('❌ Error detallado:', err);
+                        preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
+                    }
+                    heroInput.value = '';
+                });
+            }
 
             // Hero video
             const heroVideoUpload = document.getElementById('uploadAreaHeroVideo');
             const heroVideoInput = document.getElementById('subirHeroVideo');
-            if (heroVideoUpload) heroVideoUpload.addEventListener('click', () => heroVideoInput.click());
-            heroVideoInput?.addEventListener('change', async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const preview = document.getElementById('previewHeroVideo');
-                preview.innerHTML = '<span class="spinner"></span> Subiendo video...';
-                try {
-                    const nombre = await subirVideoPendiente(file);
-                    document.getElementById('hero-video').value = nombre;
-                    preview.innerHTML = `<span style="color: green;">✅ Video subido (pendiente de optimización): ${nombre}</span>`;
-                } catch (err) {
-                    console.error('Error:', err);
-                    preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
-                }
-                heroVideoInput.value = '';
-            });
+            if (heroVideoUpload) {
+                heroVideoUpload.addEventListener('click', () => heroVideoInput.click());
+            }
+            if (heroVideoInput) {
+                heroVideoInput.addEventListener('change', async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    
+                    console.log('🎬 Hero - Video seleccionado:', file.name, (file.size / 1024).toFixed(2), 'KB');
+                    
+                    const preview = document.getElementById('previewHeroVideo');
+                    preview.innerHTML = '<span class="spinner"></span> Subiendo video...';
+                    
+                    try {
+                        const nombre = await subirVideoPendiente(file);
+                        document.getElementById('hero-video').value = nombre;
+                        preview.innerHTML = `<span style="color: green;">✅ Video subido (pendiente de optimización): ${nombre}</span>`;
+                    } catch (err) {
+                        console.error('❌ Error detallado:', err);
+                        preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
+                    }
+                    heroVideoInput.value = '';
+                });
+            }
 
             // Nosotros imagen
             const nosotrosUpload = document.getElementById('uploadAreaNosotros');
             const nosotrosInput = document.getElementById('subirNosotros');
-            if (nosotrosUpload) nosotrosUpload.addEventListener('click', () => nosotrosInput.click());
-            nosotrosInput?.addEventListener('change', async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const preview = document.getElementById('previewNosotros');
-                preview.innerHTML = '<span class="spinner"></span> Subiendo...';
-                try {
-                    const nombre = await comprimirYSubirImagen(file, 'nosotros');
-                    document.getElementById('nosotros-imagen').value = nombre;
-                    preview.innerHTML = `<span style="color: green;">✅ Imagen subida: ${nombre}</span>`;
-                } catch (err) {
-                    console.error('Error:', err);
-                    preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
-                }
-                nosotrosInput.value = '';
-            });
+            if (nosotrosUpload) {
+                nosotrosUpload.addEventListener('click', () => nosotrosInput.click());
+            }
+            if (nosotrosInput) {
+                nosotrosInput.addEventListener('change', async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    
+                    console.log('📖 Nosotros - Archivo seleccionado:', file.name, (file.size / 1024).toFixed(2), 'KB');
+                    
+                    const preview = document.getElementById('previewNosotros');
+                    preview.innerHTML = '<span class="spinner"></span> Subiendo...';
+                    
+                    try {
+                        const nombre = await comprimirYSubirImagen(file, 'nosotros');
+                        document.getElementById('nosotros-imagen').value = nombre;
+                        preview.innerHTML = `<span style="color: green;">✅ Imagen subida: ${nombre}</span>`;
+                    } catch (err) {
+                        console.error('❌ Error detallado:', err);
+                        preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`;
+                    }
+                    nosotrosInput.value = '';
+                });
+            }
         }
 
         // ============================================
@@ -723,10 +776,11 @@
             if (!idPublico || !password) { alert('Ingresa ID y contraseña'); return; }
             
             try {
-                // Crear cliente Supabase solo una vez
                 supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
                 const cliente = await window.loginCliente(idPublico, password, supabaseUrl, supabaseKey);
                 clienteData = cliente;
+                
+                console.log('✅ Cliente logueado:', clienteData.id_publico, clienteData.uuid);
                 
                 // Cargar datos del config
                 const config = cliente.config || {};
@@ -775,6 +829,7 @@
                 initUploaders();
                 
             } catch (error) {
+                console.error('❌ Error en login:', error);
                 alert('Error: ' + error.message);
             }
         }
@@ -858,6 +913,7 @@
                 setTimeout(() => { mensajeDiv.style.display = 'none'; }, 3000);
                 
             } catch (error) {
+                console.error('❌ Error guardando:', error);
                 const mensajeDiv = document.getElementById('mensaje');
                 mensajeDiv.textContent = '❌ Error: ' + error.message;
                 mensajeDiv.className = 'mensaje mensaje-error';
@@ -869,4 +925,4 @@
         }
     </script>
 </body>
-                                </html>
+    </html>

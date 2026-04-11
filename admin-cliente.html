@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración - Mi Negocio</title>
+    <title>Panel de Control - Mi Negocio</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     <style>
@@ -48,16 +48,36 @@
         .btn-agregar:hover { background: #218838; }
         .btn-subir-imagen { background: #F4A261; color: #0B2B40; margin-right: 0.5rem; }
         .btn-subir-imagen:hover { background: #e67e22; }
-        .tab-buttons { display: flex; gap: 0.5rem; margin-bottom: 2rem; flex-wrap: wrap; }
-        .tab-btn { background: #e0e0e0; color: #333; }
-        .tab-btn.active { background: #0B4F6C; color: white; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .item-card {
+        .seccion-card {
             background: #f8f9fa;
             border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .seccion-titulo {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #0B4F6C;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #F4A261;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        @media (max-width: 768px) { .form-row { grid-template-columns: 1fr; } }
+        .item-card {
+            background: white;
+            border-radius: 12px;
             padding: 1rem;
             margin-bottom: 1rem;
+            border: 1px solid #e0e0e0;
         }
         .item-header {
             display: flex;
@@ -70,33 +90,17 @@
         }
         .item-contenido { margin-top: 1rem; }
         .hidden { display: none; }
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
-        @media (max-width: 768px) { .form-row { grid-template-columns: 1fr; } }
-        .mensaje {
-            margin-top: 1rem;
-            padding: 1rem;
+        .upload-area {
+            border: 2px dashed #0B4F6C;
             border-radius: 12px;
-            display: none;
+            padding: 1rem;
+            text-align: center;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
         }
-        .mensaje-exito { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .mensaje-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .logout-btn { background: #dc3545; margin-bottom: 1rem; }
-        h2 { color: #0B4F6C; margin-bottom: 1rem; }
-        .img-miniatura {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-        .categoria-badge {
-            display: inline-block;
-            background: #0B4F6C;
-            color: white;
-            padding: 0.2rem 0.6rem;
-            border-radius: 50px;
-            font-size: 0.7rem;
-            margin-left: 0.5rem;
-        }
+        .upload-area:hover { background: #f0f8ff; border-color: #F4A261; }
+        .preview-upload { margin-top: 0.5rem; font-size: 0.8rem; }
         .spinner {
             display: inline-block;
             width: 16px;
@@ -109,25 +113,53 @@
             vertical-align: middle;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-        .upload-area {
-            border: 2px dashed #0B4F6C;
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-align: center;
-            margin-bottom: 1rem;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .upload-area:hover {
-            background: #f0f8ff;
-            border-color: #F4A261;
-        }
-        .preview-imagen {
-            max-width: 80px;
-            max-height: 80px;
+        .img-miniatura {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
             border-radius: 8px;
-            margin-top: 0.5rem;
         }
+        .btn-guardar {
+            width: 100%;
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            font-size: 1.2rem;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        .btn-guardar:disabled { opacity: 0.6; cursor: not-allowed; }
+        .logout-btn { background: #dc3545; margin-bottom: 1rem; }
+        .mensaje {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 12px;
+            display: none;
+        }
+        .mensaje-exito { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .mensaje-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .color-input {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .color-input input[type="color"] { width: 60px; height: 50px; border-radius: 12px; cursor: pointer; }
+        .color-input span { font-family: monospace; background: #f5f5f5; padding: 0.3rem 0.8rem; border-radius: 8px; }
+        .color-input input[type="text"] { width: 150px; }
+        .paleta-colores {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .color-opcion {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .color-opcion:hover { transform: scale(1.1); border-color: #333; }
     </style>
 </head>
 <body>
@@ -135,240 +167,593 @@
         <div id="loginPanel" class="login-form">
             <h1>🔐 Acceso a tu panel</h1>
             <div class="form-group">
-                <label>ID de tu negocio</label>
-                <input type="text" id="negocioId" placeholder="Ej: abc123...">
+                <label>ID de cliente (ej: RGS-7823)</label>
+                <input type="text" id="clienteId" placeholder="RGS-0000">
             </div>
             <div class="form-group">
                 <label>Contraseña</label>
-                <input type="password" id="password" placeholder="admin">
+                <input type="password" id="password" placeholder="contraseña">
+            </div>
+            <div class="form-group">
+                <label>URL de Supabase</label>
+                <input type="text" id="supabaseUrl" value="https://nvrcqlxnvjvhznmxozhh.supabase.co">
+            </div>
+            <div class="form-group">
+                <label>Clave anónima</label>
+                <input type="text" id="supabaseKey" value="sb_publishable_qCtRLmyJxBbYRcO7Suuqnw_mrmqspp6">
             </div>
             <button onclick="login()">Ingresar</button>
         </div>
 
         <div id="adminPanel" style="display: none;">
             <button class="logout-btn" onclick="logout()">🚪 Cerrar sesión</button>
-            <h1>📋 Panel de Administración</h1>
-            <p>Aquí puedes gestionar el contenido de tu página web.</p>
+            <h1>📋 Panel de Control</h1>
+            <p>Edita todos los aspectos de tu página web. Los cambios se aplican al instante.</p>
             
-            <div class="tab-buttons">
-                <button class="tab-btn active" data-tab="productos">📦 Productos</button>
-                <button class="tab-btn" data-tab="servicios">🛠️ Servicios</button>
-                <button class="tab-btn" data-tab="galeria">📸 Galería</button>
-                <button class="tab-btn" data-tab="testimonios">⭐ Testimonios</button>
-            </div>
-
-            <!-- TAB: PRODUCTOS -->
-            <div id="tab-productos" class="tab-content active">
-                <div class="upload-area" id="uploadAreaProductos">
-                    <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #0B4F6C;"></i>
-                    <p>Toca o arrastra imágenes aquí para crear productos</p>
-                    <p style="font-size: 0.8rem; color: #666;">Se optimizarán automáticamente (WebP, 85% calidad)</p>
-                    <input type="file" id="subirImagenProductos" accept="image/*" multiple style="display: none;">
+            <!-- SECCIÓN CONFIGURACIÓN -->
+            <div class="seccion-card">
+                <div class="seccion-titulo">
+                    <i class="fas fa-sliders-h"></i> Configuración de la página
                 </div>
-                <div id="uploadPreviewProductos" style="margin-bottom: 1rem;"></div>
                 
-                <button class="btn-agregar" onclick="abrirModalAgregar('producto')"><i class="fas fa-plus"></i> Agregar producto manualmente</button>
+                <!-- Colores -->
+                <h3 style="margin: 1rem 0 0.5rem 0;">🎨 Colores de tu marca</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Color principal</label>
+                        <div class="color-input">
+                            <input type="color" id="color-primario" value="#1E3A5F">
+                            <span id="color-primario-text">#1E3A5F</span>
+                            <input type="text" id="color-primario-texto" placeholder="O escribe el color">
+                        </div>
+                        <div class="paleta-colores" data-target="color-primario">
+                            <div class="color-opcion" style="background: #0B2B40;" data-color="#0B2B40"></div>
+                            <div class="color-opcion" style="background: #1C6E8F;" data-color="#1C6E8F"></div>
+                            <div class="color-opcion" style="background: #F4A261;" data-color="#F4A261"></div>
+                            <div class="color-opcion" style="background: #2A9D8F;" data-color="#2A9D8F"></div>
+                            <div class="color-opcion" style="background: #4A4A4A;" data-color="#4A4A4A"></div>
+                            <div class="color-opcion" style="background: #F9F9F9;" data-color="#F9F9F9"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Color secundario</label>
+                        <div class="color-input">
+                            <input type="color" id="color-secundario" value="#4A90E2">
+                            <span id="color-secundario-text">#4A90E2</span>
+                            <input type="text" id="color-secundario-texto" placeholder="O escribe el color">
+                        </div>
+                        <div class="paleta-colores" data-target="color-secundario">
+                            <div class="color-opcion" style="background: #0B2B40;" data-color="#0B2B40"></div>
+                            <div class="color-opcion" style="background: #1C6E8F;" data-color="#1C6E8F"></div>
+                            <div class="color-opcion" style="background: #F4A261;" data-color="#F4A261"></div>
+                            <div class="color-opcion" style="background: #2A9D8F;" data-color="#2A9D8F"></div>
+                            <div class="color-opcion" style="background: #4A4A4A;" data-color="#4A4A4A"></div>
+                            <div class="color-opcion" style="background: #F9F9F9;" data-color="#F9F9F9"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Color de acento</label>
+                        <div class="color-input">
+                            <input type="color" id="color-acento" value="#F77F00">
+                            <span id="color-acento-text">#F77F00</span>
+                            <input type="text" id="color-acento-texto" placeholder="O escribe el color">
+                        </div>
+                        <div class="paleta-colores" data-target="color-acento">
+                            <div class="color-opcion" style="background: #0B2B40;" data-color="#0B2B40"></div>
+                            <div class="color-opcion" style="background: #1C6E8F;" data-color="#1C6E8F"></div>
+                            <div class="color-opcion" style="background: #F4A261;" data-color="#F4A261"></div>
+                            <div class="color-opcion" style="background: #2A9D8F;" data-color="#2A9D8F"></div>
+                            <div class="color-opcion" style="background: #4A4A4A;" data-color="#4A4A4A"></div>
+                            <div class="color-opcion" style="background: #F9F9F9;" data-color="#F9F9F9"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Color de texto</label>
+                        <div class="color-input">
+                            <input type="color" id="color-texto" value="#0A1C2E">
+                            <span id="color-texto-text">#0A1C2E</span>
+                            <input type="text" id="color-texto-texto" placeholder="O escribe el color">
+                        </div>
+                        <div class="paleta-colores" data-target="color-texto">
+                            <div class="color-opcion" style="background: #0B2B40;" data-color="#0B2B40"></div>
+                            <div class="color-opcion" style="background: #1C6E8F;" data-color="#1C6E8F"></div>
+                            <div class="color-opcion" style="background: #F4A261;" data-color="#F4A261"></div>
+                            <div class="color-opcion" style="background: #2A9D8F;" data-color="#2A9D8F"></div>
+                            <div class="color-opcion" style="background: #4A4A4A;" data-color="#4A4A4A"></div>
+                            <div class="color-opcion" style="background: #F9F9F9;" data-color="#F9F9F9"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Color de fondo</label>
+                    <div class="color-input">
+                        <input type="color" id="color-fondo" value="#F0F8FF">
+                        <span id="color-fondo-text">#F0F8FF</span>
+                        <input type="text" id="color-fondo-texto" placeholder="O escribe el color">
+                    </div>
+                    <div class="paleta-colores" data-target="color-fondo">
+                        <div class="color-opcion" style="background: #0B2B40;" data-color="#0B2B40"></div>
+                        <div class="color-opcion" style="background: #1C6E8F;" data-color="#1C6E8F"></div>
+                        <div class="color-opcion" style="background: #F4A261;" data-color="#F4A261"></div>
+                        <div class="color-opcion" style="background: #2A9D8F;" data-color="#2A9D8F"></div>
+                        <div class="color-opcion" style="background: #4A4A4A;" data-color="#4A4A4A"></div>
+                        <div class="color-opcion" style="background: #F9F9F9;" data-color="#F9F9F9"></div>
+                    </div>
+                </div>
+                
+                <!-- Hero -->
+                <h3 style="margin: 1.5rem 0 0.5rem 0;">🖼️ Portada principal (Hero)</h3>
+                <div class="form-row">
+                    <div class="form-group"><label>Texto superior</label><input type="text" id="hero-superior" placeholder="BIENVENIDOS A"></div>
+                    <div class="form-group"><label>Texto principal</label><input type="text" id="hero-principal" placeholder="Mi Negocio"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Texto inferior</label><input type="text" id="hero-inferior" placeholder="Calidad • Confianza"></div>
+                    <div class="form-group"><label>Texto del botón</label><input type="text" id="hero-boton" value="Ver productos"></div>
+                </div>
+                <div class="form-group">
+                    <label>Imagen de fondo</label>
+                    <div class="upload-area" id="uploadAreaHero"><i class="fas fa-cloud-upload-alt"></i> Toca para subir imagen<input type="file" id="subirHero" accept="image/*" style="display: none;"></div>
+                    <div id="previewHero" class="preview-upload"></div>
+                </div>
+                <div class="form-group">
+                    <label>Video de fondo (MP4)</label>
+                    <div class="upload-area" id="uploadAreaHeroVideo"><i class="fas fa-cloud-upload-alt"></i> Toca para subir video<input type="file" id="subirHeroVideo" accept="video/mp4" style="display: none;"></div>
+                    <div id="previewHeroVideo" class="preview-upload"></div>
+                </div>
+                <div class="form-group"><label>Opacidad del overlay (0 a 1)</label><input type="number" id="hero-overlay" step="0.1" min="0" max="1" value="0.5"></div>
+                
+                <!-- Sobre Nosotros -->
+                <h3 style="margin: 1.5rem 0 0.5rem 0;">📖 Sobre Nosotros</h3>
+                <div class="form-group"><label>Título</label><input type="text" id="nosotros-titulo" value="Sobre Nosotros"></div>
+                <div class="form-group"><label>Subtítulo</label><input type="text" id="nosotros-subtitulo" value="Conócenos mejor"></div>
+                <div class="form-group"><label>Historia</label><textarea id="nosotros-historia" rows="4"></textarea></div>
+                <div class="form-group">
+                    <label>Imagen</label>
+                    <div class="upload-area" id="uploadAreaNosotros"><i class="fas fa-cloud-upload-alt"></i> Toca para subir imagen<input type="file" id="subirNosotros" accept="image/*" style="display: none;"></div>
+                    <div id="previewNosotros" class="preview-upload"></div>
+                </div>
+                <div class="form-group"><label>Valores (separados por coma)</label><input type="text" id="nosotros-valores" placeholder="Calidad, Confianza, Compromiso"></div>
+                
+                <!-- Contacto -->
+                <h3 style="margin: 1.5rem 0 0.5rem 0;">📞 Contacto</h3>
+                <div class="form-group"><label>Dirección</label><input type="text" id="contacto-direccion"></div>
+                <div class="form-row">
+                    <div class="form-group"><label>WhatsApp</label><input type="text" id="contacto-whatsapp"></div>
+                    <div class="form-group"><label>Mapa (URL embed)</label><input type="text" id="contacto-mapa"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Facebook</label><input type="text" id="red-facebook"></div>
+                    <div class="form-group"><label>Instagram</label><input type="text" id="red-instagram"></div>
+                </div>
+                
+                <!-- Footer -->
+                <h3 style="margin: 1.5rem 0 0.5rem 0;">📄 Pie de página</h3>
+                <div class="form-group"><label>Texto del footer</label><input type="text" id="footer-texto"></div>
+            </div>
+            
+            <!-- SECCIÓN CONTENIDO -->
+            <div class="seccion-card">
+                <div class="seccion-titulo">
+                    <i class="fas fa-edit"></i> Contenido editable
+                </div>
+                
+                <!-- Productos -->
+                <h3 style="margin: 0 0 0.5rem 0;">📦 Productos / Servicios</h3>
+                <button class="btn-agregar" onclick="agregarProducto()"><i class="fas fa-plus"></i> Agregar producto</button>
                 <div id="productos-list"></div>
-            </div>
-
-            <!-- TAB: SERVICIOS -->
-            <div id="tab-servicios" class="tab-content">
-                <button class="btn-agregar" onclick="abrirModalAgregar('servicio')"><i class="fas fa-plus"></i> Agregar servicio</button>
-                <div id="servicios-list"></div>
-            </div>
-
-            <!-- TAB: GALERÍA -->
-            <div id="tab-galeria" class="tab-content">
-                <div style="margin-bottom: 1rem;">
-                    <label>Filtrar por categoría:</label>
-                    <select id="filtroCategoria" onchange="filtrarGaleria()">
-                        <option value="todas">Todas las categorías</option>
-                        <option value="productos">📦 Productos</option>
-                        <option value="servicios">🛠️ Servicios</option>
-                        <option value="equipo">👥 Equipo</option>
-                        <option value="local">🏢 Local</option>
-                        <option value="eventos">🎉 Eventos</option>
-                        <option value="otros">📷 Otros</option>
-                    </select>
-                </div>
                 
-                <div class="upload-area" id="uploadAreaGaleria">
-                    <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #0B4F6C;"></i>
-                    <p>Toca o arrastra imágenes aquí</p>
-                    <p style="font-size: 0.8rem; color: #666;">Se optimizarán automáticamente (WebP, 85% calidad, 1920px máx)</p>
-                    <input type="file" id="subirImagenGaleria" accept="image/*" multiple style="display: none;">
-                </div>
-                <div id="uploadPreviewGaleria" style="margin-bottom: 1rem;"></div>
+                <!-- Testimonios -->
+                <h3 style="margin: 1.5rem 0 0.5rem 0;">⭐ Testimonios</h3>
+                <button class="btn-agregar" onclick="agregarTestimonio()"><i class="fas fa-plus"></i> Agregar testimonio</button>
+                <div id="testimonios-list"></div>
                 
-                <button class="btn-agregar" onclick="abrirModalAgregar('imagen')"><i class="fas fa-plus"></i> Agregar imagen manualmente</button>
+                <!-- Galería -->
+                <h3 style="margin: 1.5rem 0 0.5rem 0;">📸 Galería</h3>
+                <button class="btn-agregar" onclick="agregarGaleria()"><i class="fas fa-plus"></i> Agregar categoría</button>
                 <div id="galeria-list"></div>
             </div>
-
-            <!-- TAB: TESTIMONIOS -->
-            <div id="tab-testimonios" class="tab-content">
-                <button class="btn-agregar" onclick="abrirModalAgregar('testimonio')"><i class="fas fa-plus"></i> Agregar testimonio</button>
-                <div id="testimonios-list"></div>
-            </div>
-
+            
+            <button class="btn-guardar" id="btnGuardar" onclick="guardarTodo()">
+                <i class="fas fa-save"></i> GUARDAR TODOS LOS CAMBIOS
+            </button>
             <div id="mensaje" class="mensaje"></div>
         </div>
     </div>
 
-    <div id="modalAgregar" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000;">
-        <div style="background: white; border-radius: 20px; padding: 2rem; max-width: 500px; width: 90%; max-height: 80vh; overflow-y: auto;">
-            <h3 id="modalTitulo">Agregar</h3>
-            <div id="modalFormulario"></div>
-            <div style="margin-top: 1rem; display: flex; gap: 1rem; justify-content: flex-end;">
-                <button onclick="cerrarModalAgregar()">Cancelar</button>
-                <button id="btnGuardarModal" style="background: #28a745;">Guardar</button>
-            </div>
-        </div>
-    </div>
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-conector.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <script>eruda.init();</script>
     <script>
         // ============================================
-        // CREDENCIALES FIJAS
+        // VARIABLES GLOBALES
         // ============================================
-        const SUPABASE_URL = 'https://nvrcqlxnvjvhznmxozhh.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_qCtRLmyJxBbYRcO7Suuqnw_mrmqspp6';
-        const BUCKET_NAME = 'cliente';
-        
-        let negocioIdActual = null;
+        let clienteData = null;
+        let supabaseUrl = '';
+        let supabaseKey = '';
         let supabaseClient = null;
-        let productosData = [];
-        let serviciosData = [];
-        let galeriaData = [];
-        let galeriaFiltrada = [];
-        let testimoniosData = [];
-        let tipoAgregando = null;
+        let productos = [];
+        let testimonios = [];
+        let galeria = [];
+        let productoId = 1;
+        let testimonioId = 1;
+        let galeriaId = 1;
 
         // ============================================
-        // FUNCIONES DE URL
+        // FUNCIONES DE COLOR
         // ============================================
-        function getImagenUrlProducto(nombreArchivo) {
-            if (!nombreArchivo) return '';
-            return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/${negocioIdActual}/productos/${nombreArchivo}`;
+        function nombreAColor(nombre) {
+            const colores = { 'navy': '#0B2B40', 'blue': '#1C6E8F', 'orange': '#F4A261', 'green': '#2A9D8F', 'gray': '#4A4A4A', 'white': '#F9F9F9', 'black': '#1E1E24', 'red': '#C41E3A', 'yellow': '#FFD700' };
+            return colores[nombre.toLowerCase()] || nombre;
+        }
+
+        function actualizarColorPreview() {
+            const primario = nombreAColor(document.getElementById('color-primario-texto').value || document.getElementById('color-primario').value);
+            document.getElementById('color-primario').value = primario;
+            document.getElementById('color-primario-text').textContent = primario;
+            const secundario = nombreAColor(document.getElementById('color-secundario-texto').value || document.getElementById('color-secundario').value);
+            document.getElementById('color-secundario').value = secundario;
+            document.getElementById('color-secundario-text').textContent = secundario;
+            const acento = nombreAColor(document.getElementById('color-acento-texto').value || document.getElementById('color-acento').value);
+            document.getElementById('color-acento').value = acento;
+            document.getElementById('color-acento-text').textContent = acento;
+            const texto = nombreAColor(document.getElementById('color-texto-texto').value || document.getElementById('color-texto').value);
+            document.getElementById('color-texto').value = texto;
+            document.getElementById('color-texto-text').textContent = texto;
+            const fondo = nombreAColor(document.getElementById('color-fondo-texto').value || document.getElementById('color-fondo').value);
+            document.getElementById('color-fondo').value = fondo;
+            document.getElementById('color-fondo-text').textContent = fondo;
+        }
+
+        function initColorPalettes() {
+            document.querySelectorAll('.paleta-colores').forEach(palette => {
+                const targetId = palette.dataset.target;
+                palette.querySelectorAll('.color-opcion').forEach(opt => {
+                    opt.addEventListener('click', () => {
+                        document.getElementById(targetId).value = opt.dataset.color;
+                        document.getElementById(targetId + '-texto').value = '';
+                        actualizarColorPreview();
+                    });
+                });
+            });
+            ['color-primario', 'color-secundario', 'color-acento', 'color-texto', 'color-fondo'].forEach(id => {
+                document.getElementById(id)?.addEventListener('input', () => {
+                    document.getElementById(id + '-texto').value = '';
+                    actualizarColorPreview();
+                });
+            });
+            ['color-primario-texto', 'color-secundario-texto', 'color-acento-texto', 'color-texto-texto', 'color-fondo-texto'].forEach(id => {
+                document.getElementById(id)?.addEventListener('input', actualizarColorPreview);
+            });
         }
 
         // ============================================
-        // FUNCIÓN DE COMPRESIÓN Y SUBIDA
+        // FUNCIONES DE SUBIDA
         // ============================================
         async function comprimirYSubirImagen(file, carpeta) {
-            const options = {
-                maxSizeMB: 1,
-                maxWidthOrHeight: 1920,
-                useWebWorker: true,
-                fileType: 'image/webp'
-            };
-            
+            const options = { maxSizeMB: 1, maxWidthOrHeight: 1920, useWebWorker: true, fileType: 'image/webp' };
             const compressedFile = await imageCompression(file, options);
-            const nombreArchivo = `${Date.now()}.webp`;
-            const ruta = `${negocioIdActual}/${carpeta}/${nombreArchivo}`;
-            
-            const { data, error } = await supabaseClient.storage
-                .from(BUCKET_NAME)
-                .upload(ruta, compressedFile);
-            
+            const nombreArchivo = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.webp`;
+            const ruta = `${clienteData.uuid}/${carpeta}/${nombreArchivo}`;
+            const { error } = await supabaseClient.storage.from('cliente').upload(ruta, compressedFile);
             if (error) throw error;
             return nombreArchivo;
         }
 
-        // ============================================
-        // SUBIR IMAGEN PARA UN PRODUCTO EXISTENTE
-        // ============================================
-        async function subirImagenProducto(event, productoId) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            const card = document.querySelector(`.item-card[data-id="${productoId}"]`);
-            if (!card) return;
-            
-            let previewDiv = card.querySelector(`.preview-producto-${productoId}`);
-            if (!previewDiv) {
-                previewDiv = document.createElement('div');
-                previewDiv.className = `preview-producto-${productoId}`;
-                previewDiv.style.marginTop = '0.5rem';
-                card.querySelector('.item-contenido').appendChild(previewDiv);
-            }
-            
-            previewDiv.innerHTML = '<span class="spinner"></span> Subiendo imagen...';
-            
-            try {
-                const options = {
-                    maxSizeMB: 1,
-                    maxWidthOrHeight: 1920,
-                    useWebWorker: true,
-                    fileType: 'image/webp'
-                };
-                
-                const compressedFile = await imageCompression(file, options);
-                const nombreArchivo = `${Date.now()}.webp`;
-                const ruta = `${negocioIdActual}/productos/${nombreArchivo}`;
-                
-                const { error: uploadError } = await supabaseClient.storage
-                    .from(BUCKET_NAME)
-                    .upload(ruta, compressedFile);
-                
-                if (uploadError) throw uploadError;
-                
-                const { error: updateError } = await supabaseClient
-                    .from('productos')
-                    .update({ imagen: nombreArchivo })
-                    .eq('id', productoId);
-                
-                if (updateError) throw updateError;
-                
-                previewDiv.innerHTML = `<span style="color: green;">✅ Imagen actualizada: ${nombreArchivo}</span>`;
-                
-                setTimeout(() => {
-                    cargarProductos();
-                }, 1500);
-                
-            } catch (error) {
-                previewDiv.innerHTML = `<span style="color: red;">❌ Error: ${error.message}</span>`;
-                console.error(error);
-            }
-            
-            event.target.value = '';
+        async function subirVideoPendiente(file) {
+            const nombreArchivo = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.mp4`;
+            const ruta = `${clienteData.uuid}/hero/pendientes/${nombreArchivo}`;
+            const { error } = await supabaseClient.storage.from('cliente').upload(ruta, file);
+            if (error) throw error;
+            return `pendientes/${nombreArchivo}`;
         }
 
-        function abrirSubirImagen(productoId) {
-            const fileInput = document.getElementById(`file-input-${productoId}`);
-            if (fileInput) {
-                fileInput.click();
-            }
+        function initUploaders() {
+            // Hero imagen
+            const heroUpload = document.getElementById('uploadAreaHero');
+            const heroInput = document.getElementById('subirHero');
+            if (heroUpload) heroUpload.addEventListener('click', () => heroInput.click());
+            heroInput?.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const preview = document.getElementById('previewHero');
+                preview.innerHTML = '<span class="spinner"></span> Subiendo...';
+                try {
+                    const nombre = await comprimirYSubirImagen(file, 'hero');
+                    document.getElementById('hero-imagen').value = nombre;
+                    preview.innerHTML = `<span style="color: green;">✅ Imagen subida: ${nombre}</span>`;
+                } catch (err) { preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`; }
+                heroInput.value = '';
+            });
+
+            // Hero video
+            const heroVideoUpload = document.getElementById('uploadAreaHeroVideo');
+            const heroVideoInput = document.getElementById('subirHeroVideo');
+            if (heroVideoUpload) heroVideoUpload.addEventListener('click', () => heroVideoInput.click());
+            heroVideoInput?.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const preview = document.getElementById('previewHeroVideo');
+                preview.innerHTML = '<span class="spinner"></span> Subiendo video...';
+                try {
+                    const nombre = await subirVideoPendiente(file);
+                    document.getElementById('hero-video').value = nombre;
+                    preview.innerHTML = `<span style="color: green;">✅ Video subido (pendiente de optimización): ${nombre}</span>`;
+                } catch (err) { preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`; }
+                heroVideoInput.value = '';
+            });
+
+            // Nosotros imagen
+            const nosotrosUpload = document.getElementById('uploadAreaNosotros');
+            const nosotrosInput = document.getElementById('subirNosotros');
+            if (nosotrosUpload) nosotrosUpload.addEventListener('click', () => nosotrosInput.click());
+            nosotrosInput?.addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const preview = document.getElementById('previewNosotros');
+                preview.innerHTML = '<span class="spinner"></span> Subiendo...';
+                try {
+                    const nombre = await comprimirYSubirImagen(file, 'nosotros');
+                    document.getElementById('nosotros-imagen').value = nombre;
+                    preview.innerHTML = `<span style="color: green;">✅ Imagen subida: ${nombre}</span>`;
+                } catch (err) { preview.innerHTML = `<span style="color: red;">❌ Error: ${err.message}</span>`; }
+                nosotrosInput.value = '';
+            });
         }
 
         // ============================================
-        // LOGIN
+        // FUNCIONES DE PRODUCTOS
+        // ============================================
+        function agregarProducto() {
+            productos.push({ id: productoId++, nombre: '', descripcion: '', precio: 0, imagen: '', caracteristicas: [], badgePermanente: '' });
+            renderizarProductos();
+            setTimeout(() => {
+                const id = productos[productos.length-1].id;
+                const uploadArea = document.getElementById(`uploadAreaProducto-${id}`);
+                const fileInput = document.getElementById(`subirProducto-${id}`);
+                if (uploadArea && fileInput) {
+                    uploadArea.addEventListener('click', () => fileInput.click());
+                    fileInput.addEventListener('change', async (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        const preview = document.getElementById(`previewProducto-${id}`);
+                        if (preview) preview.innerHTML = '<span class="spinner"></span> Subiendo...';
+                        try {
+                            const nombre = await comprimirYSubirImagen(file, 'productos');
+                            const prod = productos.find(p => p.id === id);
+                            if (prod) prod.imagen = nombre;
+                            renderizarProductos();
+                        } catch (err) { if (preview) preview.innerHTML = `<span style="color: red;">❌ Error</span>`; }
+                    });
+                }
+            }, 100);
+        }
+
+        function eliminarProducto(id) {
+            productos = productos.filter(p => p.id !== id);
+            renderizarProductos();
+        }
+
+        function renderizarProductos() {
+            const container = document.getElementById('productos-list');
+            if (!container) return;
+            if (productos.length === 0) { container.innerHTML = '<p>No hay productos. Agrega uno.</p>'; return; }
+            container.innerHTML = productos.map(p => `
+                <div class="item-card">
+                    <div class="item-header" onclick="toggleContenido(this)">
+                        <strong>📦 ${p.nombre || `Producto ${p.id}`}</strong>
+                        <div><button class="btn-subir-imagen" onclick="event.stopPropagation(); document.getElementById('file-input-${p.id}').click()"><i class="fas fa-upload"></i> Subir imagen</button><button class="btn-eliminar" onclick="event.stopPropagation(); eliminarProducto(${p.id})">Eliminar</button></div>
+                    </div>
+                    <div class="item-contenido hidden">
+                        <div class="form-group"><label>Nombre</label><input type="text" class="prod-nombre" value="${escapeHtml(p.nombre)}" onchange="actualizarProducto(${p.id}, 'nombre', this.value)"></div>
+                        <div class="form-group"><label>Precio</label><input type="number" class="prod-precio" value="${p.precio}" onchange="actualizarProducto(${p.id}, 'precio', parseFloat(this.value))"></div>
+                        <div class="form-group"><label>Descripción</label><textarea class="prod-descripcion" rows="2" onchange="actualizarProducto(${p.id}, 'descripcion', this.value)">${escapeHtml(p.descripcion)}</textarea></div>
+                        <div class="form-group"><label>Características (separadas por coma)</label><input type="text" class="prod-caracteristicas" value="${p.caracteristicas.join(', ')}" onchange="actualizarProducto(${p.id}, 'caracteristicas', this.value.split(',').map(c=>c.trim()).filter(c=>c))"></div>
+                        <div class="form-group"><label>Badge</label><input type="text" class="prod-badge" value="${p.badgePermanente}" onchange="actualizarProducto(${p.id}, 'badgePermanente', this.value)"></div>
+                        <div class="upload-area" id="uploadAreaProducto-${p.id}" style="margin-top:0.5rem;"><i class="fas fa-cloud-upload-alt"></i> Toca para subir imagen<input type="file" id="subirProducto-${p.id}" accept="image/*" style="display: none;"></div>
+                        <div id="previewProducto-${p.id}" class="preview-upload"></div>
+                        ${p.imagen ? `<div><small>Imagen actual: ${p.imagen}</small></div>` : ''}
+                    </div>
+                    <input type="file" id="file-input-${p.id}" accept="image/*" style="display: none;" onchange="document.getElementById('subirProducto-${p.id}').files = this.files; document.getElementById('subirProducto-${p.id}').dispatchEvent(new Event('change'))">
+                </div>
+            `).join('');
+        }
+
+        function actualizarProducto(id, campo, valor) {
+            const index = productos.findIndex(p => p.id === id);
+            if (index !== -1) productos[index][campo] = valor;
+        }
+
+        // ============================================
+        // FUNCIONES DE TESTIMONIOS
+        // ============================================
+        function agregarTestimonio() {
+            testimonios.push({ id: testimonioId++, nombre: '', lugar: '', texto: '', rating: 5, avatar: '' });
+            renderizarTestimonios();
+            setTimeout(() => {
+                const id = testimonios[testimonios.length-1].id;
+                const uploadArea = document.getElementById(`uploadAreaTestimonio-${id}`);
+                const fileInput = document.getElementById(`subirTestimonio-${id}`);
+                if (uploadArea && fileInput) {
+                    uploadArea.addEventListener('click', () => fileInput.click());
+                    fileInput.addEventListener('change', async (e) => {
+                        const file = e.target.files[0];
+                        if (!file) return;
+                        const preview = document.getElementById(`previewTestimonio-${id}`);
+                        if (preview) preview.innerHTML = '<span class="spinner"></span> Subiendo...';
+                        try {
+                            const nombre = await comprimirYSubirImagen(file, 'avatares');
+                            const test = testimonios.find(t => t.id === id);
+                            if (test) test.avatar = nombre;
+                            renderizarTestimonios();
+                        } catch (err) { if (preview) preview.innerHTML = `<span style="color: red;">❌ Error</span>`; }
+                    });
+                }
+            }, 100);
+        }
+
+        function eliminarTestimonio(id) {
+            testimonios = testimonios.filter(t => t.id !== id);
+            renderizarTestimonios();
+        }
+
+        function renderizarTestimonios() {
+            const container = document.getElementById('testimonios-list');
+            if (!container) return;
+            if (testimonios.length === 0) { container.innerHTML = '<p>No hay testimonios. Agrega uno.</p>'; return; }
+            container.innerHTML = testimonios.map(t => `
+                <div class="item-card">
+                    <div class="item-header" onclick="toggleContenido(this)">
+                        <strong>⭐ ${t.nombre || `Testimonio ${t.id}`}</strong>
+                        <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarTestimonio(${t.id})">Eliminar</button>
+                    </div>
+                    <div class="item-contenido hidden">
+                        <div class="form-row"><div class="form-group"><label>Nombre</label><input type="text" class="test-nombre" value="${escapeHtml(t.nombre)}" onchange="actualizarTestimonio(${t.id}, 'nombre', this.value)"></div><div class="form-group"><label>Lugar</label><input type="text" class="test-lugar" value="${escapeHtml(t.lugar)}" onchange="actualizarTestimonio(${t.id}, 'lugar', this.value)"></div></div>
+                        <div class="form-group"><label>Testimonio</label><textarea class="test-texto" rows="2" onchange="actualizarTestimonio(${t.id}, 'texto', this.value)">${escapeHtml(t.texto)}</textarea></div>
+                        <div class="form-row"><div class="form-group"><label>Rating (1-5)</label><input type="number" class="test-rating" min="1" max="5" value="${t.rating}" onchange="actualizarTestimonio(${t.id}, 'rating', parseInt(this.value))"></div></div>
+                        <div class="upload-area" id="uploadAreaTestimonio-${t.id}"><i class="fas fa-cloud-upload-alt"></i> Toca para subir avatar<input type="file" id="subirTestimonio-${t.id}" accept="image/*" style="display: none;"></div>
+                        <div id="previewTestimonio-${t.id}" class="preview-upload"></div>
+                        ${t.avatar ? `<div><small>Avatar actual: ${t.avatar}</small></div>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function actualizarTestimonio(id, campo, valor) {
+            const index = testimonios.findIndex(t => t.id === id);
+            if (index !== -1) testimonios[index][campo] = valor;
+        }
+
+        // ============================================
+        // FUNCIONES DE GALERÍA
+        // ============================================
+        function agregarGaleria() {
+            galeria.push({ id: galeriaId++, titulo: '', descripcion: '', fotos: [] });
+            renderizarGaleria();
+            setTimeout(() => {
+                const id = galeria[galeria.length-1].id;
+                const uploadArea = document.getElementById(`uploadAreaGaleria-${id}`);
+                const fileInput = document.getElementById(`subirGaleria-${id}`);
+                if (uploadArea && fileInput) {
+                    uploadArea.addEventListener('click', () => fileInput.click());
+                    fileInput.addEventListener('change', async (e) => {
+                        const files = Array.from(e.target.files);
+                        const preview = document.getElementById(`previewGaleria-${id}`);
+                        for (const file of files) {
+                            if (preview) preview.innerHTML = '<span class="spinner"></span> Subiendo...';
+                            try {
+                                const nombre = await comprimirYSubirImagen(file, 'galeria');
+                                const gal = galeria.find(g => g.id === id);
+                                if (gal) gal.fotos.push(nombre);
+                                renderizarGaleria();
+                            } catch (err) { if (preview) preview.innerHTML = `<span style="color: red;">❌ Error</span>`; }
+                        }
+                    });
+                }
+            }, 100);
+        }
+
+        function eliminarGaleria(id) {
+            galeria = galeria.filter(g => g.id !== id);
+            renderizarGaleria();
+        }
+
+        function renderizarGaleria() {
+            const container = document.getElementById('galeria-list');
+            if (!container) return;
+            if (galeria.length === 0) { container.innerHTML = '<p>No hay categorías. Agrega una.</p>'; return; }
+            container.innerHTML = galeria.map(g => `
+                <div class="item-card">
+                    <div class="item-header" onclick="toggleContenido(this)">
+                        <strong>🖼️ ${g.titulo || `Categoría ${g.id}`}</strong>
+                        <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarGaleria(${g.id})">Eliminar</button>
+                    </div>
+                    <div class="item-contenido hidden">
+                        <div class="form-row"><div class="form-group"><label>Título</label><input type="text" class="gal-titulo" value="${escapeHtml(g.titulo)}" onchange="actualizarGaleria(${g.id}, 'titulo', this.value)"></div><div class="form-group"><label>Descripción</label><input type="text" class="gal-descripcion" value="${escapeHtml(g.descripcion)}" onchange="actualizarGaleria(${g.id}, 'descripcion', this.value)"></div></div>
+                        <div class="upload-area" id="uploadAreaGaleria-${g.id}"><i class="fas fa-cloud-upload-alt"></i> Toca para subir imágenes (múltiples)<input type="file" id="subirGaleria-${g.id}" accept="image/*" multiple style="display: none;"></div>
+                        <div id="previewGaleria-${g.id}" class="preview-upload"></div>
+                        ${g.fotos.length ? `<div><small>Imágenes: ${g.fotos.join(', ')}</small></div>` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function actualizarGaleria(id, campo, valor) {
+            const index = galeria.findIndex(g => g.id === id);
+            if (index !== -1) galeria[index][campo] = valor;
+        }
+
+        function toggleContenido(header) {
+            const contenido = header.nextElementSibling;
+            contenido.classList.toggle('hidden');
+        }
+
+        function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => { if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; return m; }); }
+
+        // ============================================
+        // LOGIN Y CARGA DE DATOS
         // ============================================
         async function login() {
-            const id = document.getElementById('negocioId').value;
-            const pass = document.getElementById('password').value;
+            const idPublico = document.getElementById('clienteId').value;
+            const password = document.getElementById('password').value;
+            supabaseUrl = document.getElementById('supabaseUrl').value;
+            supabaseKey = document.getElementById('supabaseKey').value;
             
-            if (!id) { alert('Ingresa el ID de tu negocio'); return; }
-            if (pass !== 'admin') { alert('Contraseña incorrecta'); return; }
+            if (!idPublico || !password) { alert('Ingresa ID y contraseña'); return; }
             
             try {
-                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+                const cliente = await window.loginCliente(idPublico, password, supabaseUrl, supabaseKey);
+                clienteData = cliente;
                 
-                const { data, error } = await supabaseClient
-                    .from('negocios')
-                    .select('*')
-                    .eq('id', id)
-                    .single();
+                // Cargar datos del config
+                const config = cliente.config;
+                if (config.marca?.colores) {
+                    document.getElementById('color-primario').value = config.marca.colores.primario || '#1E3A5F';
+                    document.getElementById('color-secundario').value = config.marca.colores.secundario || '#4A90E2';
+                    document.getElementById('color-acento').value = config.marca.colores.acento || '#F77F00';
+                    document.getElementById('color-texto').value = config.marca.colores.texto || '#0A1C2E';
+                    document.getElementById('color-fondo').value = config.marca.colores.fondo || '#F0F8FF';
+                    actualizarColorPreview();
+                }
+                document.getElementById('hero-superior').value = config.hero?.texto_superior || '';
+                document.getElementById('hero-principal').value = config.hero?.texto_principal || '';
+                document.getElementById('hero-inferior').value = config.hero?.texto_inferior || '';
+                document.getElementById('hero-boton').value = config.hero?.boton || 'Ver productos';
+                document.getElementById('hero-imagen').value = config.hero?.imagen || '';
+                document.getElementById('hero-video').value = config.hero?.video || '';
+                document.getElementById('hero-overlay').value = config.hero?.overlay || 0.5;
+                document.getElementById('nosotros-titulo').value = config.nosotros?.titulo || 'Sobre Nosotros';
+                document.getElementById('nosotros-subtitulo').value = config.nosotros?.subtitulo || 'Conócenos mejor';
+                document.getElementById('nosotros-historia').value = config.nosotros?.historia || '';
+                document.getElementById('nosotros-imagen').value = config.nosotros?.imagen || '';
+                document.getElementById('nosotros-valores').value = (config.nosotros?.valores || []).join(', ');
+                document.getElementById('contacto-direccion').value = config.contacto?.direccion || '';
+                document.getElementById('contacto-whatsapp').value = config.contacto?.whatsapp || '';
+                document.getElementById('contacto-mapa').value = config.contacto?.mapa || '';
+                document.getElementById('red-facebook').value = config.contacto?.redes?.facebook || '';
+                document.getElementById('red-instagram').value = config.contacto?.redes?.instagram || '';
+                document.getElementById('footer-texto').value = config.footer?.texto || '';
                 
-                if (error) throw error;
-                if (!data) { alert('Negocio no encontrado'); return; }
-                if (data.estado !== 'publicado') { alert('Tu página aún no está publicada.'); return; }
+                // Cargar productos, testimonios, galería desde las tablas
+                const prods = await window.getProductosPorCliente(cliente.uuid, supabaseUrl, supabaseKey);
+                if (prods.length) productos = prods.map(p => ({ ...p, id: p.id }));
+                const tests = await window.getTestimoniosPorCliente(cliente.uuid, supabaseUrl, supabaseKey);
+                if (tests.length) testimonios = tests.map(t => ({ ...t, id: t.id }));
+                const gals = await window.getGaleriaPorCliente(cliente.uuid, supabaseUrl, supabaseKey);
+                if (gals.length) galeria = gals.map(g => ({ ...g, id: g.id, fotos: g.imagen_url ? [g.imagen_url] : [] }));
                 
-                negocioIdActual = id;
+                renderizarProductos();
+                renderizarTestimonios();
+                renderizarGaleria();
+                
                 document.getElementById('loginPanel').style.display = 'none';
                 document.getElementById('adminPanel').style.display = 'block';
-                cargarTodosLosDatos();
+                initColorPalettes();
+                initUploaders();
                 
             } catch (error) {
                 alert('Error: ' + error.message);
@@ -378,676 +763,91 @@
         function logout() {
             document.getElementById('loginPanel').style.display = 'block';
             document.getElementById('adminPanel').style.display = 'none';
-            document.getElementById('negocioId').value = '';
-            document.getElementById('password').value = '';
-            negocioIdActual = null;
+            clienteData = null;
         }
 
         // ============================================
-        // SUBIDA DE IMÁGENES (GALERÍA)
+        // GUARDAR TODO
         // ============================================
-        function initUploaderGaleria() {
-            const uploadArea = document.getElementById('uploadAreaGaleria');
-            const fileInput = document.getElementById('subirImagenGaleria');
+        async function guardarTodo() {
+            const btn = document.getElementById('btnGuardar');
+            const textoOriginal = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner"></span> Guardando...';
+            btn.disabled = true;
             
-            if (uploadArea) {
-                uploadArea.addEventListener('click', () => fileInput.click());
-            }
-            
-            if (fileInput) {
-                fileInput.addEventListener('change', async (e) => {
-                    const files = Array.from(e.target.files);
-                    const previewDiv = document.getElementById('uploadPreviewGaleria');
-                    
-                    for (const file of files) {
-                        const fileId = Date.now() + Math.random();
-                        previewDiv.innerHTML += `<div id="preview-${fileId}" style="margin-bottom: 0.5rem;"><span class="spinner"></span> Subiendo ${file.name}...</div>`;
-                        
-                        try {
-                            const nombreArchivo = await comprimirYSubirImagen(file, 'galeria');
-                            
-                            const nuevo = {
-                                titulo: file.name.replace(/\.[^/.]+$/, ''),
-                                categoria: 'galeria',
-                                descripcion: '',
-                                imagen_url: nombreArchivo,
-                                orden: galeriaData.length
-                            };
-                            
-                            const { error } = await supabaseClient
-                                .from('galeria')
-                                .insert([{ ...nuevo, negocio_id: negocioIdActual }]);
-                            
-                            if (error) throw error;
-                            
-                            document.getElementById(`preview-${fileId}`).innerHTML = `<span style="color: green;">✅ Imagen agregada a galería: ${nuevo.titulo}</span>`;
-                            
-                        } catch (error) {
-                            document.getElementById(`preview-${fileId}`).innerHTML = `<span style="color: red;">❌ Error: ${error.message}</span>`;
-                        }
+            const config = {
+                marca: {
+                    nombre: clienteData.nombre,
+                    logo: '',
+                    eslogan: '',
+                    colores: {
+                        primario: document.getElementById('color-primario').value,
+                        secundario: document.getElementById('color-secundario').value,
+                        acento: document.getElementById('color-acento').value,
+                        texto: document.getElementById('color-texto').value,
+                        fondo: document.getElementById('color-fondo').value
                     }
-                    
-                    setTimeout(() => {
-                        previewDiv.innerHTML = '';
-                        cargarGaleria();
-                    }, 2000);
-                    
-                    fileInput.value = '';
-                });
-            }
-        }
-
-        // ============================================
-        // SUBIDA DE IMÁGENES (PRODUCTOS - NUEVOS)
-        // ============================================
-        function initUploaderProductos() {
-            const uploadArea = document.getElementById('uploadAreaProductos');
-            const fileInput = document.getElementById('subirImagenProductos');
-            
-            if (uploadArea) {
-                uploadArea.addEventListener('click', () => fileInput.click());
-            }
-            
-            if (fileInput) {
-                fileInput.addEventListener('change', async (e) => {
-                    const files = Array.from(e.target.files);
-                    const previewDiv = document.getElementById('uploadPreviewProductos');
-                    
-                    for (const file of files) {
-                        const fileId = Date.now() + Math.random();
-                        previewDiv.innerHTML += `<div id="preview-${fileId}" style="margin-bottom: 0.5rem;"><span class="spinner"></span> Subiendo ${file.name}...</div>`;
-                        
-                        try {
-                            const nombreArchivo = await comprimirYSubirImagen(file, 'productos');
-                            
-                            const nuevoProducto = {
-                                nombre: file.name.replace(/\.[^/.]+$/, ''),
-                                descripcion: '',
-                                precio: 0,
-                                imagen: nombreArchivo,
-                                caracteristicas: [],
-                                badge_permanente: '',
-                                disponible: true,
-                                orden: productosData.length
-                            };
-                            
-                            const { error } = await supabaseClient
-                                .from('productos')
-                                .insert([{ ...nuevoProducto, negocio_id: negocioIdActual }]);
-                            
-                            if (error) throw error;
-                            
-                            document.getElementById(`preview-${fileId}`).innerHTML = `<span style="color: green;">✅ Producto creado: ${nuevoProducto.nombre}</span>`;
-                            
-                        } catch (error) {
-                            document.getElementById(`preview-${fileId}`).innerHTML = `<span style="color: red;">❌ Error: ${error.message}</span>`;
-                        }
+                },
+                hero: {
+                    texto_superior: document.getElementById('hero-superior').value,
+                    texto_principal: document.getElementById('hero-principal').value,
+                    texto_inferior: document.getElementById('hero-inferior').value,
+                    boton: document.getElementById('hero-boton').value,
+                    imagen: document.getElementById('hero-imagen').value,
+                    video: document.getElementById('hero-video').value,
+                    overlay: parseFloat(document.getElementById('hero-overlay').value)
+                },
+                nosotros: {
+                    titulo: document.getElementById('nosotros-titulo').value,
+                    subtitulo: document.getElementById('nosotros-subtitulo').value,
+                    historia: document.getElementById('nosotros-historia').value,
+                    imagen: document.getElementById('nosotros-imagen').value,
+                    valores: (document.getElementById('nosotros-valores').value || '').split(',').map(v => v.trim())
+                },
+                contacto: {
+                    direccion: document.getElementById('contacto-direccion').value,
+                    telefono: clienteData.telefono,
+                    email: clienteData.email,
+                    whatsapp: document.getElementById('contacto-whatsapp').value,
+                    mapa: document.getElementById('contacto-mapa').value,
+                    redes: {
+                        facebook: document.getElementById('red-facebook').value,
+                        instagram: document.getElementById('red-instagram').value
                     }
-                    
-                    setTimeout(() => {
-                        previewDiv.innerHTML = '';
-                        cargarProductos();
-                    }, 2000);
-                    
-                    fileInput.value = '';
-                });
-            }
-        }
-
-        // ============================================
-        // CARGAR DATOS
-        // ============================================
-        async function cargarTodosLosDatos() {
-            await cargarProductos();
-            await cargarServicios();
-            await cargarGaleria();
-            await cargarTestimonios();
-            initUploaderGaleria();
-            initUploaderProductos();
-        }
-
-        async function cargarProductos() {
-            const { data, error } = await supabaseClient
-                .from('productos')
-                .select('*')
-                .eq('negocio_id', negocioIdActual)
-                .eq('disponible', true)
-                .order('orden');
-            if (error) throw error;
-            productosData = data || [];
-            renderizarProductos();
-        }
-
-        function renderizarProductos() {
-            const container = document.getElementById('productos-list');
-            if (!productosData.length) { container.innerHTML = '<p>No hay productos. Agrega uno.</p>'; return; }
-            
-            container.innerHTML = productosData.map(p => `
-                <div class="item-card" data-id="${p.id}">
-                    <div class="item-header" onclick="toggleContenido(this)">
-                        <strong>📦 ${escapeHtml(p.nombre)}</strong>
-                        <div>
-                            <button class="btn-subir-imagen" onclick="event.stopPropagation(); abrirSubirImagen(${p.id})" style="background: #F4A261; margin-right: 0.5rem;">
-                                <i class="fas fa-upload"></i> Subir imagen
-                            </button>
-                            <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarProducto(${p.id})">Eliminar</button>
-                        </div>
-                    </div>
-                    <div class="item-contenido hidden">
-                        <div class="form-group"><label>Nombre</label><input type="text" class="edit-nombre" value="${escapeHtml(p.nombre)}"></div>
-                        <div class="form-group"><label>Descripción</label><textarea class="edit-descripcion" rows="2">${escapeHtml(p.descripcion || '')}</textarea></div>
-                        <div class="form-row">
-                            <div class="form-group"><label>Precio</label><input type="number" class="edit-precio" value="${p.precio || 0}"></div>
-                            <div class="form-group"><label>Badge</label><input type="text" class="edit-badge" value="${escapeHtml(p.badge_permanente || '')}"></div>
-                        </div>
-                        <div class="form-group"><label>Características (separadas por coma)</label><input type="text" class="edit-caracteristicas" value="${(p.caracteristicas || []).join(', ')}"></div>
-                        <div class="form-group">
-                            <label>Imagen actual:</label>
-                            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-                                ${p.imagen ? `<img src="${getImagenUrlProducto(p.imagen)}" class="img-miniatura" onerror="this.style.display='none'">` : ''}
-                                <span class="edit-imagen-nombre">${p.imagen || 'Sin imagen'}</span>
-                            </div>
-                        </div>
-                        <button onclick="guardarProducto(${p.id})" style="margin-top: 0.5rem;">Guardar cambios</button>
-                    </div>
-                    <input type="file" id="file-input-${p.id}" accept="image/*" style="display: none;" onchange="subirImagenProducto(event, ${p.id})">
-                </div>
-            `).join('');
-        }
-
-        async function guardarProducto(id) {
-            const card = document.querySelector(`.item-card[data-id="${id}"]`);
-            if (!card) return;
-            
-            const updates = {
-                nombre: card.querySelector('.edit-nombre')?.value || '',
-                descripcion: card.querySelector('.edit-descripcion')?.value || '',
-                precio: parseFloat(card.querySelector('.edit-precio')?.value) || 0,
-                badge_permanente: card.querySelector('.edit-badge')?.value || '',
-                caracteristicas: (card.querySelector('.edit-caracteristicas')?.value || '').split(',').map(c => c.trim()).filter(c => c),
-                imagen: card.querySelector('.edit-imagen-nombre')?.textContent || ''
+                },
+                footer: {
+                    texto: document.getElementById('footer-texto').value
+                }
             };
             
             try {
-                const { error } = await supabaseClient
-                    .from('productos')
-                    .update(updates)
-                    .eq('id', id);
-                if (error) throw error;
-                mostrarMensaje('✅ Producto actualizado');
-                cargarProductos();
-            } catch (error) {
-                mostrarMensaje('❌ Error: ' + error.message, 'error');
-            }
-        }
-
-        async function eliminarProducto(id) {
-            if (!confirm('¿Eliminar este producto?')) return;
-            try {
-                const { error } = await supabaseClient
-                    .from('productos')
-                    .delete()
-                    .eq('id', id);
-                if (error) throw error;
-                mostrarMensaje('✅ Producto eliminado');
-                cargarProductos();
-            } catch (error) {
-                mostrarMensaje('❌ Error: ' + error.message, 'error');
-            }
-        }
-
-        async function cargarServicios() {
-            const { data, error } = await supabaseClient
-                .from('servicios')
-                .select('*')
-                .eq('negocio_id', negocioIdActual)
-                .order('orden');
-            if (error) throw error;
-            serviciosData = data || [];
-            renderizarServicios();
-        }
-
-        function renderizarServicios() {
-            const container = document.getElementById('servicios-list');
-            if (!serviciosData.length) { container.innerHTML = '<p>No hay servicios. Agrega uno.</p>'; return; }
-            
-            container.innerHTML = serviciosData.map(s => `
-                <div class="item-card">
-                    <div class="item-header" onclick="toggleContenido(this)">
-                        <strong>🛠️ ${escapeHtml(s.nombre)}</strong>
-                        <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarServicio(${s.id})">Eliminar</button>
-                    </div>
-                    <div class="item-contenido hidden">
-                        <div class="form-group"><label>Nombre</label><input type="text" class="edit-nombre" value="${escapeHtml(s.nombre)}"></div>
-                        <div class="form-group"><label>Descripción</label><textarea class="edit-descripcion" rows="2">${escapeHtml(s.descripcion || '')}</textarea></div>
-                        <div class="form-row">
-                            <div class="form-group"><label>Horario</label><input type="text" class="edit-horario" value="${escapeHtml(s.horario || '')}"></div>
-                            <div class="form-group"><label>Icono (HTML)</label><input type="text" class="edit-icono" value="${escapeHtml(s.icono || '<i class="fas fa-star"></i>')}"></div>
-                        </div>
-                        <button onclick="guardarServicio(${s.id})" style="margin-top: 0.5rem;">Guardar cambios</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        async function guardarServicio(id) {
-            const card = document.querySelector(`.item-card:has(button[onclick*="eliminarServicio(${id})"])`);
-            if (!card) return;
-            
-            const updates = {
-                nombre: card.querySelector('.edit-nombre')?.value || '',
-                descripcion: card.querySelector('.edit-descripcion')?.value || '',
-                horario: card.querySelector('.edit-horario')?.value || '',
-                icono: card.querySelector('.edit-icono')?.value || '<i class="fas fa-star"></i>'
-            };
-            
-            try {
-                const { error } = await supabaseClient
-                    .from('servicios')
-                    .update(updates)
-                    .eq('id', id);
-                if (error) throw error;
-                mostrarMensaje('✅ Servicio actualizado');
-                cargarServicios();
-            } catch (error) {
-                mostrarMensaje('❌ Error: ' + error.message, 'error');
-            }
-        }
-
-        async function eliminarServicio(id) {
-            if (!confirm('¿Eliminar este servicio?')) return;
-            try {
-                const { error } = await supabaseClient
-                    .from('servicios')
-                    .delete()
-                    .eq('id', id);
-                if (error) throw error;
-                mostrarMensaje('✅ Servicio eliminado');
-                cargarServicios();
-            } catch (error) {
-                mostrarMensaje('❌ Error: ' + error.message, 'error');
-            }
-        }
-
-        async function cargarGaleria() {
-            const { data, error } = await supabaseClient
-                .from('galeria')
-                .select('*')
-                .eq('negocio_id', negocioIdActual)
-                .order('orden');
-            if (error) throw error;
-            galeriaData = data || [];
-            filtrarGaleria();
-        }
-
-        function filtrarGaleria() {
-            const filtro = document.getElementById('filtroCategoria')?.value || 'todas';
-            
-            if (filtro === 'todas') {
-                galeriaFiltrada = galeriaData;
-            } else {
-                galeriaFiltrada = galeriaData.filter(img => img.categoria === filtro);
-            }
-            renderizarGaleria();
-        }
-
-        function renderizarGaleria() {
-            const container = document.getElementById('galeria-list');
-            if (!galeriaFiltrada.length) { 
-                container.innerHTML = '<p>No hay imágenes en esta categoría. Agrega una.</p>'; 
-                return; 
-            }
-            
-            container.innerHTML = galeriaFiltrada.map(img => `
-                <div class="item-card">
-                    <div class="item-header" onclick="toggleContenido(this)">
-                        <div>
-                            <strong>🖼️ ${escapeHtml(img.titulo || 'Sin título')}</strong>
-                            <span class="categoria-badge">${escapeHtml(img.categoria)}</span>
-                        </div>
-                        <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarImagen(${img.id})">Eliminar</button>
-                    </div>
-                    <div class="item-contenido hidden">
-                        <div class="form-row">
-                            <div class="form-group"><label>Título</label><input type="text" class="edit-titulo" value="${escapeHtml(img.titulo || '')}"></div>
-                            <div class="form-group"><label>Categoría</label>
-                                <select class="edit-categoria">
-                                    <option value="productos" ${img.categoria === 'productos' ? 'selected' : ''}>📦 Productos</option>
-                                    <option value="servicios" ${img.categoria === 'servicios' ? 'selected' : ''}>🛠️ Servicios</option>
-                                    <option value="equipo" ${img.categoria === 'equipo' ? 'selected' : ''}>👥 Equipo</option>
-                                    <option value="local" ${img.categoria === 'local' ? 'selected' : ''}>🏢 Local</option>
-                                    <option value="eventos" ${img.categoria === 'eventos' ? 'selected' : ''}>🎉 Eventos</option>
-                                    <option value="otros" ${img.categoria === 'otros' ? 'selected' : ''}>📷 Otros</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group"><label>Descripción</label><input type="text" class="edit-descripcion" value="${escapeHtml(img.descripcion || '')}"></div>
-                        <div class="form-group"><label>Nombre del archivo de imagen</label><input type="text" class="edit-imagen" value="${img.imagen_url}"></div>
-                        <button onclick="guardarImagen(${img.id})" style="margin-top: 0.5rem;">Guardar cambios</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        async function guardarImagen(id) {
-            const card = document.querySelector(`.item-card:has(button[onclick*="eliminarImagen(${id})"])`);
-            if (!card) return;
-            
-            const updates = {
-                titulo: card.querySelector('.edit-titulo')?.value || '',
-                categoria: card.querySelector('.edit-categoria')?.value || 'otros',
-                descripcion: card.querySelector('.edit-descripcion')?.value || '',
-                imagen_url: card.querySelector('.edit-imagen')?.value || ''
-            };
-            
-            try {
-                const { error } = await supabaseClient
-                    .from('galeria')
-                    .update(updates)
-                    .eq('id', id);
-                if (error) throw error;
-                mostrarMensaje('✅ Imagen actualizada');
-                cargarGaleria();
-            } catch (error) {
-                mostrarMensaje('❌ Error: ' + error.message, 'error');
-            }
-        }
-
-        async function eliminarImagen(id) {
-            if (!confirm('¿Eliminar esta imagen?')) return;
-            try {
-                const { error } = await supabaseClient
-                    .from('galeria')
-                    .delete()
-                    .eq('id', id);
-                if (error) throw error;
-                mostrarMensaje('✅ Imagen eliminada');
-                cargarGaleria();
-            } catch (error) {
-                mostrarMensaje('❌ Error: ' + error.message, 'error');
-            }
-        }
-
-        async function cargarTestimonios() {
-            const { data, error } = await supabaseClient
-                .from('testimonios')
-                .select('*')
-                .eq('negocio_id', negocioIdActual)
-                .order('orden');
-            if (error) throw error;
-            testimoniosData = data || [];
-            renderizarTestimonios();
-        }
-
-        function renderizarTestimonios() {
-            const container = document.getElementById('testimonios-list');
-            if (!testimoniosData.length) { container.innerHTML = '<p>No hay testimonios. Agrega uno.</p>'; return; }
-            
-            container.innerHTML = testimoniosData.map(t => `
-                <div class="item-card">
-                    <div class="item-header" onclick="toggleContenido(this)">
-                        <strong>⭐ ${escapeHtml(t.nombre)}</strong>
-                        <button class="btn-eliminar" onclick="event.stopPropagation(); eliminarTestimonio(${t.id})">Eliminar</button>
-                    </div>
-                    <div class="item-contenido hidden">
-                        <div class="form-row">
-                            <div class="form-group"><label>Nombre</label><input type="text" class="edit-nombre" value="${escapeHtml(t.nombre)}"></div>
-                            <div class="form-group"><label>Lugar</label><input type="text" class="edit-lugar" value="${escapeHtml(t.lugar || '')}"></div>
-                        </div>
-                        <div class="form-group"><label>Testimonio</label><textarea class="edit-texto" rows="3">${escapeHtml(t.texto)}</textarea></div>
-                        <div class="form-row">
-                            <div class="form-group"><label>Rating (1-5)</label><input type="number" class="edit-rating" min="1" max="5" value="${t.rating || 5}"></div>
-                            <div class="form-group"><label>Nombre del archivo de avatar</label><input type="text" class="edit-avatar" value="${t.avatar || ''}"></div>
-                        </div>
-                        <button onclick="guardarTestimonio(${t.id})" style="margin-top: 0.5rem;">Guardar cambios</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        async function guardarTestimonio(id) {
-            const card = document.querySelector(`.item-card:has(button[onclick*="eliminarTestimonio(${id})"])`);
-            if (!card) return;
-            
-            const updates = {
-                nombre: card.querySelector('.edit-nombre')?.value || '',
-                lugar: card.querySelector('.edit-lugar')?.value || '',
-                texto: card.querySelector('.edit-texto')?.value || '',
-                rating: parseInt(card.querySelector('.edit-rating')?.value) || 5,
-                avatar: card.querySelector('.edit-avatar')?.value || ''
-            };
-            
-            try {
-                const { error } = await supabaseClient
-                    .from('testimonios')
-                    .update(updates)
-                    .eq('id', id);
-                if (error) throw error;
-                mostrarMensaje('✅ Testimonio actualizado');
-                cargarTestimonios();
-            } catch (error) {
-                mostrarMensaje('❌ Error: ' + error.message, 'error');
-            }
-        }
-
-        async function eliminarTestimonio(id) {
-            if (!confirm('¿Eliminar este testimonio?')) return;
-            try {
-                const { error } = await supabaseClient
-                    .from('testimonios')
-                    .delete()
-                    .eq('id', id);
-                if (error) throw error;
-                mostrarMensaje('✅ Testimonio eliminado');
-                cargarTestimonios();
-            } catch (error) {
-                mostrarMensaje('❌ Error: ' + error.message, 'error');
-            }
-        }
-
-        function abrirModalAgregar(tipo) {
-            tipoAgregando = tipo;
-            const modal = document.getElementById('modalAgregar');
-            const titulo = document.getElementById('modalTitulo');
-            const form = document.getElementById('modalFormulario');
-            
-            if (tipo === 'producto') {
-                titulo.textContent = 'Agregar producto';
-                form.innerHTML = `
-                    <div class="form-group"><label>Nombre *</label><input type="text" id="nuevo-nombre"></div>
-                    <div class="form-group"><label>Descripción</label><textarea id="nuevo-descripcion" rows="2"></textarea></div>
-                    <div class="form-row">
-                        <div class="form-group"><label>Precio</label><input type="number" id="nuevo-precio" value="0"></div>
-                        <div class="form-group"><label>Badge</label><input type="text" id="nuevo-badge" placeholder="Ej: Más vendido"></div>
-                    </div>
-                    <div class="form-group"><label>Características (separadas por coma)</label><input type="text" id="nuevo-caracteristicas"></div>
-                    <div class="form-group"><label>Nombre del archivo de imagen</label><input type="text" id="nuevo-imagen" placeholder="producto1.webp"></div>
-                `;
-            } else if (tipo === 'servicio') {
-                titulo.textContent = 'Agregar servicio';
-                form.innerHTML = `
-                    <div class="form-group"><label>Nombre *</label><input type="text" id="nuevo-nombre"></div>
-                    <div class="form-group"><label>Descripción</label><textarea id="nuevo-descripcion" rows="2"></textarea></div>
-                    <div class="form-row">
-                        <div class="form-group"><label>Horario</label><input type="text" id="nuevo-horario" placeholder="Ej: Lunes a viernes, 9am-5pm"></div>
-                        <div class="form-group"><label>Icono (HTML)</label><input type="text" id="nuevo-icono" value='<i class="fas fa-star"></i>'></div>
-                    </div>
-                `;
-            } else if (tipo === 'imagen') {
-                titulo.textContent = 'Agregar imagen a galería';
-                form.innerHTML = `
-                    <div class="form-group"><label>Título</label><input type="text" id="nuevo-titulo"></div>
-                    <div class="form-group"><label>Categoría</label>
-                        <select id="nuevo-categoria">
-                            <option value="productos">📦 Productos</option>
-                            <option value="servicios">🛠️ Servicios</option>
-                            <option value="equipo">👥 Equipo</option>
-                            <option value="local">🏢 Local</option>
-                            <option value="eventos">🎉 Eventos</option>
-                            <option value="otros">📷 Otros</option>
-                        </select>
-                    </div>
-                    <div class="form-group"><label>Descripción</label><input type="text" id="nuevo-descripcion"></div>
-                    <div class="form-group"><label>Nombre del archivo de imagen</label><input type="text" id="nuevo-imagen" placeholder="foto1.webp"></div>
-                `;
-            } else if (tipo === 'testimonio') {
-                titulo.textContent = 'Agregar testimonio';
-                form.innerHTML = `
-                    <div class="form-row">
-                        <div class="form-group"><label>Nombre *</label><input type="text" id="nuevo-nombre"></div>
-                        <div class="form-group"><label>Lugar</label><input type="text" id="nuevo-lugar"></div>
-                    </div>
-                    <div class="form-group"><label>Testimonio *</label><textarea id="nuevo-texto" rows="3"></textarea></div>
-                    <div class="form-row">
-                        <div class="form-group"><label>Rating (1-5)</label><input type="number" id="nuevo-rating" min="1" max="5" value="5"></div>
-                        <div class="form-group"><label>Nombre del archivo de avatar</label><input type="text" id="nuevo-avatar" placeholder="avatar1.webp"></div>
-                    </div>
-                `;
-            }
-            
-            modal.style.display = 'flex';
-            document.getElementById('btnGuardarModal').onclick = guardarNuevoElemento;
-        }
-
-        function cerrarModalAgregar() {
-            document.getElementById('modalAgregar').style.display = 'none';
-            tipoAgregando = null;
-        }
-
-        async function guardarNuevoElemento() {
-            if (tipoAgregando === 'producto') {
-                const nombre = document.getElementById('nuevo-nombre')?.value;
-                if (!nombre) { alert('El nombre es obligatorio'); return; }
+                await window.actualizarCliente(clienteData.id_publico, { config: config }, supabaseUrl, supabaseKey);
                 
-                const nuevo = {
-                    nombre: nombre,
-                    descripcion: document.getElementById('nuevo-descripcion')?.value || '',
-                    precio: parseFloat(document.getElementById('nuevo-precio')?.value) || 0,
-                    badge_permanente: document.getElementById('nuevo-badge')?.value || '',
-                    caracteristicas: (document.getElementById('nuevo-caracteristicas')?.value || '').split(',').map(c => c.trim()).filter(c => c),
-                    imagen: document.getElementById('nuevo-imagen')?.value || '',
-                    disponible: true,
-                    orden: productosData.length
-                };
-                
-                try {
-                    const { error } = await supabaseClient
-                        .from('productos')
-                        .insert([{ ...nuevo, negocio_id: negocioIdActual }]);
-                    if (error) throw error;
-                    mostrarMensaje('✅ Producto agregado');
-                    cerrarModalAgregar();
-                    cargarProductos();
-                } catch (error) {
-                    mostrarMensaje('❌ Error: ' + error.message, 'error');
+                // Guardar productos
+                for (const p of productos) {
+                    if (p.id > 0) {
+                        await window.actualizarProducto(p.id, { nombre: p.nombre, descripcion: p.descripcion, precio: p.precio, imagen: p.imagen, caracteristicas: p.caracteristicas, badge_permanente: p.badgePermanente }, supabaseUrl, supabaseKey);
+                    } else {
+                        await window.guardarProducto(clienteData.uuid, { nombre: p.nombre, descripcion: p.descripcion, precio: p.precio, imagen: p.imagen, caracteristicas: p.caracteristicas, badge_permanente: p.badgePermanente, disponible: true, orden: 0 }, supabaseUrl, supabaseKey);
+                    }
                 }
-            } else if (tipoAgregando === 'servicio') {
-                const nombre = document.getElementById('nuevo-nombre')?.value;
-                if (!nombre) { alert('El nombre es obligatorio'); return; }
                 
-                const nuevo = {
-                    nombre: nombre,
-                    descripcion: document.getElementById('nuevo-descripcion')?.value || '',
-                    horario: document.getElementById('nuevo-horario')?.value || 'Disponible bajo consulta',
-                    icono: document.getElementById('nuevo-icono')?.value || '<i class="fas fa-star"></i>',
-                    orden: serviciosData.length
-                };
+                const mensajeDiv = document.getElementById('mensaje');
+                mensajeDiv.textContent = '✅ Todos los cambios guardados correctamente';
+                mensajeDiv.className = 'mensaje mensaje-exito';
+                mensajeDiv.style.display = 'block';
+                setTimeout(() => { mensajeDiv.style.display = 'none'; }, 3000);
                 
-                try {
-                    const { error } = await supabaseClient
-                        .from('servicios')
-                        .insert([{ ...nuevo, negocio_id: negocioIdActual }]);
-                    if (error) throw error;
-                    mostrarMensaje('✅ Servicio agregado');
-                    cerrarModalAgregar();
-                    cargarServicios();
-                } catch (error) {
-                    mostrarMensaje('❌ Error: ' + error.message, 'error');
-                }
-            } else if (tipoAgregando === 'imagen') {
-                const imagenUrl = document.getElementById('nuevo-imagen')?.value;
-                if (!imagenUrl) { alert('El nombre del archivo de imagen es obligatorio'); return; }
-                
-                const nuevo = {
-                    titulo: document.getElementById('nuevo-titulo')?.value || '',
-                    categoria: document.getElementById('nuevo-categoria')?.value || 'otros',
-                    descripcion: document.getElementById('nuevo-descripcion')?.value || '',
-                    imagen_url: imagenUrl,
-                    orden: galeriaData.length
-                };
-                
-                try {
-                    const { error } = await supabaseClient
-                        .from('galeria')
-                        .insert([{ ...nuevo, negocio_id: negocioIdActual }]);
-                    if (error) throw error;
-                    mostrarMensaje('✅ Imagen agregada');
-                    cerrarModalAgregar();
-                    cargarGaleria();
-                } catch (error) {
-                    mostrarMensaje('❌ Error: ' + error.message, 'error');
-                }
-            } else if (tipoAgregando === 'testimonio') {
-                const nombre = document.getElementById('nuevo-nombre')?.value;
-                const texto = document.getElementById('nuevo-texto')?.value;
-                if (!nombre || !texto) { alert('Nombre y testimonio son obligatorios'); return; }
-                
-                const nuevo = {
-                    nombre: nombre,
-                    lugar: document.getElementById('nuevo-lugar')?.value || '',
-                    texto: texto,
-                    rating: parseInt(document.getElementById('nuevo-rating')?.value) || 5,
-                    avatar: document.getElementById('nuevo-avatar')?.value || '',
-                    orden: testimoniosData.length
-                };
-                
-                try {
-                    const { error } = await supabaseClient
-                        .from('testimonios')
-                        .insert([{ ...nuevo, negocio_id: negocioIdActual }]);
-                    if (error) throw error;
-                    mostrarMensaje('✅ Testimonio agregado');
-                    cerrarModalAgregar();
-                    cargarTestimonios();
-                } catch (error) {
-                    mostrarMensaje('❌ Error: ' + error.message, 'error');
-                }
+            } catch (error) {
+                const mensajeDiv = document.getElementById('mensaje');
+                mensajeDiv.textContent = '❌ Error: ' + error.message;
+                mensajeDiv.className = 'mensaje mensaje-error';
+                mensajeDiv.style.display = 'block';
+            } finally {
+                btn.innerHTML = textoOriginal;
+                btn.disabled = false;
             }
         }
-
-        function mostrarMensaje(texto, tipo = 'exito') {
-            const msgDiv = document.getElementById('mensaje');
-            msgDiv.textContent = texto;
-            msgDiv.className = `mensaje mensaje-${tipo}`;
-            msgDiv.style.display = 'block';
-            setTimeout(() => { msgDiv.style.display = 'none'; }, 3000);
-        }
-
-        function toggleContenido(header) {
-            const contenido = header.nextElementSibling;
-            contenido.classList.toggle('hidden');
-        }
-
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/[&<>]/g, m => {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                return m;
-            });
-        }
-
-        // Tabs
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                const tab = btn.dataset.tab;
-                document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
-                document.getElementById(`tab-${tab}`).classList.add('active');
-            });
-        });
     </script>
 </body>
     </html>

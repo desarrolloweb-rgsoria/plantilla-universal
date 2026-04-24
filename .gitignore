@@ -1,0 +1,21 @@
+# Supabase
+supabase-key.js
+supabase-config.js
+.env
+.env.local
+
+# Node modules
+node_modules/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de prueba
+test-*.html

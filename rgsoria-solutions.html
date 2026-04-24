@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="siteTitle">Mi Negocio</title>
+    
+    <!-- Dependencias -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="supabase-config.js"></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --color-primario: #1E3A5F;
+            --color-secundario: #F4A261;
+            --color-acento: #4a90e2;
+        }
+        
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #0a0f1a;
+            color: white;
+            overflow: hidden;
+            height: 100vh;
+        }
+        
+        /* ===== MENÚ ===== */
+        .menu {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            background: rgba(10, 15, 26, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            height: 60px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            position: relative;
+        }
+        
+        .menu-logo {
+            color: white;
+            font-size: 18px;
+            font-weight: 700;
+            text-decoration: none;
+        }
+        
+        .menu-tabs {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .menu-tab {
+            padding: 8px 16px;
+            border: none;
+            background: transparent;
+            color: #a0b8d8;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .menu-tab:hover { color: white; background: rgba(255,255,255,0.05); }
+        .menu-tab.activo { color: var(--color-secundario); background: rgba(244,162,97,0.15); }
+        
+        .menu-hamburguesa {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 8px;
+            position: absolute;
+            right: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            transition: transform 0.3s ease;
+        }
+        .menu-hamburguesa.giro {
+            transform: translateY(-50%) rotate(90deg);
+        }
+        
+        .menu-movil {
+            display: none;
+            position: fixed;
+            top: 60px; right: 24px;
+            background: rgba(13, 20, 33, 0.98);
+            backdrop-filter: blur(15px);
+            border-radius: 16px;
+            padding: 8px;
+            z-index: 1001;
+            border: 1px solid rgba(255,255,255,0.08);
+            flex-direction: column;
+            gap: 2px;
+            min-width: 180px;
+        }
+        .menu-movil.abierto { display: flex; }
+        
+        .menu-movil-tab {
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            color: #a0b8d8;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 10px;
+            text-align: left;
+            transition: all 0.2s;
+        }
+        .menu-movil-tab:hover { color: white; background: rgba(255,255,255,0.05); }
+        .menu-movil-tab.activo { color: var(--color-secundario); background: rgba(244,162,97,0.15); }
+        
+        /* ===== CONTENEDOR PRINCIPAL ===== */
+        .main-container {
+            position: fixed;
+            top: 60px; left: 0;
+            width: 100%; height: calc(100vh - 60px);
+            overflow: hidden;
+        }
+        
+        /* ===== SECCIONES ===== */
+        .seccion {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: none;
+        }
+        .seccion.activa {
+            display: flex;
+            flex-direction: column;
+        }
+        .seccion.activa.slide-up { animation: slideUp 0.5s cubic-bezier(0.4,0,0.2,1); }
+        .seccion.activa.slide-left { animation: slideLeft 0.5s cubic-bezier(0.4,0,0.2,1); }
+        .seccion.activa.slide-right { animation: slideRight 0.5s cubic-bezier(0.4,0,0.2,1); }
+        .seccion.activa.scale-in { animation: scaleIn 0.5s cubic-bezier(0.4,0,0.2,1); }
+        .seccion.activa.fade-in { animation: fadeIn 0.5s ease; }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideLeft { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes slideRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        
+        .seccion-contenido {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 40px 24px;
+            box-sizing: border-box;
+        }
+        
+        /* ===== HERO ===== */
+        #seccion-hero {
+            padding: 0 !important;
+        }
+        #seccion-hero .seccion-contenido {
+            max-width: 100% !important;
+            padding: 0 !important;
+            height: 100%;
+        }
+        .hero {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 100%;
+            border-radius: 0 !important;
+            overflow: hidden;
+        }
+        .hero-media {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%; z-index: 0;
+        }
+        .hero-media img, .hero-media video, .hero-media iframe {
+            width: 100%; height: 100%; object-fit: cover; border: none;
+        }
+        .hero-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 1;
+        }
+        .hero-content {
+            position: relative; z-index: 2;
+            color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            max-width: 800px; padding: 20px;
+        }
+        .hero-superior { font-size: clamp(0.9rem, 2vw, 1.2rem); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 0.5rem; }
+        .hero-principal { font-size: clamp(2rem, 5vw, 4rem); font-weight: 700; margin-bottom: 0.5rem; line-height: 1.1; }
+        .hero-inferior { font-size: clamp(0.9rem, 2vw, 1.2rem); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 2rem; }
+        .hero-boton {
+            display: inline-block; padding: 0.8rem 2rem; border-radius: 50px;
+            font-weight: bold; cursor: pointer; background: var(--color-secundario);
+            color: #0a0f1a; border: none; font-size: clamp(0.9rem, 1.5vw, 1rem);
+            text-decoration: none; transition: transform 0.2s;
+        }
+        .hero-boton:hover { transform: translateY(-2px); }
+        
+        /* ===== TÍTULOS DE SECCIÓN ===== */
+        .seccion-titulo { font-size: clamp(1.5rem, 3vw, 2.5rem); font-weight: 700; margin-bottom: 0.5rem; text-align: center; }
+        .seccion-subtitulo { font-size: 1.1rem; color: #a0b8d8; text-align: center; margin-bottom: 2rem; }
+        
+        /* ===== PRODUCTOS Y SERVICIOS ===== */
+        .productos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+            width: 100%;
+            max-width: 100%;
+        }
+        
+        .producto-card, .servicio-card {
+            background: rgba(255,255,255,0.03);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.06);
+            transition: transform 0.2s;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+        }
+        .producto-card:hover, .servicio-card:hover { transform: translateY(-4px); }
+        
+        .producto-imagen {
+            aspect-ratio: 1;
+            background: rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .producto-imagen img { width: 100%; height: 100%; object-fit: cover; }
+        .producto-imagen span { font-size: 48px; color: #506080; }
+        
+        .producto-info, .servicio-info { padding: 16px; }
+        .producto-nombre, .servicio-nombre { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+        .producto-descripcion, .servicio-descripcion { color: #a0b8d8; font-size: 13px; margin-bottom: 8px; }
+        .producto-precio { font-size: 20px; font-weight: 700; color: var(--color-secundario); }
+        .producto-badge {
+            display: inline-block; background: var(--color-secundario); color: #0a0f1a;
+            padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; margin-bottom: 6px;
+        }
+        
+        .servicio-card { text-align: center; padding: 24px 16px; }
+        .servicio-icono { font-size: 40px; color: var(--color-secundario); margin-bottom: 12px; }
+        .servicio-horario { color: #6070a0; font-size: 12px; margin-top: 8px; }
+        
+        /* ===== NOSOTROS ===== */
+        .nosotros-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+        @media (max-width: 768px) { .nosotros-grid { grid-template-columns: 1fr; } }
+        
+        .nosotros-imagen {
+            border-radius: 20px;
+            overflow: hidden;
+            aspect-ratio: 4/3;
+            background: rgba(0,0,0,0.3);
+        }
+        .nosotros-imagen img { width: 100%; height: 100%; object-fit: cover; }
+        .nosotros-imagen span {
+            display: flex; align-items: center; justify-content: center;
+            height: 100%; font-size: 64px; color: #506080;
+        }
+        
+        .nosotros-texto h2 { font-size: 2rem; margin-bottom: 0.5rem; }
+        .nosotros-texto h3 { color: #a0b8d8; font-size: 1.1rem; font-weight: normal; margin-bottom: 1.5rem; }
+        .nosotros-historia { color: #c0d8ff; line-height: 1.8; }
+        
+        /* ===== GALERÍA ===== */
+        .galeria-swiper { width: 100%; padding: 20px 0 40px; }
+        .galeria-swiper .swiper-slide { width: 300px; height: 350px; }
+        .galeria-swiper .swiper-slide img { width: 100%; height: 100%; object-fit: cover; border-radius: 16px; }
+        
+        /* ===== CONTACTO ===== */
+        .contacto-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+        @media (max-width: 768px) { .contacto-grid { grid-template-columns: 1fr; } }
+        
+        .contacto-info p { font-size: 15px; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; }
+        .contacto-info i { color: var(--color-secundario); width: 20px; text-align: center; }
+        
+        .contacto-redes { display: flex; gap: 12px; margin-top: 20px; }
+        .contacto-red {
+            width: 44px; height: 44px;
+            background: rgba(244,162,97,0.15);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--color-secundario); text-decoration: none;
+            font-size: 18px; transition: all 0.2s;
+        }
+        .contacto-red:hover { background: var(--color-secundario); color: #0a0f1a; }
+        
+        .contacto-mapa {
+            border-radius: 20px;
+            overflow: hidden;
+            height: 300px;
+            background: #1a2a4a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .contacto-mapa iframe { width: 100%; height: 100%; border: none; }
+        .contacto-mapa-placeholder {
+            text-align: center;
+            color: #6070a0;
+        }
+        .contacto-mapa-placeholder i {
+            font-size: 48px;
+            opacity: 0.5;
+            margin-bottom: 10px;
+        }
+        
+        /* ===== PLACEHOLDER ===== */
+        .placeholder { text-align: center; padding: 60px 20px; color: #6070a0; }
+        .placeholder i { font-size: 64px; opacity: 0.4; margin-bottom: 16px; }
+        .placeholder h3 { font-size: 24px; margin-bottom: 8px; color: #a0b8d8; }
+        
+        /* ===== FOOTER ===== */
+        .footer { text-align: center; padding: 20px; color: #6070a0; font-size: 13px; border-top: 1px solid rgba(255,255,255,0.05); margin-top: auto; }
+        
+        /* ===== RESPONSIVE MENÚ ===== */
+        @media (max-width: 900px) {
+            .menu-tabs { display: none; }
+            .menu-hamburguesa { display: block; }
+        }
+        @media (min-width: 901px) {
+            .menu-tabs { display: flex; }
+            .menu-hamburguesa { display: none; }
+            .menu-movil { display: none !important; }
+        }
+        
+        /* ===== BOTÓN WHATSAPP ===== */
+.btn-whatsapp {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: #25D366;
+    color: white;
+    border: none;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 10px;
+}
+.btn-whatsapp:hover {
+    background: #1da851;
+    transform: scale(1.03);
+}
+.btn-whatsapp i {
+    font-size: 16px;
+}
+    </style>
+</head>
+<body>
+    
+    <!-- MENÚ -->
+    <nav class="menu">
+        <a class="menu-logo" id="menuLogo">Mi Negocio</a>
+        <div class="menu-tabs" id="menuTabs"></div>
+        <button class="menu-hamburguesa" id="menuHamburguesa" onclick="toggleMenu()">☰</button>
+        <div class="menu-movil" id="menuMovil"></div>
+    </nav>
+    
+    <!-- CONTENIDO -->
+    <div class="main-container">
+        <div id="seccion-hero" class="seccion activa fade-in"></div>
+        <div id="seccion-productos" class="seccion"></div>
+        <div id="seccion-servicios" class="seccion"></div>
+        <div id="seccion-nosotros" class="seccion"></div>
+        <div id="seccion-galeria" class="seccion"></div>
+        <div id="seccion-contacto" class="seccion"></div>
+    </div>
+    
+    <script>
+        // ============================================
+        // CONFIGURACIÓN
+        // ============================================
+        let supabaseClient = null;
+        let seccionActual = 'hero';
+        
+        const transiciones = {
+            hero: 'fade-in',
+            productos: 'slide-up',
+            servicios: 'scale-in',
+            nosotros: 'slide-left',
+            galeria: 'fade-in',
+            contacto: 'slide-right'
+        };
+        
+        function initSupabase() {
+            if (typeof window.supabase !== 'undefined') {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                return true;
+            }
+            return false;
+        }
+        
+        function getClienteId() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('id') || 'RGS-0000';
+        }
+        
+        // ============================================
+        // NAVEGACIÓN
+        // ============================================
+        function navegarA(seccion) {
+            document.querySelectorAll('.seccion').forEach(s => {
+                s.classList.remove('activa', 'slide-up', 'slide-left', 'slide-right', 'scale-in', 'fade-in');
+            });
+            
+            const nueva = document.getElementById('seccion-' + seccion);
+            if (nueva) {
+                nueva.classList.add('activa', transiciones[seccion] || 'fade-in');
+                seccionActual = seccion;
+            }
+            
+            document.querySelectorAll('.menu-tab, .menu-movil-tab').forEach(t => t.classList.remove('activo'));
+            document.querySelectorAll('[data-seccion="' + seccion + '"]').forEach(t => t.classList.add('activo'));
+            
+            document.getElementById('menuMovil').classList.remove('abierto');
+            const btnHam = document.getElementById('menuHamburguesa');
+            btnHam.innerHTML = '☰';
+            btnHam.classList.remove('giro');
+        }
+        
+        function toggleMenu() {
+            var menuMovil = document.getElementById('menuMovil');
+            var btnHam = document.getElementById('menuHamburguesa');
+            var estaAbierto = menuMovil.classList.contains('abierto');
+            
+            if (estaAbierto) {
+                menuMovil.classList.remove('abierto');
+                btnHam.innerHTML = '☰';
+                btnHam.classList.remove('giro');
+            } else {
+                menuMovil.classList.add('abierto');
+                btnHam.innerHTML = '✕';
+                btnHam.classList.add('giro');
+            }
+        }
+        
+        // ============================================
+        // CARGAR DATOS
+        // ============================================
+        async function cargarSitio() {
+            const clienteId = getClienteId();
+            
+            try {
+                initSupabase();
+                const { data: cliente } = await supabaseClient
+                    .from('cliente')
+                    .select('*')
+                    .eq('id_publico', clienteId)
+                    .single();
+                
+                if (cliente) {
+                    document.title = cliente.nombre || 'Mi Negocio';
+                    document.getElementById('menuLogo').textContent = cliente.nombre || 'Mi Negocio';
+                    if (cliente.config) {
+                        Object.keys(cliente.config).forEach(k => {
+                            localStorage.setItem(k, JSON.stringify(cliente.config[k]));
+                        });
+                    }
+                }
+            } catch(e) {
+                console.log('Cargando desde caché local...');
+            }
+            
+            const heroData = JSON.parse(localStorage.getItem('heroData') || '{}');
+            const productosData = JSON.parse(localStorage.getItem('productosData') || '[]');
+            const serviciosData = JSON.parse(localStorage.getItem('serviciosData') || '[]');
+            const nosotrosData = JSON.parse(localStorage.getItem('nosotrosData') || '{}');
+            const galeriaData = JSON.parse(localStorage.getItem('galeriaData') || '{}');
+            const contactoData = JSON.parse(localStorage.getItem('contactoData') || '{}');
+            const configData = JSON.parse(localStorage.getItem('configData') || '{}');
+            
+            if (configData.colorPrimario) document.documentElement.style.setProperty('--color-primario', configData.colorPrimario);
+            if (configData.colorSecundario) document.documentElement.style.setProperty('--color-secundario', configData.colorSecundario);
+            if (configData.colorAcento) document.documentElement.style.setProperty('--color-acento', configData.colorAcento);
+            
+            const sitio = configData.sitio || {};
+            
+            construirMenu(sitio);
+            renderizarHero(heroData);
+            renderizarProductos(productosData);
+            renderizarServicios(serviciosData);
+            renderizarNosotros(nosotrosData);
+            renderizarGaleria(galeriaData);
+            renderizarContacto(contactoData);
+            
+            navegarA('hero');
+        }
+        
+        function construirMenu(sitio) {
+            const secciones = [
+                { id: 'hero', icon: '🏠', nombre: 'Inicio' },
+                { id: 'productos', icon: '📦', nombre: 'Productos' },
+                { id: 'servicios', icon: '🛠️', nombre: 'Servicios' },
+                { id: 'nosotros', icon: '📖', nombre: 'Nosotros' },
+                { id: 'galeria', icon: '🖼️', nombre: 'Galería' },
+                { id: 'contacto', icon: '📞', nombre: 'Contacto' }
+            ];
+            
+            const tabsContainer = document.getElementById('menuTabs');
+            const movilContainer = document.getElementById('menuMovil');
+            
+            let tabsHtml = '', movilHtml = '';
+            
+            secciones.forEach(s => {
+                const conf = sitio[s.id] || { visible: true };
+                if (conf.visible !== false) {
+                    tabsHtml += '<button class="menu-tab" data-seccion="' + s.id + '" onclick="navegarA(\'' + s.id + '\')">' + s.icon + ' ' + s.nombre + '</button>';
+                    movilHtml += '<button class="menu-movil-tab" data-seccion="' + s.id + '" onclick="navegarA(\'' + s.id + '\')">' + s.icon + ' ' + s.nombre + '</button>';
+                }
+            });
+            
+            tabsContainer.innerHTML = tabsHtml;
+            movilContainer.innerHTML = movilHtml;
+        }
+        
+        // ============================================
+        // RENDERIZAR SECCIONES
+        // ============================================
+        
+        function renderizarHero(data) {
+            const container = document.getElementById('seccion-hero');
+            
+            let mediaHtml = '';
+            if (data.tipoFondo === 'video' && data.video) {
+                const ytMatch = data.video.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/);
+                if (ytMatch) {
+                    mediaHtml = '<iframe src="https://www.youtube.com/embed/' + ytMatch[1] + '?autoplay=1&mute=1&loop=1&playlist=' + ytMatch[1] + '&controls=0&modestbranding=1"></iframe>';
+                } else if (data.video.includes('vimeo.com')) {
+                    const vimeoMatch = data.video.match(/vimeo\.com\/(\d+)/);
+                    if (vimeoMatch) {
+                        mediaHtml = '<iframe src="https://player.vimeo.com/video/' + vimeoMatch[1] + '?autoplay=1&muted=1&loop=1&background=1"></iframe>';
+                    }
+                } else {
+                    mediaHtml = '<video src="' + data.video + '" autoplay loop muted playsinline></video>';
+                }
+            } else if (data.imagen) {
+                mediaHtml = '<img src="' + data.imagen + '" alt="Hero">';
+            }
+            
+            container.innerHTML = `
+                <div class="hero">
+                    <div class="hero-media">${mediaHtml}</div>
+                    <div class="hero-overlay" style="background:rgba(0,0,0,${data.overlay || 0.5})"></div>
+                    <div class="hero-content">
+                        <div class="hero-superior">${data.superior || 'BIENVENIDOS A'}</div>
+                        <div class="hero-principal">${data.principal || 'Mi Negocio'}</div>
+                        ${data.inferior ? '<div class="hero-inferior">' + data.inferior + '</div>' : ''}
+                        <button class="hero-boton">${data.boton || 'Ver más'}</button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function renderizarProductos(data) {
+            const container = document.getElementById('seccion-productos');
+            if (!data.length) {
+                container.innerHTML = '<div class="placeholder"><i class="fas fa-box"></i><h3>Sin productos</h3></div>';
+                return;
+            }
+            
+            let html = '<div class="seccion-contenido"><h2 class="seccion-titulo">📦 Nuestros Productos</h2><div class="productos-grid">';
+            
+            data.forEach(p => {
+                html += `
+                    <div class="producto-card">
+                        <div class="producto-imagen">${p.imagen ? '<img src="' + p.imagen + '" alt="' + p.nombre + '">' : '<span>📷</span>'}</div>
+                        <div class="producto-info">
+                            ${p.badge ? '<span class="producto-badge">' + p.badge + '</span>' : ''}
+                            <div class="producto-nombre">${p.nombre}</div>
+                            <div class="producto-descripcion">${p.descripcion || ''}</div>
+                            <div class="producto-precio">$${p.precio || '0.00'}</div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div><div class="footer">' + (JSON.parse(localStorage.getItem('configData') || '{}').copyright || '© 2024') + '</div></div>';
+            container.innerHTML = html;
+        }
+        
+        function renderizarServicios(data) {
+            const container = document.getElementById('seccion-servicios');
+            if (!data.length) {
+                container.innerHTML = '<div class="placeholder"><i class="fas fa-tools"></i><h3>Sin servicios</h3></div>';
+                return;
+            }
+            
+            let html = '<div class="seccion-contenido"><h2 class="seccion-titulo">🛠️ Nuestros Servicios</h2><div class="productos-grid">';
+            
+            data.forEach(s => {
+                html += `
+                    <div class="servicio-card">
+                        <div class="servicio-icono">${s.icono || '⭐'}</div>
+                        <div class="servicio-nombre">${s.nombre}</div>
+                        <div class="servicio-descripcion">${s.descripcion || ''}</div>
+                        <div class="servicio-horario"><i class="fas fa-clock"></i> ${s.horario || 'Siempre disponible'}</div>
+                    </div>
+                `;
+            });
+            
+            html += '</div><div class="footer">' + (JSON.parse(localStorage.getItem('configData') || '{}').copyright || '© 2024') + '</div></div>';
+            container.innerHTML = html;
+        }
+        
+        function renderizarNosotros(data) {
+            const container = document.getElementById('seccion-nosotros');
+            if (!data.titulo && !data.historia) {
+                container.innerHTML = '<div class="placeholder"><i class="fas fa-book-open"></i><h3>Sección no configurada</h3></div>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <div class="seccion-contenido">
+                    <div class="nosotros-grid">
+                        <div class="nosotros-texto">
+                            <h2>${data.titulo || 'Sobre Nosotros'}</h2>
+                            <h3>${data.subtitulo || ''}</h3>
+                            <div class="nosotros-historia">${data.historia || ''}</div>
+                        </div>
+                        <div class="nosotros-imagen">
+                            ${data.imagen ? '<img src="' + data.imagen + '" alt="Nosotros">' : '<span>🖼️</span>'}
+                        </div>
+                    </div>
+                    <div class="footer">${JSON.parse(localStorage.getItem('configData') || '{}').copyright || '© 2024'}</div>
+                </div>
+            `;
+        }
+        
+        function renderizarGaleria(data) {
+            const container = document.getElementById('seccion-galeria');
+            const imagenes = data.imagenes || [];
+            if (!imagenes.length) {
+                container.innerHTML = '<div class="placeholder"><i class="fas fa-images"></i><h3>Sin imágenes</h3></div>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <div class="seccion-contenido">
+                    <h2 class="seccion-titulo">🖼️ Galería</h2>
+                    <div class="swiper galeria-swiper" id="galeriaSwiper">
+                        <div class="swiper-wrapper">
+                            ${imagenes.map(url => '<div class="swiper-slide"><img src="' + url + '" alt="Galería"></div>').join('')}
+                        </div>
+                        <div class="swiper-pagination"></div>
+                        <div class="swiper-button-next"></div>
+                        <div class="swiper-button-prev"></div>
+                    </div>
+                    <div class="footer">${JSON.parse(localStorage.getItem('configData') || '{}').copyright || '© 2024'}</div>
+                </div>
+            `;
+            
+            setTimeout(() => {
+                new Swiper('#galeriaSwiper', {
+                    effect: 'coverflow', grabCursor: true, centeredSlides: true,
+                    slidesPerView: 'auto',
+                    coverflowEffect: { rotate: 50, stretch: 0, depth: 100, modifier: 1, slideShadows: true },
+                    pagination: { el: '.swiper-pagination', clickable: true },
+                    navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' }
+                });
+            }, 300);
+        }
+        
+        function renderizarContacto(data) {
+            const container = document.getElementById('seccion-contacto');
+            if (!data.telefono && !data.email && !data.direccion) {
+                container.innerHTML = '<div class="placeholder"><i class="fas fa-address-book"></i><h3>Información no configurada</h3></div>';
+                return;
+            }
+            
+            let mapaHtml = '';
+            if (data.mapa) {
+                mapaHtml = data.mapa;
+            } else {
+                mapaHtml = '<div class="contacto-mapa-placeholder"><i class="fas fa-map-marked-alt"></i><p>Sin mapa configurado</p></div>';
+            }
+            
+            container.innerHTML = `
+                <div class="seccion-contenido">
+                    <h2 class="seccion-titulo">📞 Contacto</h2>
+                    <div class="contacto-grid">
+                        <div class="contacto-info">
+                            ${data.telefono ? '<p><i class="fas fa-phone"></i> ' + data.telefono + '</p>' : ''}
+                            ${data.email ? '<p><i class="fas fa-envelope"></i> ' + data.email + '</p>' : ''}
+                            ${data.direccion ? '<p><i class="fas fa-map-marker-alt"></i> ' + data.direccion + '</p>' : ''}
+                            ${data.horario ? '<p><i class="fas fa-clock"></i> ' + data.horario + '</p>' : ''}
+                            <div class="contacto-redes">
+                                ${data.facebook ? '<a href="' + data.facebook + '" target="_blank" class="contacto-red"><i class="fab fa-facebook-f"></i></a>' : ''}
+                                ${data.instagram ? '<a href="' + data.instagram + '" target="_blank" class="contacto-red"><i class="fab fa-instagram"></i></a>' : ''}
+                                ${data.whatsapp ? '<a href="https://wa.me/' + data.whatsapp + '" target="_blank" class="contacto-red"><i class="fab fa-whatsapp"></i></a>' : ''}
+                                ${data.tiktok ? '<a href="' + data.tiktok + '" target="_blank" class="contacto-red"><i class="fab fa-tiktok"></i></a>' : ''}
+                            </div>
+                        </div>
+                        <div class="contacto-mapa">${mapaHtml}</div>
+                    </div>
+                    <div class="footer">${JSON.parse(localStorage.getItem('configData') || '{}').copyright || '© 2024'}</div>
+                </div>
+            `;
+        }
+        
+        // ============================================
+        // INICIAR
+        // ============================================
+        document.addEventListener('DOMContentLoaded', cargarSitio);
+        
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('menuMovil');
+            const btn = document.getElementById('menuHamburguesa');
+            if (menu && btn && !menu.contains(e.target) && e.target !== btn) {
+                menu.classList.remove('abierto');
+                btn.innerHTML = '☰';
+                btn.classList.remove('giro');
+            }
+        });
+    </script>
+</body>
+</html>

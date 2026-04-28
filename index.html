@@ -7687,7 +7687,10 @@ function modalMedios_subir() {
     btnSubir.textContent = '⏳ Subiendo...';
     
     var bucket = 'media_library';
-    var clienteId = (window.clienteData && window.clienteData.id_publico) || 'sin_id';
+var clienteId = 'RGS-0000';
+if (window.clienteData && window.clienteData.id_publico) {
+    clienteId = window.clienteData.id_publico;
+}
 var carpeta = clienteId;
     var exitos = 0;
     var fallos = 0;

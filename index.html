@@ -7795,27 +7795,6 @@ function modalMedios_cerrar() {
     if (modal) modal.style.display = 'none';
 }
 
-// Inicializar el input de archivos
-document.addEventListener('DOMContentLoaded', function() {
-    var input = document.getElementById('modalMedios_fileInput');
-    if (input) {
-        input.addEventListener('change', function(e) {
-            var file = e.target.files[0];
-            if (!file) return;
-            if (!file.type.startsWith('image/')) { alert('Solo imágenes'); return; }
-            
-            var previewUrl = URL.createObjectURL(file);
-            modalMedios_archivos.push({
-                file: file,
-                previewUrl: previewUrl,
-                nombre: file.name,
-                tamano: file.size
-            });
-            modalMedios_actualizarUI();
-        });
-    }
-});
-
 // Exponer funciones
 window.modalMedios_seleccionar = modalMedios_seleccionar;
 window.modalMedios_quitarArchivo = modalMedios_quitarArchivo;

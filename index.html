@@ -5312,6 +5312,7 @@ function mostrarDashboard() {
 }
 
 function cargarDatosDashboard() {
+    console.time('⏱️ cargarDatosDashboard');
     // 1. Actualizar Hero
     const heroData = localStorage.getItem('heroData');
     const heroElement = document.getElementById('previewHero');
@@ -5588,6 +5589,7 @@ if (contactoData) {
             if (footer) footer.textContent = d.copyright || '© 2024 Mi Negocio';
         } catch (e) {}
     }
+    console.timeEnd('⏱️ cargarDatosDashboard');
 }
 
 // Exponer funciones globales

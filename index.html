@@ -280,7 +280,7 @@ body {
     cursor: pointer;
 }
 
-/* TARJETAS DEL DASHBOARD */
+/* TARJETAS */
 .seccion-card {
     display: block;
     width: 100%;
@@ -335,14 +335,6 @@ body {
 }
 
 .seccion-card:hover .tag { opacity: 1; }
-
-.seccion-card.card-medios {
-    background: #1a2a4a;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-}
 /* ---------------------------------------- */
 /* 2.4 ESTRUCTURA COMÚN DE MODALES          */
 /* ---------------------------------------- */
@@ -3721,68 +3713,67 @@ body {
         </div>
         
         <!-- HERO -->
-        <div class="seccion-card" style="background-image:url('https://nvrcqlxnvjvhznmxozhh.supabase.co/storage/v1/object/public/media_library/dashboard_previews/preview-hero.png');" onclick="abrirEditor('hero')">
+        <div class="seccion-card" id="card-hero" onclick="abrirEditor('hero')">
             <div class="overlay"></div>
             <div class="label">🏠 Hero</div>
             <div class="tag">✏️ Editar</div>
         </div>
         
         <!-- PRODUCTOS -->
-        <div class="seccion-card" style="background-image:url('https://nvrcqlxnvjvhznmxozhh.supabase.co/storage/v1/object/public/media_library/dashboard_previews/preview-productos.png');" onclick="abrirEditor('productos')">
+        <div class="seccion-card" id="card-productos" onclick="abrirEditor('productos')">
             <div class="overlay"></div>
             <div class="label">📦 Habitaciones</div>
             <div class="tag">✏️ Editar</div>
         </div>
         
         <!-- SERVICIOS -->
-        <div class="seccion-card" style="background-image:url('https://nvrcqlxnvjvhznmxozhh.supabase.co/storage/v1/object/public/media_library/dashboard_previews/preview-servicios.png');" onclick="abrirEditor('servicios')">
+        <div class="seccion-card" id="card-servicios" onclick="abrirEditor('servicios')">
             <div class="overlay"></div>
             <div class="label">🛠️ Servicios</div>
             <div class="tag">✏️ Editar</div>
         </div>
         
         <!-- NOSOTROS -->
-        <div class="seccion-card" style="background-image:url('https://nvrcqlxnvjvhznmxozhh.supabase.co/storage/v1/object/public/media_library/dashboard_previews/preview-nosotros.png');" onclick="abrirEditor('nosotros')">
+        <div class="seccion-card" id="card-nosotros" onclick="abrirEditor('nosotros')">
             <div class="overlay"></div>
             <div class="label">📖 Nosotros</div>
             <div class="tag">✏️ Editar</div>
         </div>
         
         <!-- GALERÍA -->
-        <div class="seccion-card" style="background-image:url('https://nvrcqlxnvjvhznmxozhh.supabase.co/storage/v1/object/public/media_library/dashboard_previews/preview-galeria.png');" onclick="abrirEditor('galeria')">
+        <div class="seccion-card" id="card-galeria" onclick="abrirEditor('galeria')">
             <div class="overlay"></div>
             <div class="label">🖼️ Galería</div>
             <div class="tag">✏️ Editar</div>
         </div>
         
+        <!-- VIDEOTECA -->
+        <div class="seccion-card" id="card-videos" onclick="abrirEditor('videoGaleria')">
+            <div class="overlay"></div>
+            <div class="label">🎬 Videoteca</div>
+            <div class="tag">✏️ Editar</div>
+        </div>
+        
         <!-- CONTACTO -->
-        <div class="seccion-card" style="background-image:url('https://nvrcqlxnvjvhznmxozhh.supabase.co/storage/v1/object/public/media_library/dashboard_previews/preview-contacto.png');" onclick="abrirEditor('contacto')">
+        <div class="seccion-card" id="card-contacto" onclick="abrirEditor('contacto')">
             <div class="overlay"></div>
             <div class="label">📞 Contacto</div>
             <div class="tag">✏️ Editar</div>
         </div>
         
         <!-- CONFIGURACIÓN -->
-        <div class="seccion-card" style="background-image:url('https://nvrcqlxnvjvhznmxozhh.supabase.co/storage/v1/object/public/media_library/dashboard_previews/preview-config.png');" onclick="abrirEditor('configuracion')">
+        <div class="seccion-card" id="card-configuracion" onclick="abrirEditor('configuracion')">
             <div class="overlay"></div>
             <div class="label">⚙️ Configuración</div>
             <div class="tag">✏️ Editar</div>
         </div>
         
         <!-- MI LIBRERÍA -->
-        <div class="seccion-card" style="background-image:url('https://nvrcqlxnvjvhznmxozhh.supabase.co/storage/v1/object/public/media_library/dashboard_previews/preview-medios.png');" onclick="abrirModalMedios()">
+        <div class="seccion-card" id="card-medios" onclick="abrirModalMedios()">
             <div class="overlay"></div>
             <div class="label">📚 Mi Librería</div>
             <div class="tag">✏️ Abrir</div>
         </div>
-        
-        <!-- VIDEOTECA -->
-        <div class="seccion-card" style="background-image:url('https://nvrcqlxnvjvhznmxozhh.supabase.co/storage/v1/object/public/media_library/dashboard_previews/preview-videos.png');" onclick="abrirEditor('videoGaleria')">
-            <div class="overlay"></div>
-            <div class="label">🎬 Videoteca</div>
-            <div class="tag">✏️ Editar</div>
-        </div>
-        
     </div>
 </div>
 
@@ -4975,44 +4966,63 @@ function logout() {
 // 6.4 LÓGICA DEL DASHBOARD (con auto‑registro de modales)
 // ============================================
 
-// Objeto global para almacenar las funciones de apertura de modales
 const modalesRegistrados = {};
 
-// Función para que cada modal se registre automáticamente
 function registrarModal(seccion, funcionAbrir) {
     modalesRegistrados[seccion] = funcionAbrir;
-    console.log(`✅ Modal "${seccion}" registrado en el Dashboard`);
+    console.log('✅ Modal "' + seccion + '" registrado en el Dashboard');
 }
 
-// Función que invoca el Dashboard al hacer clic en una sección
 function abrirEditor(seccion) {
     console.log('📂 Abrir editor:', seccion);
     
-    const abrir = modalesRegistrados[seccion];
+    var abrir = modalesRegistrados[seccion];
     if (!abrir) {
-        alert(`Editor de "${seccion}" no disponible aún.`);
+        alert('Editor de "' + seccion + '" no disponible aún.');
         return;
     }
     
-    // Obtener datos guardados en localStorage (si existen)
-    const datosGuardados = localStorage.getItem(`${seccion}Data`);
-    const datosIniciales = datosGuardados ? JSON.parse(datosGuardados) : {};
-    
-    // Abrir el modal correspondiente
-    abrir(datosIniciales, function(datos) {
-        console.log(`✅ ${seccion} guardado desde Dashboard:`, datos);
-        // Refrescar la vista previa del Dashboard
-        cargarDatosDashboard();
+    abrir(null, function(datos) {
+        console.log('✅ ' + seccion + ' guardado desde Dashboard:', datos);
     });
 }
 
 function mostrarDashboard() {
     document.getElementById('loginContainer').style.display = 'none';
     document.getElementById('dashboardContainer').style.display = 'block';
-    document.getElementById('dashboardTitulo').textContent = clienteData?.nombre || 'Mi Negocio';
-    document.getElementById('userBadge').textContent = clienteData?.id_publico || 'RGS-0000';
+    document.getElementById('dashboardTitulo').textContent = window.clienteData?.nombre || 'Mi Negocio';
+    document.getElementById('userBadge').textContent = window.clienteData?.id_publico || 'RGS-0000';
     cargarDatosDashboard();
 }
+
+function cargarDatosDashboard() {
+    var baseUrl = 'https://nvrcqlxnvjvhznmxozhh.supabase.co/storage/v1/object/public/media_library/dashboard_previews/';
+    
+    var tarjetas = {
+        'card-hero': baseUrl + 'preview-hero.png',
+        'card-productos': baseUrl + 'preview-productos.png',
+        'card-servicios': baseUrl + 'preview-servicios.png',
+        'card-nosotros': baseUrl + 'preview-nosotros.png',
+        'card-galeria': baseUrl + 'preview-galeria.png',
+        'card-contacto': baseUrl + 'preview-contacto.png',
+        'card-configuracion': baseUrl + 'preview-config.png',
+        'card-medios': baseUrl + 'preview-medios.png',
+        'card-videos': baseUrl + 'preview-videos.png'
+    };
+    
+    for (var id in tarjetas) {
+        var card = document.getElementById(id);
+        if (card) {
+            card.style.backgroundImage = 'url(' + tarjetas[id] + ')';
+        }
+    }
+}
+
+// Exponer funciones globales
+window.registrarModal = registrarModal;
+window.abrirEditor = abrirEditor;
+window.mostrarDashboard = mostrarDashboard;
+window.cargarDatosDashboard = cargarDatosDashboard;
 
 
 

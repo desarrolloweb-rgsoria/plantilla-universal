@@ -3654,6 +3654,177 @@ body {
     align-items: center;
     justify-content: space-between;
 }
+
+/* ---------------------------------------- */
+/* 2.21 MODAL TESTIMONIOS                    */
+/* ---------------------------------------- */
+.modalTestimonios_overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 10000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.modalTestimonios_contenedor {
+    background: rgba(20, 35, 60, 0.95);
+    backdrop-filter: blur(12px);
+    border-radius: 24px;
+    padding: 25px;
+    max-width: 900px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    border: 1px solid rgba(100, 180, 255, 0.15);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+}
+
+.modalTestimonios_titulo {
+    color: #c0d8ff;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.modalTestimonios_tituloIzq {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.modalTestimonios_tituloIzq span { color: #F4A261; }
+
+.modalTestimonios_btnAgregar {
+    padding: 10px 20px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 40px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.modalTestimonios_lista {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.modalTestimonios_item {
+    background: rgba(10, 20, 40, 0.4);
+    border: 1px solid rgba(100, 180, 255, 0.1);
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.modalTestimonios_header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 20px;
+    cursor: pointer;
+}
+
+.modalTestimonios_avatar {
+    width: 60px;
+    height: 60px;
+    background: rgba(244, 162, 97, 0.15);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: #F4A261;
+    flex-shrink: 0;
+}
+
+.modalTestimonios_info { flex: 1; }
+.modalTestimonios_nombre { color: #e0e8ff; font-weight: 600; font-size: 16px; margin-bottom: 4px; }
+.modalTestimonios_texto { color: #8090b0; font-size: 13px; }
+.modalTestimonios_estrellas { color: #F4A261; font-size: 14px; }
+
+.modalTestimonios_editor {
+    padding: 20px;
+    border-top: 1px solid rgba(100, 180, 255, 0.15);
+    background: rgba(0,0,0,0.2);
+    display: none;
+}
+.modalTestimonios_editor.activo { display: block; }
+
+.modalTestimonios_formGroup { margin-bottom: 15px; }
+.modalTestimonios_formGroup label {
+    display: block;
+    color: #a0c4ff;
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+.modalTestimonios_formGroup input,
+.modalTestimonios_formGroup textarea,
+.modalTestimonios_formGroup select {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(10, 20, 40, 0.6);
+    border: 1px solid rgba(100, 180, 255, 0.2);
+    border-radius: 12px;
+    color: #e0e8ff;
+    font-size: 14px;
+    outline: none;
+}
+.modalTestimonios_formGroup textarea { min-height: 100px; resize: vertical; }
+
+.modalTestimonios_editorAcciones {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    justify-content: flex-end;
+}
+
+.modalTestimonios_btnEditor {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 40px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.modalTestimonios_btnGuardarEditor {
+    background: #28a745;
+    color: white;
+}
+.modalTestimonios_btnCancelarEditor {
+    background: rgba(30, 45, 70, 0.5);
+    border: 1px solid rgba(100, 150, 255, 0.2);
+    color: #b0c8e8;
+}
+
+.modalTestimonios_btnIcono {
+    width: 40px;
+    height: 40px;
+    background: rgba(74, 144, 226, 0.2);
+    border: 1px solid rgba(74, 144, 226, 0.3);
+    border-radius: 10px;
+    color: #a0c4ff;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.modalTestimonios_btnIcono.eliminar {
+    background: rgba(220, 53, 69, 0.2);
+    border-color: rgba(220, 53, 69, 0.3);
+    color: #ff8080;
+}
     </style>
 </head>
 <body>
@@ -3765,6 +3936,20 @@ body {
         <div class="seccion-card" id="card-configuracion" onclick="abrirEditor('configuracion')">
             <div class="overlay"></div>
             <div class="label">⚙️ Configuración</div>
+            <div class="tag">✏️ Editar</div>
+        </div>
+        
+        <!-- CLIENTES -->
+        <div class="seccion-card" id="card-clientes" onclick="abrirEditor('clientes')">
+            <div class="overlay"></div>
+            <div class="label">👥 Clientes</div>
+            <div class="tag">✏️ Editar</div>
+        </div>
+        
+        <!-- TESTIMONIOS -->
+        <div class="seccion-card" id="card-testimonios" onclick="abrirEditor('testimonios')">
+            <div class="overlay"></div>
+            <div class="label">⭐ Testimonios</div>
             <div class="tag">✏️ Editar</div>
         </div>
         
@@ -4486,9 +4671,10 @@ body {
         </div>
         
         <!-- ACCIONES -->
-        <div class="modalConfig_acciones">
-            <button class="modalConfig_btn modalConfig_btnCancelar" onclick="modalConfig_cancelar()">Cancelar</button>
-            <button class="modalConfig_btn modalConfig_btnGuardar" onclick="modalConfig_guardar()">Guardar cambios</button>
+<div class="modal-acciones">
+    <button class="btn btn-guardar" onclick="modalConfig_guardar()">💾 Guardar configuración</button>
+    <button class="btn btn-cancelar" onclick="modalConfig_cancelar()">❌ Cancelar</button>
+</div>
         </div>
     </div>
 </div>
@@ -4826,6 +5012,27 @@ body {
     </div>
 </div>
 
+<!-- ---------------------------------------- -->
+<!-- 5.16 MODAL TESTIMONIOS                    -->
+<!-- ---------------------------------------- -->
+<div class="modalTestimonios_overlay" id="modalTestimonios_overlay">
+    <div class="modalTestimonios_contenedor">
+        <div class="modalTestimonios_titulo">
+            <div class="modalTestimonios_tituloIzq">
+                <span>⭐</span> Gestión de Testimonios
+            </div>
+            <button class="modalTestimonios_btnAgregar" onclick="modalTestimonios_agregar()">
+                ➕ Nuevo Testimonio
+            </button>
+        </div>
+        <div class="modalTestimonios_lista" id="modalTestimonios_lista"></div>
+        <div class="modal-acciones">
+            <button class="btn btn-guardar" onclick="modalTestimonios_guardarTodo()">💾 Guardar cambios</button>
+            <button class="btn btn-cancelar" onclick="modalTestimonios_cancelar()">❌ Cancelar</button>
+        </div>
+    </div>
+</div>
+
     <!-- ============================================ -->
     <!-- 4. JAVASCRIPT                                -->
     <!-- ============================================ -->
@@ -5020,7 +5227,9 @@ function cargarDatosDashboard() {
         'card-contacto': baseUrl + 'preview-contacto.png',
         'card-configuracion': baseUrl + 'preview-config.png',
         'card-medios': baseUrl + 'preview-medios.png',
-        'card-videos': baseUrl + 'preview-videos.png'
+        'card-videos': baseUrl + 'preview-videos.png',
+        'card-clientes': baseUrl + 'preview-clientes.png',
+    'card-testimonios': baseUrl + 'preview-testimonios.png',
     };
     
     for (var id in tarjetas) {
@@ -7115,7 +7324,166 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ============================================
-// 6.19 MODAL MI LIBRERÍA DE MEDIOS
+// 6.18 MODAL CLIENTES (LÓGICA)
+// ============================================
+var modalClientes_callback = null;
+var modalClientes_lista = [];
+var modalClientes_editandoId = null;
+
+function modalClientes_cargarDatos() {
+    var saved = localStorage.getItem('clientesData');
+    if (saved) { try { modalClientes_lista = JSON.parse(saved); } catch(e) {} }
+    if (modalClientes_lista.length === 0) {
+        modalClientes_lista = [
+            { id: Date.now()+1, nombre: 'Hotel Paraíso', id_publico: 'RGS-0001', email: 'hotel@paraiso.com', telefono: '+1 809 555 0100', estado: 'activo' }
+        ];
+    }
+    modalClientes_renderizar();
+}
+
+function modalClientes_renderizar() {
+    var container = document.getElementById('modalClientes_lista');
+    if (!container) return;
+    var html = '';
+    for (var i = 0; i < modalClientes_lista.length; i++) {
+        var c = modalClientes_lista[i];
+        html += '<div class="modalClientes_item" onclick="modalClientes_seleccionar(' + c.id + ')">' +
+            '<div class="modalClientes_avatar">' + c.nombre.charAt(0).toUpperCase() + '</div>' +
+            '<div class="modalClientes_info"><div class="modalClientes_nombre">' + c.nombre + '</div><div class="modalClientes_id">' + c.id_publico + '</div></div>' +
+            '<span class="modalClientes_estado ' + (c.estado||'activo') + '">' + (c.estado==='activo'?'✅ Activo':'⏸️ Inactivo') + '</span></div>';
+    }
+    container.innerHTML = html || '<div style="text-align:center;padding:30px;color:#6070a0;">No hay clientes</div>';
+}
+
+function modalClientes_nuevo() {
+    var c = { id: Date.now(), nombre: '', id_publico: '', email: '', telefono: '', password: '', estado: 'activo' };
+    modalClientes_lista.push(c);
+    modalClientes_editandoId = c.id;
+    modalClientes_mostrarFormulario(c);
+}
+
+function modalClientes_seleccionar(id) {
+    modalClientes_editandoId = id;
+    for (var i = 0; i < modalClientes_lista.length; i++) {
+        if (modalClientes_lista[i].id === id) { modalClientes_mostrarFormulario(modalClientes_lista[i]); break; }
+    }
+}
+
+function modalClientes_mostrarFormulario(c) {
+    document.getElementById('modalClientes_formulario').style.display = 'block';
+    document.getElementById('modalClientes_formTitulo').textContent = c.nombre || 'Nuevo';
+    document.getElementById('modalClientes_nombre').value = c.nombre || '';
+    document.getElementById('modalClientes_idPublico').value = c.id_publico || '';
+    document.getElementById('modalClientes_email').value = c.email || '';
+    document.getElementById('modalClientes_telefono').value = c.telefono || '';
+    document.getElementById('modalClientes_password').value = c.password || '';
+    document.getElementById('modalClientes_estado').value = c.estado || 'activo';
+}
+
+function modalClientes_cancelarEdicion() { document.getElementById('modalClientes_formulario').style.display = 'none'; }
+
+function modalClientes_guardarCliente() {
+    for (var i = 0; i < modalClientes_lista.length; i++) {
+        if (modalClientes_lista[i].id === modalClientes_editandoId) {
+            modalClientes_lista[i].nombre = document.getElementById('modalClientes_nombre').value;
+            modalClientes_lista[i].id_publico = document.getElementById('modalClientes_idPublico').value;
+            modalClientes_lista[i].email = document.getElementById('modalClientes_email').value;
+            modalClientes_lista[i].telefono = document.getElementById('modalClientes_telefono').value;
+            modalClientes_lista[i].password = document.getElementById('modalClientes_password').value;
+            modalClientes_lista[i].estado = document.getElementById('modalClientes_estado').value;
+            break;
+        }
+    }
+    localStorage.setItem('clientesData', JSON.stringify(modalClientes_lista));
+    modalClientes_cancelarEdicion();
+    modalClientes_renderizar();
+}
+
+function abrirModalClientes(cb) { modalClientes_cargarDatos(); document.getElementById('modalClientes_formulario').style.display='none'; document.getElementById('modalClientes_overlay').style.display='flex'; }
+function modalClientes_cerrar() { cerrarModal('modalClientes_overlay'); }
+
+window.modalClientes_nuevo = modalClientes_nuevo;
+window.modalClientes_seleccionar = modalClientes_seleccionar;
+window.modalClientes_cancelarEdicion = modalClientes_cancelarEdicion;
+window.modalClientes_guardarCliente = modalClientes_guardarCliente;
+window.modalClientes_cerrar = modalClientes_cerrar;
+window.abrirModalClientes = abrirModalClientes;
+if (typeof registrarModal === 'function') registrarModal('clientes', abrirModalClientes);
+
+// ============================================
+// 6.21 MODAL TESTIMONIOS
+// ============================================
+var modalTestimonios_lista = [];
+var modalTestimonios_editandoId = null;
+
+function modalTestimonios_cargarDatos() {
+    var saved = localStorage.getItem('testimoniosData');
+    if (saved) { try { modalTestimonios_lista = JSON.parse(saved); } catch(e) {} }
+    if (modalTestimonios_lista.length === 0) {
+        modalTestimonios_lista = [
+            { id: Date.now()+1, nombre: 'María', texto: '¡Increíble experiencia!', estrellas: 5 },
+            { id: Date.now()+2, nombre: 'John', texto: 'Las mejores vacaciones.', estrellas: 5 }
+        ];
+    }
+    modalTestimonios_renderizar();
+}
+
+function modalTestimonios_renderizar() {
+    var container = document.getElementById('modalTestimonios_lista');
+    if (!container) return;
+    var html = '';
+    for (var i = 0; i < modalTestimonios_lista.length; i++) {
+        var t = modalTestimonios_lista[i];
+        var estrellas = ''; for (var e = 0; e < 5; e++) estrellas += e < t.estrellas ? '⭐' : '☆';
+        var editando = modalTestimonios_editandoId === t.id;
+        html += '<div class="modalTestimonios_item">' +
+            '<div class="modalTestimonios_header" onclick="modalTestimonios_toggleEditor(' + t.id + ')">' +
+            '<div class="modalTestimonios_avatar">👤</div>' +
+            '<div class="modalTestimonios_info"><div class="modalTestimonios_nombre">' + t.nombre + '</div>' +
+            '<div class="modalTestimonios_texto">' + (t.texto||'').substring(0,50) + '</div>' +
+            '<div class="modalTestimonios_estrellas">' + estrellas + '</div></div>' +
+            '<button class="modalTestimonios_btnIcono eliminar" onclick="event.stopPropagation();modalTestimonios_eliminar(' + t.id + ')">🗑️</button></div>' +
+            '<div class="modalTestimonios_editor' + (editando?' activo':'') + '" id="modalTestimonios_editor_' + t.id + '">' +
+            '<div class="modalTestimonios_formGroup"><label>Nombre</label><input type="text" id="modalTestimonios_nombre_' + t.id + '" value="' + t.nombre + '"></div>' +
+            '<div class="modalTestimonios_formGroup"><label>Testimonio</label><textarea id="modalTestimonios_texto_' + t.id + '">' + (t.texto||'') + '</textarea></div>' +
+            '<div class="modalTestimonios_formGroup"><label>Estrellas</label><select id="modalTestimonios_estrellas_' + t.id + '"><option value="5"'+(t.estrellas===5?' selected':'')+'>⭐⭐⭐⭐⭐</option><option value="4"'+(t.estrellas===4?' selected':'')+'>⭐⭐⭐⭐</option><option value="3"'+(t.estrellas===3?' selected':'')+'>⭐⭐⭐</option></select></div>' +
+            '<div class="modalTestimonios_editorAcciones"><button class="modalTestimonios_btnEditor modalTestimonios_btnCancelarEditor" onclick="modalTestimonios_toggleEditor(' + t.id + ')">Cancelar</button>' +
+            '<button class="modalTestimonios_btnEditor modalTestimonios_btnGuardarEditor" onclick="modalTestimonios_guardarCambios(' + t.id + ')">💾 Guardar</button></div></div></div>';
+    }
+    container.innerHTML = html || '<div style="text-align:center;padding:30px;color:#6070a0;">⭐ No hay testimonios</div>';
+}
+
+function modalTestimonios_toggleEditor(id) { modalTestimonios_editandoId = modalTestimonios_editandoId === id ? null : id; modalTestimonios_renderizar(); }
+function modalTestimonios_agregar() { var n = { id: Date.now(), nombre: '', texto: '', estrellas: 5 }; modalTestimonios_lista.push(n); modalTestimonios_editandoId = n.id; modalTestimonios_renderizar(); }
+function modalTestimonios_eliminar(id) { modalTestimonios_lista = modalTestimonios_lista.filter(function(t){ return t.id !== id; }); modalTestimonios_renderizar(); }
+function modalTestimonios_guardarCambios(id) {
+    for (var i = 0; i < modalTestimonios_lista.length; i++) {
+        if (modalTestimonios_lista[i].id === id) {
+            modalTestimonios_lista[i].nombre = document.getElementById('modalTestimonios_nombre_' + id).value;
+            modalTestimonios_lista[i].texto = document.getElementById('modalTestimonios_texto_' + id).value;
+            modalTestimonios_lista[i].estrellas = parseInt(document.getElementById('modalTestimonios_estrellas_' + id).value);
+            break;
+        }
+    }
+    modalTestimonios_editandoId = null; modalTestimonios_renderizar();
+}
+function abrirModalTestimonios(cb) { modalTestimonios_cargarDatos(); document.getElementById('modalTestimonios_overlay').style.display = 'flex'; }
+function modalTestimonios_guardarTodo() { localStorage.setItem('testimoniosData', JSON.stringify(modalTestimonios_lista)); cerrarModal('modalTestimonios_overlay'); }
+function modalTestimonios_cancelar() { cerrarModal('modalTestimonios_overlay'); }
+
+window.modalTestimonios_toggleEditor = modalTestimonios_toggleEditor;
+window.modalTestimonios_agregar = modalTestimonios_agregar;
+window.modalTestimonios_eliminar = modalTestimonios_eliminar;
+window.modalTestimonios_guardarCambios = modalTestimonios_guardarCambios;
+window.modalTestimonios_guardarTodo = modalTestimonios_guardarTodo;
+window.modalTestimonios_cancelar = modalTestimonios_cancelar;
+window.abrirModalTestimonios = abrirModalTestimonios;
+if (typeof registrarModal === 'function') {
+    registrarModal('testimonios', abrirModalTestimonios);
+}
+
+// ============================================
+//  MODAL MI LIBRERÍA DE MEDIOS
 // ============================================
 var modalMedios_archivos = [];
 

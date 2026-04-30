@@ -4335,27 +4335,40 @@ body {
             </button>
         </div>
         
-        <!-- TAB: IDENTIDAD -->
-        <div class="modalConfig_tabContent activo" data-tab="identidad">
-            <div class="modalConfig_seccion">
-                <div class="modalConfig_seccionTitulo"><i class="fas fa-building"></i> Marca</div>
-                <div class="modalConfig_logoWrapper">
-                    <div class="modalConfig_logoBox" id="modalConfig_logoPreview" onclick="modalConfig_editarLogo()"><span>🖼️</span></div>
-                    <div>
-                        <h4 style="color:#fff; font-size:16px; margin-bottom:4px;">Logo del negocio</h4>
-                        <p style="color:#6070a0; font-size:13px;" id="modalConfig_logoInfo">PNG, JPG o WEBP</p>
-                    </div>
-                </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:20px;">
-                    <div class="modalConfig_formGroup"><label>Nombre comercial</label><input type="text" id="modalConfig_nombre" value="Mi Negocio"></div>
-                    <div class="modalConfig_formGroup"><label>Eslogan</label><input type="text" id="modalConfig_slogan" value="Calidad y servicio"></div>
-                </div>
-            </div>
-            <div class="modalConfig_seccion">
-                <div class="modalConfig_seccionTitulo"><i class="fas fa-copyright"></i> Pie de página</div>
-                <div class="modalConfig_formGroup"><input type="text" id="modalConfig_copyright" value="© 2024 Mi Negocio. Todos los derechos reservados."></div>
+<!-- TAB: IDENTIDAD -->
+<div class="modalConfig_tabContent activo" data-tab="identidad">
+    <div class="modalConfig_seccion">
+        <div class="modalConfig_seccionTitulo"><i class="fas fa-building"></i> Marca</div>
+        <div class="modalConfig_logoWrapper">
+            <div class="modalConfig_logoBox" id="modalConfig_logoPreview" onclick="modalConfig_editarLogo()"><span>🖼️</span></div>
+            <div>
+                <h4 style="color:#fff; font-size:16px; margin-bottom:4px;">Logo del negocio</h4>
+                <p style="color:#6070a0; font-size:13px;" id="modalConfig_logoInfo">PNG, JPG o WEBP</p>
             </div>
         </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:20px;">
+            <div class="modalConfig_formGroup"><label>Nombre comercial</label><input type="text" id="modalConfig_nombre" value="Mi Negocio"></div>
+            <div class="modalConfig_formGroup"><label>Eslogan</label><input type="text" id="modalConfig_slogan" value="Calidad y servicio"></div>
+        </div>
+        
+        <!-- NUEVO: URL de página pública -->
+        <div style="margin-top:20px;">
+            <div class="modalConfig_formGroup">
+                <label>🌐 Nombre de tu página pública</label>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="modalConfig_urlPagina" placeholder="mi-negocio" style="flex:1;" oninput="modalConfig_actualizarUrlPreview()">
+                    <button onclick="modalConfig_verificarUrl()" style="padding:12px 16px; background:#4a90e2; color:white; border:none; border-radius:12px; cursor:pointer; font-size:13px; white-space:nowrap;">✅ Verificar</button>
+                </div>
+                <p style="color:#6070a0; font-size:11px; margin-top:5px;">Tu página será: <span id="modalConfig_urlPreview" style="color:#F4A261;">mi-negocio.html</span></p>
+                <p id="modalConfig_urlMensaje" style="font-size:11px; margin-top:3px;"></p>
+            </div>
+        </div>
+    </div>
+    <div class="modalConfig_seccion">
+        <div class="modalConfig_seccionTitulo"><i class="fas fa-copyright"></i> Pie de página</div>
+        <div class="modalConfig_formGroup"><input type="text" id="modalConfig_copyright" value="© 2024 Mi Negocio. Todos los derechos reservados."></div>
+    </div>
+</div>
         
         <!-- TAB: COLORES -->
         <div class="modalConfig_tabContent" data-tab="colores">
@@ -6113,6 +6126,7 @@ let modalConfig_data = {
     fuenteTitulos: 'Montserrat',
     fuenteTexto: 'Inter',
     copyright: '© 2024 Mi Negocio. Todos los derechos reservados.',
+    urlPagina: '',
     sitio: {
         hero: { visible: true, comportamiento: 'Mostrar placeholder' },
         productos: { visible: true, comportamiento: 'Ocultar del menú' },
@@ -6124,25 +6138,71 @@ let modalConfig_data = {
 };
 
 function modalConfig_init() {
-    // Navegación de pestañas
     document.querySelectorAll('.modalConfig_tab').forEach(tab => {
         tab.addEventListener('click', function() {
-            const tabName = this.dataset.tab;
-            modalConfig_cambiarTab(tabName);
+            modalConfig_cambiarTab(this.dataset.tab);
         });
     });
 }
 
 function modalConfig_cambiarTab(tabName) {
     document.querySelectorAll('.modalConfig_tab').forEach(t => t.classList.remove('activo'));
-    document.querySelector(`.modalConfig_tab[data-tab="${tabName}"]`).classList.add('activo');
-    
+    document.querySelector('.modalConfig_tab[data-tab="' + tabName + '"]').classList.add('activo');
     document.querySelectorAll('.modalConfig_tabContent').forEach(c => c.classList.remove('activo'));
-    document.querySelector(`.modalConfig_tabContent[data-tab="${tabName}"]`).classList.add('activo');
+    document.querySelector('.modalConfig_tabContent[data-tab="' + tabName + '"]').classList.add('activo');
 }
 
 function modalConfig_toggleSeccion(el) {
     el.classList.toggle('activo');
+}
+
+function modalConfig_actualizarUrlPreview() {
+    var input = document.getElementById('modalConfig_urlPagina');
+    if (!input) return;
+    var nombre = input.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
+    var preview = document.getElementById('modalConfig_urlPreview');
+    if (preview) preview.textContent = (nombre || 'mi-negocio') + '.html';
+}
+
+function modalConfig_verificarUrl() {
+    var input = document.getElementById('modalConfig_urlPagina');
+    var nombre = input.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
+    input.value = nombre;
+    
+    var mensaje = document.getElementById('modalConfig_urlMensaje');
+    
+    if (!nombre) {
+        mensaje.innerHTML = '⚠️ Escribe un nombre';
+        mensaje.style.color = '#ffc107';
+        return;
+    }
+    
+    mensaje.innerHTML = '⏳ Verificando...';
+    mensaje.style.color = '#a0c4ff';
+    
+    if (typeof supabaseClient !== 'undefined' && supabaseClient) {
+        supabaseClient
+            .from('cliente')
+            .select('url_pagina')
+            .eq('url_pagina', nombre)
+            .single()
+            .then(function(res) {
+                if (res.data) {
+                    mensaje.innerHTML = '❌ Este nombre ya está en uso';
+                    mensaje.style.color = '#ff6b6b';
+                } else {
+                    mensaje.innerHTML = '✅ Nombre disponible';
+                    mensaje.style.color = '#6fcf97';
+                }
+            })
+            .catch(function() {
+                mensaje.innerHTML = '✅ Nombre disponible';
+                mensaje.style.color = '#6fcf97';
+            });
+    } else {
+        mensaje.innerHTML = '✅ Nombre disponible (sin conexión)';
+        mensaje.style.color = '#6fcf97';
+    }
 }
 
 function modalConfig_cargarDatos() {
@@ -6159,6 +6219,7 @@ function modalConfig_cargarDatos() {
             modalConfig_data.fuenteTitulos = parsed.fuenteTitulos || modalConfig_data.fuenteTitulos;
             modalConfig_data.fuenteTexto = parsed.fuenteTexto || modalConfig_data.fuenteTexto;
             modalConfig_data.copyright = parsed.copyright || modalConfig_data.copyright;
+            modalConfig_data.urlPagina = parsed.urlPagina || '';
             if (parsed.sitio) modalConfig_data.sitio = parsed.sitio;
         } catch(e) {}
     }
@@ -6181,10 +6242,13 @@ function modalConfig_cargarDatos() {
         document.getElementById('modalConfig_logoInfo').textContent = 'Logo configurado';
     }
     
-    // Cargar toggles de sitio
+    document.getElementById('modalConfig_urlPagina').value = modalConfig_data.urlPagina || '';
+    document.getElementById('modalConfig_urlPreview').textContent = (modalConfig_data.urlPagina || 'mi-negocio') + '.html';
+    
     var secciones = ['hero', 'productos', 'servicios', 'nosotros', 'galeria', 'contacto'];
     secciones.forEach(function(sec) {
-        var toggle = document.getElementById('modalConfig_toggle' + sec.charAt(0).toUpperCase() + sec.slice(1));
+        var cap = sec.charAt(0).toUpperCase() + sec.slice(1);
+        var toggle = document.getElementById('modalConfig_toggle' + cap);
         if (toggle && modalConfig_data.sitio[sec]) {
             if (modalConfig_data.sitio[sec].visible) {
                 toggle.classList.add('activo');
@@ -6192,7 +6256,7 @@ function modalConfig_cargarDatos() {
                 toggle.classList.remove('activo');
             }
         }
-        var comp = document.getElementById('modalConfig_comp' + sec.charAt(0).toUpperCase() + sec.slice(1));
+        var comp = document.getElementById('modalConfig_comp' + cap);
         if (comp && modalConfig_data.sitio[sec]) {
             comp.value = modalConfig_data.sitio[sec].comportamiento;
         }
@@ -6243,8 +6307,8 @@ function modalConfig_guardar() {
     modalConfig_data.copyright = document.getElementById('modalConfig_copyright').value;
     modalConfig_data.fuenteTitulos = document.getElementById('modalConfig_fuenteTitulos').value;
     modalConfig_data.fuenteTexto = document.getElementById('modalConfig_fuenteTexto').value;
+    modalConfig_data.urlPagina = document.getElementById('modalConfig_urlPagina').value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-');
     
-    // Guardar toggles de sitio
     var secciones = ['hero', 'productos', 'servicios', 'nosotros', 'galeria', 'contacto'];
     secciones.forEach(function(sec) {
         var cap = sec.charAt(0).toUpperCase() + sec.slice(1);
@@ -6265,7 +6329,6 @@ function modalConfig_guardar() {
     }
     
     cerrarModal('modalConfig_overlay');
-    if (typeof cargarDatosDashboard === 'function') cargarDatosDashboard();
 }
 
 function modalConfig_cancelar() {
@@ -6276,6 +6339,8 @@ window.modalConfig_cambiarTab = modalConfig_cambiarTab;
 window.modalConfig_toggleSeccion = modalConfig_toggleSeccion;
 window.modalConfig_editarLogo = modalConfig_editarLogo;
 window.modalConfig_seleccionarColor = modalConfig_seleccionarColor;
+window.modalConfig_verificarUrl = modalConfig_verificarUrl;
+window.modalConfig_actualizarUrlPreview = modalConfig_actualizarUrlPreview;
 window.modalConfig_guardar = modalConfig_guardar;
 window.modalConfig_cancelar = modalConfig_cancelar;
 window.abrirModalConfiguracion = abrirModalConfiguracion;
@@ -7321,7 +7386,11 @@ function initApp() {
     document.getElementById('logoutBtn').addEventListener('click', logout);
     document.getElementById('clearStorageBtn').addEventListener('click', () => { clearSavedCredentials(); showLoginMessage('🧹 Datos eliminados', 'success'); });
     document.getElementById('loginPassword').addEventListener('keypress', e => { if(e.key==='Enter') handleLogin(); });
-    document.getElementById('verSitioBtn').addEventListener('click', () => { window.open(`sitio.html?id=${clienteData?.id_publico || 'RGS-0000'}`, '_blank'); });
+   document.getElementById('verSitioBtn').addEventListener('click', function() {
+    var configData = JSON.parse(localStorage.getItem('configData') || '{}');
+    var urlPagina = configData.urlPagina || 'sitio';
+    window.open(urlPagina + '.html?id=' + (window.clienteData?.id_publico || 'RGS-0000'), '_blank');
+});
     window.abrirEditor = abrirEditor;
     window.cerrarModal = cerrarModal;
     window.cargarDatosDashboard = cargarDatosDashboard;

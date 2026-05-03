@@ -3825,6 +3825,128 @@ body {
     border-color: rgba(220, 53, 69, 0.3);
     color: #ff8080;
 }
+
+/* ============================================ */
+/* MODAL SELECTOR DE LIBRERÍA                   */
+/* ============================================ */
+.modalSelectorLibreria_overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(10, 15, 26, 0.9);
+    backdrop-filter: blur(10px);
+    z-index: 10002;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.modalSelectorLibreria_contenedor {
+    background: rgba(20, 35, 60, 0.95);
+    backdrop-filter: blur(12px);
+    border-radius: 24px;
+    padding: 25px;
+    max-width: 700px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    border: 1px solid rgba(100, 180, 255, 0.15);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+}
+
+.modalSelectorLibreria_titulo {
+    color: #c0d8ff;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.modalSelectorLibreria_titulo span {
+    color: #F4A261;
+}
+
+.modalSelectorLibreria_item {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    background: rgba(10, 20, 40, 0.6);
+    transition: all 0.2s ease;
+}
+
+.modalSelectorLibreria_item:hover {
+    border-color: #F4A261;
+    transform: scale(1.03);
+    box-shadow: 0 8px 20px rgba(244, 162, 97, 0.2);
+}
+
+.modalSelectorLibreria_item.seleccionado {
+    border-color: #F4A261;
+    box-shadow: 0 0 0 3px rgba(244, 162, 97, 0.3);
+}
+
+.modalSelectorLibreria_item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.modalSelectorLibreria_item_nombre {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    font-size: 10px;
+    padding: 4px 8px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.modalSelectorLibreria_vacio {
+    text-align: center;
+    padding: 40px;
+    color: #6070a0;
+    grid-column: 1 / -1;
+}
+
+.modalSelectorLibreria_vacio span {
+    font-size: 48px;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.modalSelectorLibreria_btnElegir {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #F4A261 0%, #e67e22 100%);
+    color: #0a0f1a;
+    border: none;
+    border-radius: 40px;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    margin-top: 15px;
+    display: none;
+}
+
+.modalSelectorLibreria_btnElegir.visible {
+    display: block;
+}
+
+@media (max-width: 500px) {
+    #modalSelectorLibreria_grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+}
     </style>
 </head>
 <body>
@@ -4036,9 +4158,9 @@ body {
                         <p style="color:#c0d8ff; font-size:13px; margin-bottom:5px;">Imagen seleccionada</p>
                         <p style="color:#6070a0; font-size:11px;" id="modalHero_infoImagen">Sin imagen</p>
                     </div>
-                    <button class="modalHero_btnEditar" onclick="modalHero_editarImagen()">
-                        📷 Seleccionar imagen
-                    </button>
+                 <button class="modalHero_btnEditar" onclick="modalHero_elegirDeLibreria()">
+    📁 Elegir de mi Librería
+</button>
                 </div>
             </div>
             
@@ -5029,6 +5151,32 @@ body {
         <div class="modal-acciones">
             <button class="btn btn-guardar" onclick="modalTestimonios_guardarTodo()">💾 Guardar cambios</button>
             <button class="btn btn-cancelar" onclick="modalTestimonios_cancelar()">❌ Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================ -->
+<!-- MODAL SELECTOR DE LIBRERÍA                   -->
+<!-- ============================================ -->
+<div class="modalSelectorLibreria_overlay" id="modalSelectorLibreria_overlay" style="display:none;">
+    <div class="modalSelectorLibreria_contenedor">
+        
+        <div class="modalSelectorLibreria_titulo">
+            <span>📁</span> Elegir de mi Librería
+            <button onclick="modalSelectorLibreria_cerrar()" style="background:rgba(220,53,69,0.2);border:1px solid rgba(220,53,69,0.4);color:#ff8080;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:18px;">✕</button>
+        </div>
+        
+        <div id="modalSelectorLibreria_grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-height:400px;overflow-y:auto;margin-bottom:20px;min-height:150px;">
+            <div style="text-align:center;padding:40px;color:#506080;grid-column:1/-1;">
+                <span style="font-size:36px;">⏳</span>
+                <p style="font-size:13px;">Cargando imágenes...</p>
+            </div>
+        </div>
+        
+        <div class="modal-acciones">
+            <button class="btn btn-cancelar" onclick="modalSelectorLibreria_cerrar()">
+                ❌ Cancelar
+            </button>
         </div>
     </div>
 </div>
@@ -7765,6 +7913,134 @@ function initApp() {
 }
 
 document.addEventListener('DOMContentLoaded', initApp);
+
+// ============================================
+// SELECTOR DE LIBRERÍA DE MEDIOS
+// ============================================
+let modalSelectorLibreria_callback = null;
+let modalSelectorLibreria_seleccionada = null;
+
+async function abrirSelectorLibreria(callback) {
+    modalSelectorLibreria_callback = callback;
+    modalSelectorLibreria_seleccionada = null;
+    
+    const overlay = document.getElementById('modalSelectorLibreria_overlay');
+    const grid = document.getElementById('modalSelectorLibreria_grid');
+    const btnElegir = document.getElementById('modalSelectorLibreria_btnElegir') || crearBtnElegir();
+    
+    // Mostrar overlay
+    overlay.style.display = 'flex';
+    btnElegir.classList.remove('visible');
+    
+    // Cargando
+    grid.innerHTML = `
+        <div class="modalSelectorLibreria_vacio">
+            <span>⏳</span>
+            <p>Cargando imágenes de tu librería...</p>
+        </div>`;
+    
+    try {
+        // Obtener lista de archivos de Supabase
+        const clienteId = (window.clienteData && window.clienteData.id_publico) || 'sin_id';
+        const carpeta = clienteId + '/';
+        
+        const { data: archivos, error } = await supabaseClient
+            .storage
+            .from('media_library')
+            .list(carpeta, {
+                limit: 100,
+                offset: 0,
+                sortBy: { column: 'created_at', order: 'desc' }
+            });
+        
+        if (error) throw error;
+        
+        // Filtrar solo imágenes
+        const imagenes = archivos.filter(f =>
+            f.name.match(/\.(jpg|jpeg|png|webp|gif|svg|bmp)$/i)
+        );
+        
+        if (imagenes.length === 0) {
+            grid.innerHTML = `
+                <div class="modalSelectorLibreria_vacio">
+                    <span>📭</span>
+                    <p>No hay imágenes en tu librería</p>
+                    <p style="font-size:13px;">Ve al Tutorial 2 para aprender a subir imágenes</p>
+                </div>`;
+            return;
+        }
+        
+        // Renderizar grid
+        grid.innerHTML = imagenes.map(img => {
+            const url = `https://nvrcqlxnvjvhznmxozhh.supabase.co/storage/v1/object/public/media_library/${clienteId}/${img.name}`;
+            return `
+                <div class="modalSelectorLibreria_item" 
+                     data-url="${url}" 
+                     data-nombre="${img.name}"
+                     onclick="modalSelectorLibreria_seleccionar(this, '${url}')">
+                    <img src="${url}" alt="${img.name}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🖼️</text></svg>'">
+                    <div class="modalSelectorLibreria_item_nombre">${img.name}</div>
+                </div>`;
+        }).join('');
+        
+    } catch (error) {
+        console.error('Error cargando librería:', error);
+        grid.innerHTML = `
+            <div class="modalSelectorLibreria_vacio">
+                <span>⚠️</span>
+                <p>Error al cargar las imágenes</p>
+                <p style="font-size:13px;">Verifica tu conexión a internet</p>
+            </div>`;
+    }
+}
+
+function modalSelectorLibreria_seleccionar(elemento, url) {
+    // Quitar selección anterior
+    document.querySelectorAll('.modalSelectorLibreria_item').forEach(el => el.classList.remove('seleccionado'));
+    
+    // Marcar como seleccionado
+    elemento.classList.add('seleccionado');
+    modalSelectorLibreria_seleccionada = url;
+    
+    // Mostrar botón de elegir
+    const btnElegir = document.getElementById('modalSelectorLibreria_btnElegir');
+    if (btnElegir) {
+        btnElegir.classList.add('visible');
+        btnElegir.textContent = '✅ Elegir esta imagen';
+    }
+}
+
+function modalSelectorLibreria_confirmar() {
+    if (modalSelectorLibreria_seleccionada && modalSelectorLibreria_callback) {
+        modalSelectorLibreria_callback(modalSelectorLibreria_seleccionada);
+    }
+    modalSelectorLibreria_cerrar();
+}
+
+function modalSelectorLibreria_cerrar() {
+    document.getElementById('modalSelectorLibreria_overlay').style.display = 'none';
+    modalSelectorLibreria_callback = null;
+    modalSelectorLibreria_seleccionada = null;
+}
+
+function crearBtnElegir() {
+    const contenedor = document.querySelector('.modalSelectorLibreria_contenedor');
+    if (!contenedor) return null;
+    
+    const btn = document.createElement('button');
+    btn.id = 'modalSelectorLibreria_btnElegir';
+    btn.className = 'modalSelectorLibreria_btnElegir';
+    btn.textContent = '✅ Elegir esta imagen';
+    btn.onclick = modalSelectorLibreria_confirmar;
+    contenedor.appendChild(btn);
+    return btn;
+}
+
+// Exponer
+window.abrirSelectorLibreria = abrirSelectorLibreria;
+window.modalSelectorLibreria_seleccionar = modalSelectorLibreria_seleccionar;
+window.modalSelectorLibreria_confirmar = modalSelectorLibreria_confirmar;
+window.modalSelectorLibreria_cerrar = modalSelectorLibreria_cerrar;
     </script>
 </body>
 </html>

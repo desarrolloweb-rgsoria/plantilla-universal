@@ -2215,10 +2215,11 @@ body {
     padding: 25px;
     max-width: 600px;
     width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
     border: 1px solid rgba(100, 180, 255, 0.15);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
 }
-
 .modalImagen_titulo {
     color: #c0d8ff;
     font-size: 18px;
@@ -4164,13 +4165,16 @@ body {
                 </div>
             </div>
             
-            <div id="modalHero_seccionVideo" style="display:none;">
-                <label style="color:#a0c4ff; font-size:13px; display:block; margin-bottom:8px;">URL del video (YouTube, Vimeo, MP4)</label>
-                <input type="text" id="modalHero_videoUrl" placeholder="https://youtu.be/xxx o https://vimeo.com/xxx" style="width:100%; padding:12px; background:rgba(10,20,40,0.6); border:1px solid rgba(100,180,255,0.2); border-radius:12px; color:#e0e8ff; font-size:14px; outline:none;">
-                <p style="color:#6070a0; font-size:11px; margin-top:8px;">
-                    💡 Pega el enlace de tu video de YouTube o Vimeo
-                </p>
-            </div>
+<div id="modalHero_seccionVideo" style="display:none;">
+    <label style="color:#a0c4ff;font-size:13px;display:block;margin-bottom:8px;">Video de fondo</label>
+    <div style="display:flex;gap:8px;margin-bottom:8px;">
+        <input type="text" id="modalHero_videoUrl" placeholder="URL del video desde tu librería" readonly style="flex:1;padding:12px;background:rgba(10,20,40,0.6);border:1px solid rgba(100,180,255,0.2);border-radius:12px;color:#e0e8ff;font-size:14px;outline:none;">
+        <button onclick="modalHero_elegirVideo()" style="padding:12px 16px;background:rgba(74,144,226,0.2);border:1px solid rgba(74,144,226,0.4);border-radius:12px;color:#a0c4ff;cursor:pointer;font-size:13px;white-space:nowrap;">📁 Mi Librería</button>
+    </div>
+    <p style="color:#6070a0;font-size:11px;margin-top:8px;">
+        💡 Elige un video MP4 o WEBM de tu Librería de Medios
+    </p>
+</div>
             
             <div class="modalHero_sliderContainer">
                 <span>🌙 Opacidad overlay</span>
@@ -4240,6 +4244,9 @@ body {
 </div>
 
 <!-- 5.8 MODAL IMAGEN (SOLO URLs) -->
+<!-- ============================================ -->
+<!-- MODAL EDITOR DE IMAGEN PROFESIONAL           -->
+<!-- ============================================ -->
 <div class="modalImagen_overlay" id="modalImagen_overlay">
     <div class="modalImagen_contenedor">
         
@@ -4247,6 +4254,7 @@ body {
             <span>🖼️</span> Editor de Imagen
         </div>
         
+        <!-- VISOR -->
         <div class="modalImagen_visor" id="modalImagen_visor">
             <div class="modalImagen_placeholder" id="modalImagen_placeholder">
                 <span>🖼️</span>
@@ -4266,24 +4274,46 @@ body {
             </div>
         </div>
         
-        <div style="margin-bottom: 20px;">
-            <label style="color:#a0c4ff; font-size:13px; display:block; margin-bottom:8px;">URL de la imagen (Google Drive, Imgur, etc.)</label>
-            <input type="text" id="modalImagen_urlInput" placeholder="https://drive.google.com/file/d/xxx o https://i.imgur.com/xxx.jpg" style="width:100%; padding:12px; background:rgba(10,20,40,0.6); border:1px solid rgba(100,180,255,0.2); border-radius:12px; color:#e0e8ff; font-size:14px; outline:none;">
-            <p style="color:#6070a0; font-size:11px; margin-top:8px;">
-                💡 Para Google Drive: Comparte la imagen como "Cualquier persona con el enlace puede ver"
-            </p>
+        <!-- URL (solo lectura, se llena automáticamente) -->
+        <div style="margin-bottom: 15px;">
+            <label style="color:#a0c4ff; font-size:13px; display:block; margin-bottom:6px;">URL de la imagen</label>
+            <div style="display:flex; gap:8px;">
+                <input type="text" id="modalImagen_urlInput" placeholder="Selecciona una imagen de tu librería" readonly style="flex:1; padding:12px; background:rgba(10,20,40,0.6); border:1px solid rgba(100,180,255,0.2); border-radius:12px; color:#e0e8ff; font-size:13px; outline:none;">
+                <button onclick="modalImagen_quitar()" style="padding:12px 16px; background:rgba(220,53,69,0.2); border:1px solid rgba(220,53,69,0.4); border-radius:12px; color:#ff8080; cursor:pointer; font-size:14px; white-space:nowrap;">🗑️ Quitar</button>
+            </div>
         </div>
         
-        <div style="display: flex; gap: 12px; margin-bottom: 20px;">
-    <button class="modalImagen_btnSelector" onclick="modalImagen_cargarDesdeUrl()">
-        🔄 Cargar imagen
-    </button>
-    <span class="modalImagen_info" id="modalImagen_info">Ningún archivo</span>
-    <button class="modalImagen_btnSelector modalImagen_btnQuitar" onclick="modalImagen_quitar()">
-        🗑️ Quitar
-    </button>
-</div>
+        <!-- SELECTOR DE LIBRERÍA INTEGRADO -->
+        <div style="margin-bottom: 10px; background: rgba(10,20,40,0.3); border-radius: 16px; padding: 15px; border: 1px solid rgba(100,180,255,0.1);">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 12px;">
+                <span style="color:#a0c4ff; font-size:13px; font-weight:600;">📁 Mi Librería de Medios</span>
+                <div style="display:flex; gap:6px;">
+                    <button onclick="modalImagen_subirNueva()" style="padding:6px 12px; background:rgba(40,167,69,0.2); border:1px solid rgba(40,167,69,0.4); border-radius:8px; color:#6fcf97; cursor:pointer; font-size:11px;">
+                        ➕ Subir
+                    </button>
+                    <button onclick="modalImagen_recargarLibreria()" style="padding:6px 12px; background:rgba(74,144,226,0.2); border:1px solid rgba(74,144,226,0.4); border-radius:8px; color:#a0c4ff; cursor:pointer; font-size:11px;">
+                        🔄 Recargar
+                    </button>
+                </div>
+            </div>
+            
+            <!-- BÚSQUEDA -->
+            <div style="margin-bottom: 10px;">
+                <input type="text" id="modalImagen_busquedaLibreria" placeholder="🔍 Buscar por nombre..." oninput="modalImagen_filtrarLibreria()" style="width:100%; padding:8px 12px; background:rgba(10,20,40,0.6); border:1px solid rgba(100,180,255,0.2); border-radius:8px; color:#e0e8ff; font-size:12px; outline:none;">
+            </div>
+            
+            <!-- GRID DE IMÁGENES -->
+            <div id="modalImagen_libreriaGrid" style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; max-height:250px; overflow-y:auto; min-height:60px;">
+                <div style="text-align:center;padding:20px;color:#506080;grid-column:1/-1;font-size:13px;">
+                    ⏳ Cargando imágenes...
+                </div>
+            </div>
+            
+            <!-- CONTADOR -->
+            <div id="modalImagen_contadorLibreria" style="text-align:center; color:#506080; font-size:11px; margin-top:8px;"></div>
+        </div>
         
+        <!-- ZOOM -->
         <div class="modalImagen_zoomControl">
             <div class="modalImagen_zoomHeader">
                 <label>🔍 Zoom</label>
@@ -4301,6 +4331,12 @@ body {
             </div>
         </div>
         
+        <!-- COORDENADAS -->
+        <div class="modalImagen_coordenadas" id="modalImagen_coordenadas">
+            Posición: X=0px Y=0px
+        </div>
+        
+        <!-- ACCIONES -->
         <div class="modal-acciones">
             <button class="btn btn-guardar" onclick="modalImagen_guardar()">
                 💾 Guardar configuración
@@ -4309,15 +4345,11 @@ body {
                 ❌ Cancelar
             </button>
         </div>
-        
-        <div class="modalImagen_coordenadas" id="modalImagen_coordenadas">
-            Posición: X=0px Y=0px
-        </div>
-        <div class="modalImagen_datosGuardados" id="modalImagen_datosGuardados">
-            Listo para editar
-        </div>
     </div>
 </div>
+
+<!-- INPUT OCULTO PARA SUBIR NUEVAS IMÁGENES DESDE EL EDITOR -->
+<input type="file" id="modalImagen_uploadInput" accept="image/*" style="display:none;" onchange="modalImagen_procesarSubida(event)">
 
 <!-- 5.4 MODAL NOSOTROS -->
 <div class="modalNosotros_overlay" id="modalNosotros_overlay">
@@ -5096,41 +5128,43 @@ body {
 <!-- ---------------------------------------- -->
 <!-- 5.15 MODAL MI LIBRERÍA DE MEDIOS          -->
 <!-- ---------------------------------------- -->
+<!-- ============================================ -->
+<!-- MODAL MI LIBRERÍA DE MEDIOS (NUEVO)          -->
+<!-- ============================================ -->
 <div class="modalMedios_overlay" id="modalMedios_overlay" style="display:none;">
     <div class="modalMedios_contenedor">
         
-        <div class="modalMedios_titulo">
-            <span>📚</span> Mi Librería de Medios
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+            <div style="display:flex;align-items:center;gap:10px;color:#c0d8ff;font-size:18px;font-weight:600;">
+                <span style="color:#F4A261;">📚</span> Mi Librería de Medios
+            </div>
             <button onclick="modalMedios_cerrar()" style="background:rgba(220,53,69,0.2);border:1px solid rgba(220,53,69,0.4);color:#ff8080;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:18px;">✕</button>
         </div>
         
-<input type="file" id="modalMedios_fileInput" accept="image/*,video/*" multiple style="display:none;">
-        
-        <div style="border:2px dashed rgba(100,180,255,0.4);border-radius:16px;padding:30px;text-align:center;cursor:pointer;margin-bottom:15px;color:#a0c4ff;" onclick="modalMedios_seleccionar()">
-            <i class="fas fa-cloud-upload-alt" style="font-size:36px;color:#506080;display:block;margin-bottom:10px;"></i>
-            📁 Toca para seleccionar imágenes
-            <br><small style="color:#6070a0;">Una por una, se irán acumulando</small>
+        <div id="zonaSubida" style="border:2px dashed rgba(100,180,255,0.4);border-radius:16px;padding:30px;text-align:center;cursor:pointer;margin-bottom:15px;color:#a0c4ff;transition:all 0.2s;" onclick="document.getElementById('modalMedios_fileInput').click()">
+            <div style="font-size:36px;margin-bottom:8px;">☁️</div>
+            <div style="font-size:15px;font-weight:600;">Arrastra aquí o haz clic para subir</div>
+            <div style="font-size:12px;color:#6070a0;margin-top:4px;">JPG, PNG, WEBP, MP4, WEBM</div>
         </div>
         
-        <div id="modalMedios_contador" style="color:#a0c4ff;font-size:13px;margin-bottom:15px;text-align:center;padding:8px;background:rgba(244,162,97,0.1);border-radius:10px;">
-            🖼️ <strong>0</strong> imágenes en cola
+        <div id="vistaPrevia" style="display:none;margin-bottom:15px;">
+            <div style="color:#a0c4ff;font-size:13px;margin-bottom:8px;">📤 Archivos listos:</div>
+            <div id="gridSubida" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;"></div>
         </div>
         
-        <div id="modalMedios_grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:15px;min-height:80px;">
-            <div style="text-align:center;padding:30px;color:#506080;grid-column:1/-1;">
-                <span style="font-size:36px;">📭</span>
-                <p style="font-size:13px;">Sin imágenes</p>
-            </div>
+        <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <input type="text" id="modalMedios_buscador" placeholder="🔍 Buscar por nombre..." style="flex:1;padding:10px 14px;background:rgba(10,20,40,0.6);border:1px solid rgba(100,180,255,0.2);border-radius:10px;color:#e0e8ff;font-size:13px;outline:none;">
+            <button id="btnSubirYA" style="padding:10px 16px;background:#F4A261;color:#0a0f1a;border:none;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;display:none;">☁️ Subir ya</button>
+            <button onclick="modalMedios_recargar()" style="padding:10px 16px;background:rgba(74,144,226,0.2);border:1px solid rgba(74,144,226,0.4);border-radius:10px;color:#a0c4ff;cursor:pointer;font-size:13px;">🔄</button>
         </div>
         
-        <div class="modal-acciones">
-            <button class="btn btn-guardar" id="modalMedios_btnSubir" onclick="modalMedios_subir()" disabled>
-                ☁️ Subir a Supabase
-            </button>
-            <button class="btn btn-cancelar" onclick="modalMedios_cerrar()">
-                ❌ Cerrar
-            </button>
+        <div id="modalMedios_contador" style="color:#a0c4ff;font-size:12px;margin-bottom:10px;text-align:center;padding:6px;background:rgba(244,162,97,0.1);border-radius:8px;">Cargando...</div>
+        
+        <div id="modalMedios_grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-height:350px;overflow-y:auto;min-height:120px;">
+            <div style="text-align:center;padding:30px;color:#506080;grid-column:1/-1;">⏳ Cargando...</div>
         </div>
+        
+        <input type="file" id="modalMedios_fileInput" accept="image/*,video/*" multiple style="display:none;">
     </div>
 </div>
 
@@ -5590,6 +5624,37 @@ document.addEventListener('DOMContentLoaded', function() {
         registrarModal('hero', abrirModalHero);
     }
 });
+
+function modalHero_elegirVideo() {
+    // Crear un input temporal para seleccionar video de la librería
+    const grid = document.createElement('div');
+    grid.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-height:300px;overflow-y:auto;padding:10px;background:rgba(10,20,40,0.6);border-radius:12px;border:1px solid rgba(100,180,255,0.2);margin-bottom:10px;';
+    grid.innerHTML = '<div style="text-align:center;padding:20px;color:#506080;grid-column:1/-1;">⏳ Cargando videos...</div>';
+    
+    // Insertar grid debajo del campo de video
+    const videoSection = document.getElementById('modalHero_seccionVideo');
+    const oldGrid = videoSection.querySelector('.videoGridTemporal');
+    if (oldGrid) oldGrid.remove();
+    grid.className = 'videoGridTemporal';
+    videoSection.appendChild(grid);
+    
+    // Cargar videos
+    (async function() {
+        const cid = (window.clienteData?.id_publico) || 'sin_id';
+        const { data } = await supabaseClient.storage.from('media_library').list(cid + '/', { limit: 100 });
+        const videos = (data || []).filter(f => /\.(mp4|webm|mov|avi|mkv)$/i.test(f.name));
+        
+        if (!videos.length) {
+            grid.innerHTML = '<div style="text-align:center;padding:20px;color:#506080;grid-column:1/-1;">🎬 No hay videos en tu librería</div>';
+            return;
+        }
+        
+        grid.innerHTML = videos.map(v => {
+            const url = 'https://nvrcqlxnvjvhznmxozhh.supabase.co/storage/v1/object/public/media_library/' + cid + '/' + v.name;
+            return '<div onclick="document.getElementById(\'modalHero_videoUrl\').value=\'' + url + '\';modalHero_data.video=\'' + url + '\';modalHero_actualizarPreviewMedia();this.parentElement.querySelectorAll(\'div\').forEach(d=>d.style.borderColor=\'transparent\');this.style.borderColor=\'#F4A261\';" style="position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;cursor:pointer;border:2px solid transparent;background:rgba(10,20,40,0.6);"><video src="' + url + '" style="width:100%;height:100%;object-fit:cover;" muted preload="metadata"></video><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;">▶️</div><div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.7);color:white;font-size:8px;padding:3px;text-align:center;">' + v.name + '</div></div>';
+        }).join('');
+    })();
+}
 
 // ============================================
 // 6.6 MODAL PRODUCTOS
@@ -6713,9 +6778,14 @@ document.addEventListener('DOMContentLoaded', function() {
 // 6.12 MODAL IMAGEN (SOLO URLs - COMPLETO Y CORREGIDO)
 // ============================================
 
+// ============================================
+// 6.12 MODAL IMAGEN PROFESIONAL
+// ============================================
+
 let modalImagen_datos = { translateX: 0, translateY: 0, zoom: 100, imagen: null };
 let modalImagen_estadoInicial = null;
 let modalImagen_callback = null;
+let modalImagen_imagenesLibreria = [];
 
 function modalImagen_init() {
     const slider = document.getElementById('modalImagen_zoomSlider');
@@ -6728,93 +6798,194 @@ function modalImagen_init() {
     }
 }
 
-function modalImagen_convertirUrlDrive(url) {
-    const driveMatch = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
-    if (driveMatch) {
-        return `https://drive.google.com/uc?export=view&id=${driveMatch[1]}`;
+// ========== CARGAR LIBRERÍA ==========
+async function modalImagen_cargarLibreria() {
+    const grid = document.getElementById('modalImagen_libreriaGrid');
+    const contador = document.getElementById('modalImagen_contadorLibreria');
+    
+    if (!grid) return;
+    
+    grid.innerHTML = '<div style="text-align:center;padding:20px;color:#506080;grid-column:1/-1;font-size:13px;">⏳ Cargando...</div>';
+    
+    try {
+        const clienteId = (window.clienteData && window.clienteData.id_publico) || 'sin_id';
+        
+        const { data: archivos, error } = await supabaseClient
+            .storage
+            .from('media_library')
+            .list(clienteId + '/', {
+                limit: 100,
+                sortBy: { column: 'created_at', order: 'desc' }
+            });
+        
+        if (error) throw error;
+        
+        modalImagen_imagenesLibreria = archivos.filter(f => 
+            f.name.match(/\.(jpg|jpeg|png|webp|gif|svg|bmp)$/i)
+        );
+        
+        modalImagen_renderizarGrid(modalImagen_imagenesLibreria);
+        if (contador) contador.textContent = modalImagen_imagenesLibreria.length + ' imágenes en tu librería';
+        
+    } catch (error) {
+        console.error('Error cargando librería:', error);
+        grid.innerHTML = '<div style="text-align:center;padding:20px;color:#ff6b6b;grid-column:1/-1;font-size:13px;">⚠️ Error al cargar</div>';
     }
-    return url;
 }
 
-function modalImagen_cargarDesdeUrl() {
-    const urlInput = document.getElementById('modalImagen_urlInput');
-    if (!urlInput) {
-        console.error('❌ No se encontró modalImagen_urlInput');
+function modalImagen_renderizarGrid(imagenes) {
+    const grid = document.getElementById('modalImagen_libreriaGrid');
+    if (!grid) return;
+    
+    const clienteId = (window.clienteData && window.clienteData.id_publico) || 'sin_id';
+    
+    if (imagenes.length === 0) {
+        grid.innerHTML = `
+            <div style="text-align:center;padding:20px;color:#506080;grid-column:1/-1;">
+                <span style="font-size:32px;">📭</span>
+                <p style="font-size:12px;margin-top:5px;">No hay imágenes</p>
+            </div>`;
         return;
     }
     
-    let url = urlInput.value.trim();
-    if (!url) {
-        alert('Por favor, pega una URL de imagen válida.');
-        return;
-    }
+    grid.innerHTML = imagenes.map(img => {
+        const url = `https://nvrcqlxnvjvhznmxozhh.supabase.co/storage/v1/object/public/media_library/${clienteId}/${img.name}`;
+        const seleccionada = modalImagen_datos.imagen === url;
+        return `
+            <div class="modalImagen_libreriaItem ${seleccionada ? 'seleccionada' : ''}" 
+                 data-url="${url}" 
+                 data-nombre="${img.name}"
+                 onclick="modalImagen_seleccionarDeLibreria('${url}', '${img.name.replace(/'/g, "\\'")}')"
+                 style="position:relative; aspect-ratio:1; border-radius:10px; overflow:hidden; cursor:pointer; border:2px solid ${seleccionada ? '#F4A261' : 'transparent'}; background:rgba(10,20,40,0.6); transition:all 0.2s;">
+                <img src="${url}" alt="${img.name}" loading="lazy" 
+                     style="width:100%;height:100%;object-fit:cover;"
+                     onerror="this.parentElement.innerHTML='<div style=width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#506080;font-size:24px;>🖼️</div>'">
+                <button onclick="event.stopPropagation(); modalImagen_eliminarDeLibreria('${img.name.replace(/'/g, "\\'")}')" 
+                        style="position:absolute; top:4px; right:4px; width:22px; height:22px; background:rgba(220,53,69,0.9); color:white; border:none; border-radius:50%; cursor:pointer; font-size:11px; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.2s;"
+                        onmouseover="this.style.opacity='1'" 
+                        onmouseout="this.style.opacity='0'"
+                        title="Eliminar">✕</button>
+                <div style="position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.7); color:white; font-size:9px; padding:3px 6px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${img.name}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+// ========== SELECCIONAR DE LIBRERÍA ==========
+function modalImagen_seleccionarDeLibreria(url, nombre) {
+    modalImagen_datos.imagen = url;
+    document.getElementById('modalImagen_urlInput').value = url;
     
-    url = modalImagen_convertirUrlDrive(url);
-    
+    // Cargar imagen en el visor
     const imgEl = document.getElementById('modalImagen_img');
     const placeholder = document.getElementById('modalImagen_placeholder');
     const cruceta = document.getElementById('modalImagen_cruceta');
-    const infoEl = document.getElementById('modalImagen_info');
     
-    if (!imgEl) {
-        console.error('❌ No se encontró modalImagen_img');
+    imgEl.src = url;
+    imgEl.style.display = 'block';
+    if (placeholder) placeholder.style.display = 'none';
+    if (cruceta) cruceta.classList.add('visible');
+    
+    // Resetear posición
+    modalImagen_datos.translateX = 0;
+    modalImagen_datos.translateY = 0;
+    modalImagen_datos.zoom = 100;
+    document.getElementById('modalImagen_zoomSlider').value = 100;
+    document.getElementById('modalImagen_zoomValor').textContent = '100%';
+    modalImagen_actualizarImagen();
+    
+    // Actualizar grid para marcar seleccionada
+    modalImagen_renderizarGrid(modalImagen_imagenesLibreria);
+}
+
+// ========== ELIMINAR DE LIBRERÍA ==========
+async function modalImagen_eliminarDeLibreria(nombre) {
+    const confirmar = await abrirModalConfirmar({
+        icono: '🗑️',
+        titulo: '¿Eliminar imagen?',
+        mensaje: `"${nombre}" se eliminará permanentemente de tu librería.`,
+        btnTexto: 'Sí, eliminar',
+        variante: 'peligro'
+    });
+    
+    if (!confirmar) return;
+    
+    try {
+        const clienteId = (window.clienteData && window.clienteData.id_publico) || 'sin_id';
+        
+        const { error } = await supabaseClient
+            .storage
+            .from('media_library')
+            .remove([clienteId + '/' + nombre]);
+        
+        if (error) throw error;
+        
+        // Recargar librería
+        await modalImagen_cargarLibreria();
+        
+    } catch (error) {
+        console.error('Error eliminando:', error);
+        alert('No se pudo eliminar la imagen.');
+    }
+}
+
+// ========== FILTRAR ==========
+function modalImagen_filtrarLibreria() {
+    const busqueda = document.getElementById('modalImagen_busquedaLibreria').value.toLowerCase();
+    if (!busqueda) {
+        modalImagen_renderizarGrid(modalImagen_imagenesLibreria);
+        return;
+    }
+    const filtradas = modalImagen_imagenesLibreria.filter(img => 
+        img.name.toLowerCase().includes(busqueda)
+    );
+    modalImagen_renderizarGrid(filtradas);
+}
+
+// ========== SUBIR NUEVA ==========
+function modalImagen_subirNueva() {
+    document.getElementById('modalImagen_uploadInput').click();
+}
+
+async function modalImagen_procesarSubida(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    if (!file.type.startsWith('image/')) {
+        alert('Solo se permiten imágenes.');
         return;
     }
     
-    if (infoEl) infoEl.textContent = 'Cargando...';
+    const clienteId = (window.clienteData && window.clienteData.id_publico) || 'sin_id';
+    const nombreArchivo = clienteId + '/' + Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9.]/g, '_');
     
-    const img = new Image();
-    img.onload = function() {
-        modalImagen_datos.imagen = url;
+    try {
+        const { error } = await supabaseClient
+            .storage
+            .from('media_library')
+            .upload(nombreArchivo, file, {
+                cacheControl: '3600',
+                upsert: false
+            });
         
-        imgEl.src = url;
-        imgEl.style.display = 'block';
-        if (placeholder) placeholder.style.display = 'none';
-        if (cruceta) cruceta.classList.add('visible');
+        if (error) throw error;
         
-        modalImagen_datos.translateX = 0;
-        modalImagen_datos.translateY = 0;
-        modalImagen_datos.zoom = 100;
+        // Recargar librería
+        await modalImagen_cargarLibreria();
         
-        const slider = document.getElementById('modalImagen_zoomSlider');
-        if (slider) slider.value = 100;
-        
-        const zoomValor = document.getElementById('modalImagen_zoomValor');
-        if (zoomValor) zoomValor.textContent = '100%';
-        
-        if (infoEl) {
-            infoEl.textContent = 'Imagen cargada';
-            infoEl.style.color = '#8090b0';
-        }
-        
-        modalImagen_actualizarImagen();
-        modalImagen_guardarEstadoInicial();
-        modalImagen_actualizarMensajeGuardado();
-        
-        console.log('✅ Imagen cargada exitosamente desde URL');
-    };
+    } catch (error) {
+        console.error('Error subiendo:', error);
+        alert('Error al subir la imagen: ' + error.message);
+    }
     
-    img.onerror = function() {
-        if (infoEl) {
-            infoEl.textContent = 'Error al cargar la imagen';
-            infoEl.style.color = '#ff6b6b';
-        }
-        alert('No se pudo cargar la imagen. Verifica que la URL sea válida y accesible públicamente.');
-        console.error('❌ Error al cargar imagen desde:', url);
-    };
-    
-    img.src = url;
+    event.target.value = '';
 }
 
-function modalImagen_guardarEstadoInicial() {
-    modalImagen_estadoInicial = {
-        translateX: modalImagen_datos.translateX,
-        translateY: modalImagen_datos.translateY,
-        zoom: modalImagen_datos.zoom,
-        imagen: modalImagen_datos.imagen
-    };
+function modalImagen_recargarLibreria() {
+    modalImagen_cargarLibreria();
 }
 
+// ========== FUNCIONES EXISTENTES ==========
 function modalImagen_actualizarImagen() {
     const img = document.getElementById('modalImagen_img');
     if (img && img.style.display === 'block') {
@@ -6828,22 +6999,8 @@ function modalImagen_actualizarImagen() {
     }
 }
 
-function modalImagen_actualizarMensajeGuardado() {
-    const msg = document.getElementById('modalImagen_datosGuardados');
-    if (msg) {
-        if (modalImagen_datos.imagen) {
-            msg.innerHTML = `✅ Imagen lista<br>Zoom: ${modalImagen_datos.zoom}% | X=${modalImagen_datos.translateX}px, Y=${modalImagen_datos.translateY}px`;
-        } else {
-            msg.textContent = 'Sin imagen seleccionada';
-        }
-    }
-}
-
 function modalImagen_mover(dx, dy) {
-    if (!modalImagen_datos.imagen) {
-        alert('Primero carga una imagen');
-        return;
-    }
+    if (!modalImagen_datos.imagen) return;
     modalImagen_datos.translateX += dx;
     modalImagen_datos.translateY += dy;
     modalImagen_actualizarImagen();
@@ -6856,48 +7013,39 @@ function modalImagen_centrar() {
 }
 
 function modalImagen_cambiarZoom(delta) {
-    if (!modalImagen_datos.imagen) {
-        alert('Primero carga una imagen');
-        return;
-    }
+    if (!modalImagen_datos.imagen) return;
     if (delta === 0) {
         modalImagen_datos.zoom = 100;
     } else {
         modalImagen_datos.zoom = Math.max(50, Math.min(150, modalImagen_datos.zoom + delta));
     }
-    const slider = document.getElementById('modalImagen_zoomSlider');
-    if (slider) slider.value = modalImagen_datos.zoom;
-    const zoomValor = document.getElementById('modalImagen_zoomValor');
-    if (zoomValor) zoomValor.textContent = modalImagen_datos.zoom + '%';
+    document.getElementById('modalImagen_zoomSlider').value = modalImagen_datos.zoom;
+    document.getElementById('modalImagen_zoomValor').textContent = modalImagen_datos.zoom + '%';
     modalImagen_actualizarImagen();
 }
 
 function modalImagen_quitar() {
-    const img = document.getElementById('modalImagen_img');
-    const placeholder = document.getElementById('modalImagen_placeholder');
-    const cruceta = document.getElementById('modalImagen_cruceta');
-    const urlInput = document.getElementById('modalImagen_urlInput');
-    const infoEl = document.getElementById('modalImagen_info');
-    
-    if (img) { img.style.display = 'none'; img.src = ''; }
-    if (placeholder) placeholder.style.display = 'flex';
-    if (cruceta) cruceta.classList.remove('visible');
-    if (urlInput) urlInput.value = '';
-    if (infoEl) { infoEl.textContent = 'Ningún archivo'; infoEl.style.color = '#8090b0'; }
-    
+    document.getElementById('modalImagen_img').style.display = 'none';
+    document.getElementById('modalImagen_placeholder').style.display = 'flex';
+    document.getElementById('modalImagen_cruceta').classList.remove('visible');
+    document.getElementById('modalImagen_urlInput').value = '';
     modalImagen_datos.imagen = null;
     modalImagen_datos.translateX = 0;
     modalImagen_datos.translateY = 0;
     modalImagen_datos.zoom = 100;
-    
-    const slider = document.getElementById('modalImagen_zoomSlider');
-    if (slider) slider.value = 100;
-    const zoomValor = document.getElementById('modalImagen_zoomValor');
-    if (zoomValor) zoomValor.textContent = '100%';
-    const coords = document.getElementById('modalImagen_coordenadas');
-    if (coords) coords.textContent = 'Posición: X=0px Y=0px';
-    const msg = document.getElementById('modalImagen_datosGuardados');
-    if (msg) msg.textContent = 'Sin imagen seleccionada';
+    document.getElementById('modalImagen_zoomSlider').value = 100;
+    document.getElementById('modalImagen_zoomValor').textContent = '100%';
+    document.getElementById('modalImagen_coordenadas').textContent = 'Posición: X=0px Y=0px';
+    modalImagen_renderizarGrid(modalImagen_imagenesLibreria);
+}
+
+function modalImagen_guardarEstadoInicial() {
+    modalImagen_estadoInicial = {
+        translateX: modalImagen_datos.translateX,
+        translateY: modalImagen_datos.translateY,
+        zoom: modalImagen_datos.zoom,
+        imagen: modalImagen_datos.imagen
+    };
 }
 
 function modalImagen_guardar() {
@@ -6909,92 +7057,59 @@ function modalImagen_guardar() {
             zoom: modalImagen_datos.zoom
         });
     }
-    localStorage.setItem('modalImagen_data', JSON.stringify(modalImagen_datos));
     cerrarModal('modalImagen_overlay');
 }
 
 function modalImagen_cancelar() {
-    if (modalImagen_estadoInicial) {
-        modalImagen_datos.translateX = modalImagen_estadoInicial.translateX;
-        modalImagen_datos.translateY = modalImagen_estadoInicial.translateY;
-        modalImagen_datos.zoom = modalImagen_estadoInicial.zoom;
-        
-        const slider = document.getElementById('modalImagen_zoomSlider');
-        if (slider) slider.value = modalImagen_datos.zoom;
-        const zoomValor = document.getElementById('modalImagen_zoomValor');
-        if (zoomValor) zoomValor.textContent = modalImagen_datos.zoom + '%';
-        
-        if (modalImagen_estadoInicial.imagen) {
-            if (!modalImagen_datos.imagen) {
-                const imgEl = document.getElementById('modalImagen_img');
-                const placeholder = document.getElementById('modalImagen_placeholder');
-                const cruceta = document.getElementById('modalImagen_cruceta');
-                const urlInput = document.getElementById('modalImagen_urlInput');
-                const infoEl = document.getElementById('modalImagen_info');
-                
-                if (imgEl) { imgEl.src = modalImagen_estadoInicial.imagen; imgEl.style.display = 'block'; }
-                if (placeholder) placeholder.style.display = 'none';
-                if (cruceta) cruceta.classList.add('visible');
-                if (urlInput) urlInput.value = modalImagen_estadoInicial.imagen;
-                if (infoEl) { infoEl.textContent = 'Imagen cargada'; infoEl.style.color = '#8090b0'; }
-            }
-            modalImagen_datos.imagen = modalImagen_estadoInicial.imagen;
-        } else if (modalImagen_estadoInicial.imagen === null) {
-            modalImagen_quitar();
-        }
-        modalImagen_actualizarImagen();
+    if (modalImagen_estadoInicial && modalImagen_estadoInicial.imagen) {
+        modalImagen_datos = { ...modalImagen_estadoInicial };
     }
     cerrarModal('modalImagen_overlay');
 }
 
 function abrirModalImagen(datosIniciales, callback) {
     modalImagen_callback = callback;
-    modalImagen_datos = { translateX: 0, translateY: 0, zoom: 100, imagen: null };
+    modalImagen_datos = { 
+        translateX: datosIniciales?.translateX || 0, 
+        translateY: datosIniciales?.translateY || 0, 
+        zoom: datosIniciales?.zoom || 100, 
+        imagen: datosIniciales?.imagen || null 
+    };
     
-    if (datosIniciales) {
-        if (datosIniciales.imagen) modalImagen_datos.imagen = datosIniciales.imagen;
-        if (datosIniciales.translateX !== undefined) modalImagen_datos.translateX = datosIniciales.translateX;
-        if (datosIniciales.translateY !== undefined) modalImagen_datos.translateY = datosIniciales.translateY;
-        if (datosIniciales.zoom !== undefined) modalImagen_datos.zoom = datosIniciales.zoom;
-    }
-    
-    const slider = document.getElementById('modalImagen_zoomSlider');
-    if (slider) slider.value = modalImagen_datos.zoom;
-    const zoomValor = document.getElementById('modalImagen_zoomValor');
-    if (zoomValor) zoomValor.textContent = modalImagen_datos.zoom + '%';
-    
-    const urlInput = document.getElementById('modalImagen_urlInput');
-    const infoEl = document.getElementById('modalImagen_info');
+    document.getElementById('modalImagen_zoomSlider').value = modalImagen_datos.zoom;
+    document.getElementById('modalImagen_zoomValor').textContent = modalImagen_datos.zoom + '%';
     
     if (modalImagen_datos.imagen) {
-        const imgEl = document.getElementById('modalImagen_img');
-        const placeholder = document.getElementById('modalImagen_placeholder');
-        const cruceta = document.getElementById('modalImagen_cruceta');
-        
-        if (imgEl) { imgEl.src = modalImagen_datos.imagen; imgEl.style.display = 'block'; }
-        if (placeholder) placeholder.style.display = 'none';
-        if (cruceta) cruceta.classList.add('visible');
-        if (urlInput) urlInput.value = modalImagen_datos.imagen;
-        if (infoEl) { infoEl.textContent = 'Imagen cargada'; infoEl.style.color = '#8090b0'; }
-        
+        document.getElementById('modalImagen_img').src = modalImagen_datos.imagen;
+        document.getElementById('modalImagen_img').style.display = 'block';
+        document.getElementById('modalImagen_placeholder').style.display = 'none';
+        document.getElementById('modalImagen_cruceta').classList.add('visible');
+        document.getElementById('modalImagen_urlInput').value = modalImagen_datos.imagen;
         modalImagen_actualizarImagen();
-        modalImagen_actualizarMensajeGuardado();
     } else {
         modalImagen_quitar();
     }
     
     modalImagen_guardarEstadoInicial();
     document.getElementById('modalImagen_overlay').style.display = 'flex';
+    
+    // Cargar librería
+    modalImagen_cargarLibreria();
 }
 
-// Exponer funciones globales
-window.modalImagen_cargarDesdeUrl = modalImagen_cargarDesdeUrl;
+// Exponer
 window.modalImagen_mover = modalImagen_mover;
 window.modalImagen_centrar = modalImagen_centrar;
 window.modalImagen_cambiarZoom = modalImagen_cambiarZoom;
 window.modalImagen_quitar = modalImagen_quitar;
 window.modalImagen_guardar = modalImagen_guardar;
 window.modalImagen_cancelar = modalImagen_cancelar;
+window.modalImagen_seleccionarDeLibreria = modalImagen_seleccionarDeLibreria;
+window.modalImagen_eliminarDeLibreria = modalImagen_eliminarDeLibreria;
+window.modalImagen_filtrarLibreria = modalImagen_filtrarLibreria;
+window.modalImagen_subirNueva = modalImagen_subirNueva;
+window.modalImagen_procesarSubida = modalImagen_procesarSubida;
+window.modalImagen_recargarLibreria = modalImagen_recargarLibreria;
 window.abrirModalImagen = abrirModalImagen;
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -7631,210 +7746,142 @@ if (typeof registrarModal === 'function') {
 }
 
 // ============================================
-//  MODAL MI LIBRERÍA DE MEDIOS
+// MI LIBRERÍA DE MEDIOS (COMPLETO NUEVO)
 // ============================================
-var modalMedios_archivos = [];
+let _ml_todos = [];
+let _ml_subir = [];
 
-function formatearTamano(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    var k = 1024;
-    var sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    var i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+function _ml_id() {
+    if (!window.clienteData?.id_publico) {
+        const s = localStorage.getItem('clienteData');
+        if (s) window.clienteData = JSON.parse(s);
+    }
+    return window.clienteData?.id_publico || 'sin_id';
 }
 
-function modalMedios_seleccionar() {
-    var input = document.getElementById('modalMedios_fileInput');
-    if (!input) return;
-    input.value = '';
-    input.click();
+async function modalMedios_cargar() {
+    const grid = document.getElementById('modalMedios_grid');
+    const contador = document.getElementById('modalMedios_contador');
+    if (!grid) return;
+    grid.innerHTML = '<div style="text-align:center;padding:30px;color:#506080;grid-column:1/-1;">⏳ Cargando...</div>';
+    try {
+        const cid = _ml_id();
+        const { data, error } = await supabaseClient.storage.from('media_library').list(cid + '/', { limit: 200, sortBy: { column: 'created_at', order: 'desc' } });
+        if (error) throw error;
+        _ml_todos = data || [];
+        modalMedios_renderizar(_ml_todos);
+        const imgs = _ml_todos.filter(f => /\.(jpg|jpeg|png|webp|gif|svg|bmp)$/i.test(f.name)).length;
+        const vids = _ml_todos.filter(f => /\.(mp4|webm|mov|avi|mkv)$/i.test(f.name)).length;
+        if (contador) contador.innerHTML = '📁 ' + _ml_todos.length + ' archivos · 🖼️ ' + imgs + ' imágenes · 🎬 ' + vids + ' videos';
+    } catch(e) {
+        grid.innerHTML = '<div style="text-align:center;padding:30px;color:#ff6b6b;grid-column:1/-1;">⚠️ Error al cargar</div>';
+    }
 }
 
-function modalMedios_quitarArchivo(index) {
-    var item = modalMedios_archivos[index];
-    if (item && item.previewUrl) URL.revokeObjectURL(item.previewUrl);
-    modalMedios_archivos.splice(index, 1);
-    modalMedios_actualizarUI();
-}
-
-function modalMedios_actualizarUI() {
-    var grid = document.getElementById('modalMedios_grid');
-    var contador = document.getElementById('modalMedios_contador');
-    var btnSubir = document.getElementById('modalMedios_btnSubir');
-    if (!grid || !contador || !btnSubir) return;
-    
-    var total = modalMedios_archivos.length;
-    
-    if (total === 0) {
-        contador.innerHTML = '🖼️ <strong>0</strong> archivos en cola';
-        grid.innerHTML = '<div style="text-align:center;padding:30px;color:#506080;grid-column:1/-1;"><span style="font-size:36px;">📭</span><p style="font-size:13px;">Sin archivos</p></div>';
-        btnSubir.disabled = true;
-        btnSubir.textContent = '☁️ Subir a Supabase';
+function modalMedios_renderizar(lista) {
+    const grid = document.getElementById('modalMedios_grid');
+    if (!grid) return;
+    if (!lista.length) {
+        grid.innerHTML = '<div style="text-align:center;padding:30px;color:#506080;grid-column:1/-1;"><span style="font-size:40px;">📭</span><p>No hay archivos</p></div>';
         return;
     }
-    
-    var tamanoTotal = 0;
-    for (var i = 0; i < modalMedios_archivos.length; i++) {
-        tamanoTotal += modalMedios_archivos[i].tamano;
-    }
-    
-    var numImagenes = 0;
-    var numVideos = 0;
-    for (var v = 0; v < modalMedios_archivos.length; v++) {
-        if (modalMedios_archivos[v].file.type.startsWith('video/')) {
-            numVideos++;
-        } else {
-            numImagenes++;
-        }
-    }
-    
-    var textoContador = '🖼️ <strong>' + total + '</strong> archivos · ' + formatearTamano(tamanoTotal);
-    if (numImagenes > 0) textoContador += ' | 📷 ' + numImagenes;
-    if (numVideos > 0) textoContador += ' | 🎬 ' + numVideos;
-    contador.innerHTML = textoContador;
-    
-    var html = '';
-    for (var j = 0; j < modalMedios_archivos.length; j++) {
-        var esVideo = modalMedios_archivos[j].file.type.startsWith('video/');
-        
-        html += '<div style="position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:rgba(10,20,40,0.6);border:2px solid rgba(100,180,255,0.1);">';
-        
-        if (esVideo) {
-            html += '<video src="' + modalMedios_archivos[j].previewUrl + '" style="width:100%;height:100%;object-fit:cover;" muted></video>';
-            html += '<span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:white;font-size:28px;pointer-events:none;">▶️</span>';
-        } else {
-            html += '<img src="' + modalMedios_archivos[j].previewUrl + '" style="width:100%;height:100%;object-fit:cover;">';
-        }
-        
-        html += '<span style="position:absolute;top:4px;left:4px;background:rgba(0,0,0,0.7);color:white;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;">' + (j + 1) + '</span>';
-        
-        if (esVideo) {
-            html += '<span style="position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,0.7);color:#F4A261;padding:2px 6px;border-radius:4px;font-size:9px;">🎬 VIDEO</span>';
-        }
-        
-        html += '<button onclick="modalMedios_quitarArchivo(' + j + ')" style="position:absolute;top:4px;right:4px;width:22px;height:22px;background:rgba(220,53,69,0.9);color:white;border:none;border-radius:50%;cursor:pointer;font-size:12px;">×</button>';
-        html += '</div>';
-    }
-    grid.innerHTML = html;
-    
-    btnSubir.disabled = false;
-    btnSubir.textContent = '☁️ Subir ' + total + ' archivos a Supabase';
+    const cid = _ml_id();
+    grid.innerHTML = lista.map(item => {
+        const url = 'https://nvrcqlxnvjvhznmxozhh.supabase.co/storage/v1/object/public/media_library/' + cid + '/' + item.name;
+        const esVideo = /\.(mp4|webm|mov|avi|mkv)$/i.test(item.name);
+        return '<div style="position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:rgba(10,20,40,0.6);border:1px solid rgba(100,180,255,0.1);">' +
+            (esVideo ? '<video src="' + url + '" style="width:100%;height:100%;object-fit:cover;" muted preload="metadata"></video><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;background:rgba(0,0,0,0.5);width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;">▶️</div>' : '<img src="' + url + '" style="width:100%;height:100%;object-fit:cover;" loading="lazy">') +
+            '<button onclick="modalMedios_eliminar(\'' + item.name.replace(/'/g, "\\'") + '\')" style="position:absolute;top:5px;right:5px;width:24px;height:24px;background:rgba(220,53,69,0.9);color:white;border:none;border-radius:50%;cursor:pointer;font-size:12px;z-index:5;">✕</button>' +
+            '<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.75);color:white;font-size:9px;padding:4px 6px;text-align:center;">' + item.name + '</div>' +
+            (esVideo ? '<div style="position:absolute;top:5px;left:5px;background:rgba(244,162,97,0.9);color:#0a0f1a;font-size:8px;padding:2px 6px;border-radius:4px;">🎬</div>' : '') + '</div>';
+    }).join('');
 }
 
-function modalMedios_subir() {
-    if (modalMedios_archivos.length === 0) { alert('Sin archivos'); return; }
-    
-    var btnSubir = document.getElementById('modalMedios_btnSubir');
-    btnSubir.disabled = true;
-    btnSubir.textContent = '⏳ Subiendo...';
-    
-    var bucket = 'media_library';
-    var clienteId = (window.clienteData && window.clienteData.id_publico) || 'sin_id';
-    var carpeta = clienteId;
-    var exitos = 0;
-    var fallos = 0;
-    
-    function subirSiguiente(i) {
-        if (i >= modalMedios_archivos.length) {
-            alert('📊 ' + exitos + ' subidas correctas, ' + fallos + ' errores.');
-            for (var k = 0; k < modalMedios_archivos.length; k++) {
-                if (modalMedios_archivos[k].previewUrl) {
-                    URL.revokeObjectURL(modalMedios_archivos[k].previewUrl);
-                }
-            }
-            modalMedios_archivos = [];
-            modalMedios_actualizarUI();
-            return;
-        }
-        
-        var item = modalMedios_archivos[i];
-        var nombreArchivo = carpeta + '/' + item.nombre;
-        
-        btnSubir.textContent = '⏳ ' + (i + 1) + '/' + modalMedios_archivos.length;
-        
-        if (typeof supabaseClient !== 'undefined' && supabaseClient) {
-            supabaseClient.storage.from(bucket).upload(nombreArchivo, item.file, {
-                cacheControl: '3600',
-                upsert: true,
-                contentType: item.file.type
-            }).then(function(res) {
-                if (res.error) {
-                    console.error('❌', res.error.message);
-                    fallos++;
-                } else {
-                    var urlData = supabaseClient.storage.from(bucket).getPublicUrl(nombreArchivo);
-                    console.log('✅ Subido:', urlData.data.publicUrl);
-                    exitos++;
-                }
-                subirSiguiente(i + 1);
-            }).catch(function(err) {
-                console.error('❌ Error de red:', err.message);
-                fallos++;
-                subirSiguiente(i + 1);
-            });
-        } else {
-            console.error('❌ Supabase no disponible');
-            fallos++;
-            subirSiguiente(i + 1);
-        }
-    }
-    
-    subirSiguiente(0);
+async function modalMedios_eliminar(nombre) {
+    if (!confirm('🗑️ ¿Eliminar "' + nombre + '"?')) return;
+    await supabaseClient.storage.from('media_library').remove([_ml_id() + '/' + nombre]);
+    modalMedios_cargar();
 }
+
+function modalMedios_recargar() { modalMedios_cargar(); }
+
+function modalMedios_mostrarVistaPrevia(files) {
+    _ml_subir = Array.from(files);
+    document.getElementById('vistaPrevia').style.display = 'block';
+    document.getElementById('btnSubirYA').style.display = 'block';
+    document.getElementById('gridSubida').innerHTML = _ml_subir.map((file, i) => {
+        const url = URL.createObjectURL(file);
+        return '<div style="position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;background:rgba(10,20,40,0.6);border:2px solid #F4A261;">' +
+            (file.type.startsWith('video/') ? '<video src="' + url + '" style="width:100%;height:100%;object-fit:cover;" muted></video><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:white;">▶️</div>' : '<img src="' + url + '" style="width:100%;height:100%;object-fit:cover;">') +
+            '<button onclick="modalMedios_quitarDeSubida(' + i + ')" style="position:absolute;top:3px;right:3px;width:20px;height:20px;background:rgba(220,53,69,0.9);color:white;border:none;border-radius:50%;cursor:pointer;font-size:10px;">✕</button>' +
+            '<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.7);color:white;font-size:8px;padding:2px 4px;text-align:center;">' + file.name.substring(0,20) + '</div></div>';
+    }).join('');
+}
+
+function modalMedios_quitarDeSubida(i) {
+    _ml_subir.splice(i, 1);
+    if (!_ml_subir.length) {
+        document.getElementById('vistaPrevia').style.display = 'none';
+        document.getElementById('btnSubirYA').style.display = 'none';
+    } else modalMedios_mostrarVistaPrevia(_ml_subir);
+}
+
+async function modalMedios_subirYa() {
+    if (!_ml_subir.length) return;
+    const btn = document.getElementById('btnSubirYA');
+    btn.disabled = true; btn.textContent = '⏳ Subiendo...';
+    let ok = 0, fail = 0;
+    for (let i = 0; i < _ml_subir.length; i++) {
+        btn.textContent = '⏳ ' + (i+1) + '/' + _ml_subir.length;
+        const file = _ml_subir[i];
+        const nombre = _ml_id() + '/' + Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9._-]/g, '');
+        const { error } = await supabaseClient.storage.from('media_library').upload(nombre, file, { cacheControl: '3600', upsert: true });
+        error ? fail++ : ok++;
+    }
+    _ml_subir = [];
+    document.getElementById('vistaPrevia').style.display = 'none';
+    btn.style.display = 'none'; btn.disabled = false; btn.textContent = '☁️ Subir ya';
+    document.getElementById('modalMedios_fileInput').value = '';
+    alert('✅ ' + ok + ' subidos, ' + fail + ' errores');
+    modalMedios_cargar();
+}
+
+function modalMedios_cerrar() { document.getElementById('modalMedios_overlay').style.display = 'none'; }
 
 function abrirModalMedios() {
-    var modal = document.getElementById('modalMedios_overlay');
-    if (!modal) return;
-    modal.style.display = 'flex';
-    
-    var input = document.getElementById('modalMedios_fileInput');
-    if (!input) return;
-    
-    input.value = '';
-    
-    input.onchange = function(e) {
-        var files = e.target.files;
-        if (!files || files.length === 0) return;
-        
-        for (var i = 0; i < files.length; i++) {
-            var file = files[i];
-            if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) continue;
-            if (file.type.startsWith('video/') && file.size > 200 * 1024 * 1024) {
-                alert('⚠️ El video "' + file.name + '" pesa más de 200 MB.');
-                continue;
-            }
-            
-            var previewUrl = URL.createObjectURL(file);
-            modalMedios_archivos.push({
-                file: file,
-                previewUrl: previewUrl,
-                nombre: file.name,
-                tamano: file.size
-            });
-        }
-        modalMedios_actualizarUI();
-    };
+    document.getElementById('modalMedios_overlay').style.display = 'flex';
+    modalMedios_cargar();
 }
 
-function modalMedios_cerrar() {
-    for (var i = 0; i < modalMedios_archivos.length; i++) {
-        if (modalMedios_archivos[i].previewUrl) {
-            URL.revokeObjectURL(modalMedios_archivos[i].previewUrl);
-        }
+// Eventos
+document.addEventListener('DOMContentLoaded', function() {
+    const zona = document.getElementById('zonaSubida');
+    if (zona) {
+        zona.addEventListener('dragover', function(e) { e.preventDefault(); zona.style.borderColor = '#F4A261'; });
+        zona.addEventListener('dragleave', function(e) { zona.style.borderColor = 'rgba(100,180,255,0.4)'; });
+        zona.addEventListener('drop', function(e) {
+            e.preventDefault();
+            zona.style.borderColor = 'rgba(100,180,255,0.4)';
+            if (e.dataTransfer.files.length) modalMedios_mostrarVistaPrevia(e.dataTransfer.files);
+        });
     }
-    modalMedios_archivos = [];
-    modalMedios_actualizarUI();
-    var modal = document.getElementById('modalMedios_overlay');
-    if (modal) modal.style.display = 'none';
-}
+    const input = document.getElementById('modalMedios_fileInput');
+    if (input) input.addEventListener('change', function() { if (this.files.length) modalMedios_mostrarVistaPrevia(this.files); });
+    const buscador = document.getElementById('modalMedios_buscador');
+    if (buscador) buscador.addEventListener('input', function() {
+        const q = this.value.toLowerCase();
+        modalMedios_renderizar(q ? _ml_todos.filter(function(f) { return f.name.toLowerCase().indexOf(q) !== -1; }) : _ml_todos);
+    });
+    const btn = document.getElementById('btnSubirYA');
+    if (btn) btn.addEventListener('click', modalMedios_subirYa);
+});
 
-// Exponer funciones globales
-window.modalMedios_seleccionar = modalMedios_seleccionar;
-window.modalMedios_quitarArchivo = modalMedios_quitarArchivo;
-window.modalMedios_subir = modalMedios_subir;
+window.modalMedios_eliminar = modalMedios_eliminar;
+window.modalMedios_recargar = modalMedios_recargar;
+window.modalMedios_quitarDeSubida = modalMedios_quitarDeSubida;
+window.modalMedios_subirYa = modalMedios_subirYa;
 window.modalMedios_cerrar = modalMedios_cerrar;
 window.abrirModalMedios = abrirModalMedios;
-
 // ============================================
 // 6.20 INICIALIZACIÓN
 // ============================================
@@ -8041,6 +8088,24 @@ window.abrirSelectorLibreria = abrirSelectorLibreria;
 window.modalSelectorLibreria_seleccionar = modalSelectorLibreria_seleccionar;
 window.modalSelectorLibreria_confirmar = modalSelectorLibreria_confirmar;
 window.modalSelectorLibreria_cerrar = modalSelectorLibreria_cerrar;
+
+function modalHero_elegirDeLibreria() {
+    abrirSelectorLibreria(function(url) {
+        // Cargar la URL en el Editor de Imagen
+        abrirModalImagen(
+            { imagen: url, translateX: 0, translateY: 0, zoom: 100 },
+            function(datos) {
+                modalHero_data.imagen = datos.imagen;
+                modalHero_data.translateX = datos.translateX;
+                modalHero_data.translateY = datos.translateY;
+                modalHero_data.zoom = datos.zoom;
+                document.getElementById('modalHero_infoImagen').textContent = '✓ Imagen de tu librería';
+                modalHero_actualizarPreviewMedia();
+            },
+            'hero'
+        );
+    });
+}
     </script>
 </body>
 </html>

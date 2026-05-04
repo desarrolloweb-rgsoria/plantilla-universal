@@ -2611,203 +2611,155 @@ body {
 /* ---------------------------------------- */
 /* 2.14 MODAL ICONO                         */
 /* ---------------------------------------- */
-.modalIcono_overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.85);
-    z-index: 10001;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
+// ============================================
+// 6.14 MODAL ICONO (COMPLETO - +2,000 ICONOS CATEGORIZADOS)
+// ============================================
+let modalIcono_callback = null;
+let modalIcono_actual = '<i class="fas fa-star"></i>';
+let modalIcono_todos = [];
+let modalIcono_categorias = {};
+let modalIcono_categoriaActual = 'todas';
+
+// Categorización automática por palabras clave
+function _icono_categorizar(nombre) {
+    const n = nombre.toLowerCase();
+    if (/store|shop|building|briefcase|chart|trophy|rocket|money|dollar|cash|wallet|credit|bank|percent|tag|barcode|receipt|ticket|scale|balance|certificate|award|medal|crown|gem|diamond|bullhorn|ad|sitemap|diagram|network|server|database/.test(n)) return 'negocio';
+    if (/phone|envelope|comment|bell|message|headset|microphone|paper-plane|share|fax|voicemail|walkie|satellite|signal|antenna|podcast|rss|newspaper|inbox|outbox|language|translate|globe|earth|map|location|pin|compass/.test(n)) return 'comunicacion';
+    if (/wifi|coffee|bed|shower|bath|toilet|sink|faucet|stairs|elevator|door|window|chair|couch|lamp|light|outlet|plug|battery|solar|water|wind|fire-burner|bolt|magnet|gear|wrench|screwdriver|tool|ruler|pencil|eraser|highlighter|paperclip|scissors|clipboard|notebook|memo|sticky|print|keyboard|mouse|desktop|laptop|tablet|mobile/.test(n)) return 'servicios';
+    if (/cart|shopping|bag|basket|cash-register|box|boxes|container|pallet|truck|shipping|dolly|forklift|conveyor|inventory|scan|qrcode|gift|donate|charity|auction|hand-holding/.test(n)) return 'comercio';
+    if (/home|search|user|users|cog|menu|bars|times|check|plus|minus|chevron|caret|arrow|rotate|repeat|shuffle|play|pause|stop|forward|backward|eject|power|toggle|circle|square|star|heart|thumbs|thumbtack|filter|sort|list|grid|grip|trash|edit|copy|paste|undo|redo|sync|spinner/.test(n)) return 'interfaz';
+    if (/facebook|instagram|whatsapp|twitter|youtube|tiktok|linkedin|telegram|discord|twitch|spotify|github|gitlab|bitbucket|stack|reddit|pinterest|snapchat|skype|viber|line|weixin|weibo|behance|dribbble|figma|framer|sketch|codepen|product-hunt|kickstarter|patreon|medium|blogger|wordpress|tumblr|flickr|unsplash|soundcloud|bandcamp|apple|google|microsoft|windows|linux|android|chrome|firefox|safari|edge|opera/.test(n)) return 'redes';
+    if (/utensils|pizza|hamburger|wine|beer|mug|coffee|martini|champagne|whiskey|ice-cream|cake|cookie|candy|lollipop|popcorn|taco|burrito|bowl|pot-food|pan|kettle|teapot|bottle|glass|pepper|garlic|leaf|seedling|plant/.test(n)) return 'comida';
+    if (/bed|shower|concierge|suitcase|luggage|key|door-open|elevator|restroom|bath|pool|dumbbell|spa|tv|wifi|parking|snowflake|fan|thermometer|blanket|mattress|pillow|towel|soap|shampoo|lotion|hair-dryer|umbrella-beach|beach|palm-tree|island|resort|hot-tub|massage|facial|manicure|pedicure|barber|salon/.test(n)) return 'hoteleria';
+    if (/heart|heartbeat|hospital|stethoscope|doctor|nurse|ambulance|syringe|capsules|pills|first-aid|band-aid|thermometer|lungs|brain|tooth|eye|ear|hand|foot|bone|dna|gene|cell|virus|bacteria|allergy|asthma|diabetes|cancer|vaccine|mask|shield-virus|mortar-pestle|prescription|tablets|injection|dropper|vial|flask|microscope|x-ray|mri|ct-scan|ultrasound|defibrillator|stretcher|crutch|walker|wheelchair|cane|hearing-aid|glasses|blind|sign-language|braille/.test(n)) return 'salud';
+    if (/book|graduation|school|university|microscope|calculator|ruler|pencil|pen|marker|chalkboard|protractor|paint-brush|palette|swatchbook|bezier-curve|vector|shapes|cubes|box-archive|ballot|vote|poll/.test(n)) return 'educacion';
+    if (/gamepad|music|headphones|film|video|camera|ticket|trophy|crown|dice|chess|puzzle|crossword|sudoku|card|cards|domino|mahjong|billiards|bowling|football|basketball|baseball|tennis|volleyball|table-tennis|badminton|hockey|golf|skiing|snowboarding|skating|fishing|fish|ghost|robot|alien|monster|dragon/.test(n)) return 'entretenimiento';
+    if (/clock|calendar|alarm|hourglass|stopwatch|timer|history|bell/.test(n)) return 'tiempo';
+    if (/folder|file|copy|paste|save|download|upload|cloud-upload|cloud-download/.test(n)) return 'archivos';
+    if (/lock|unlock|key|shield|user-secret|eye-slash|fingerprint|id-card|ban|passport|badge|helmet|goggles|respirator|hazmat|biohazard|radiation|nuclear|explosion/.test(n)) return 'seguridad';
+    if (/map-marker|map-pin|map-location|location|compass|street-view|flag|landmark|mountain|tree|route|road|sign|directions|traffic|ferry|anchor|boat|ship|plane|helicopter|drone|rocket|satellite/.test(n)) return 'ubicacion';
+    if (/sun|moon|cloud|rain|snow|wind|temperature|thermometer|umbrella|bolt|rainbow|raindrop|droplet|ice|icicles|hail|fog|smog|hurricane|tornado|volcano|earthquake|flood|tsunami|wildfire|fire-extinguisher/.test(n)) return 'clima';
+    if (/font|bold|italic|underline|strikethrough|heading|paragraph|align|indent|outdent|columns|bezier-curve|vector|layer|magic|crop|object-group|images|image/.test(n)) return 'diseno';
+    if (/user|users|baby|child|person|people|wheelchair|breastfeeding|pregnant|praying|hiking|swimming|walking|running/.test(n)) return 'personas';
+    if (/car|bus|train|truck|motorcycle|bicycle|taxi|ambulance|tractor|trolleybus|subway|tram|monorail|cable-car|aerial|helicopter|plane|rocket|ship|boat|sailboat|yacht|submarine|jet|fighter/.test(n)) return 'vehiculos';
+    if (/calculator|divide|equals|greater|less|plus|minus|times|percent|square-root|fraction|infinity|sigma|sum|integral/.test(n)) return 'matematicas';
+    if (/laptop|desktop|keyboard|mouse|microchip|server|database|cloud|wifi|bluetooth|mobile|tablet|headphones|code|bug|terminal|sd-card|sim|memory|hard-drive|usb|cable|ethernet|router|modem/.test(n)) return 'tecnologia';
+    return 'interfaz';
 }
 
-.modalIcono_contenedor {
-    background: rgba(20, 35, 60, 0.95);
-    backdrop-filter: blur(12px);
-    border-radius: 24px;
-    padding: 25px;
-    max-width: 780px;
-    width: 100%;
-    max-height: 85vh;
-    overflow-y: auto;
-    border: 1px solid rgba(100, 180, 255, 0.15);
-    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+async function modalIcono_cargarIconos() {
+    try {
+        const resp = await fetch('https://raw.githubusercontent.com/FortAwesome/Font-Awesome/master/metadata/icons.json');
+        const data = await resp.json();
+        
+        modalIcono_categorias = {};
+        modalIcono_todos = [];
+        
+        Object.entries(data).forEach(([name, info]) => {
+            const cat = _icono_categorizar(name);
+            if (!modalIcono_categorias[cat]) modalIcono_categorias[cat] = [];
+            const icono = { nombre: name, label: info.label || name, categoria: cat };
+            modalIcono_categorias[cat].push(icono);
+            modalIcono_todos.push(icono);
+        });
+        
+        Object.values(modalIcono_categorias).forEach(arr => arr.sort((a, b) => a.nombre.localeCompare(b.nombre)));
+        modalIcono_todos.sort((a, b) => a.nombre.localeCompare(b.nombre));
+        
+        localStorage.setItem('iconos_cache', JSON.stringify({ categorias: modalIcono_categorias, todos: modalIcono_todos }));
+        modalIcono_llenarDropdown();
+        modalIcono_filtrar();
+        console.log('✅ ' + modalIcono_todos.length + ' iconos categorizados en ' + Object.keys(modalIcono_categorias).length + ' categorías');
+    } catch(e) {
+        console.log('⚠️ Sin conexión, usando cache local');
+        const cache = localStorage.getItem('iconos_cache');
+        if (cache) {
+            const parsed = JSON.parse(cache);
+            modalIcono_categorias = parsed.categorias;
+            modalIcono_todos = parsed.todos;
+            modalIcono_llenarDropdown();
+            modalIcono_filtrar();
+        }
+    }
 }
 
-.modalIcono_titulo {
-    color: #c0d8ff;
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 18px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-.modalIcono_titulo span { color: #F4A261; }
-
-.modalIcono_filtrosRow {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
+function modalIcono_llenarDropdown() {
+    const select = document.getElementById('modalIcono_categoriaSelect');
+    let html = '<option value="todas">📋 Todos (' + modalIcono_todos.length + ')</option>';
+    const nombres = { negocio:'🏢 Negocio', comunicacion:'💬 Comunicación', servicios:'🛠️ Servicios', comercio:'🛒 Comercio', interfaz:'🖥️ Interfaz', redes:'🌐 Redes', comida:'🍔 Comida', hoteleria:'🏨 Hotelería', salud:'⚕️ Salud', educacion:'🎓 Educación', entretenimiento:'🎮 Entretenimiento', tiempo:'📅 Tiempo', archivos:'📁 Archivos', seguridad:'🔒 Seguridad', ubicacion:'📍 Ubicación', clima:'☀️ Clima', diseno:'🎨 Diseño', personas:'👤 Personas', vehiculos:'🚗 Vehículos', matematicas:'📊 Matemáticas', tecnologia:'💻 Tecnología' };
+    Object.keys(modalIcono_categorias).sort().forEach(cat => {
+        html += '<option value="' + cat + '">' + (nombres[cat] || cat) + ' (' + modalIcono_categorias[cat].length + ')</option>';
+    });
+    select.innerHTML = html;
 }
 
-.modalIcono_buscador {
-    flex: 2;
-}
-.modalIcono_buscador input {
-    width: 100%;
-    padding: 12px 16px;
-    background: rgba(10, 20, 40, 0.6);
-    border: 1px solid rgba(100, 180, 255, 0.2);
-    border-radius: 12px;
-    color: #e0e8ff;
-    font-size: 14px;
-    outline: none;
-}
-.modalIcono_buscador input:focus {
-    border-color: #4a90e2;
-}
-.modalIcono_buscador input::placeholder {
-    color: #506080;
+function modalIcono_seleccionarCategoria(categoria) {
+    modalIcono_categoriaActual = categoria;
+    document.getElementById('modalIcono_busqueda').value = '';
+    modalIcono_filtrar();
 }
 
-.modalIcono_categoriaDropdown {
-    flex: 1;
-}
-.modalIcono_categoriaSelect {
-    width: 100%;
-    padding: 12px 16px;
-    background: rgba(10, 20, 40, 0.6);
-    border: 1px solid rgba(100, 180, 255, 0.2);
-    border-radius: 12px;
-    color: #e0e8ff;
-    font-size: 14px;
-    outline: none;
-    cursor: pointer;
-    appearance: none;
-    -webkit-appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a0c4ff' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 16px center;
+function modalIcono_filtrar() {
+    const busqueda = document.getElementById('modalIcono_busqueda').value.toLowerCase();
+    let iconos;
+    if (busqueda) {
+        iconos = modalIcono_todos.filter(i => i.nombre.includes(busqueda) || (i.label && i.label.toLowerCase().includes(busqueda)));
+    } else if (modalIcono_categoriaActual === 'todas') {
+        iconos = modalIcono_todos;
+    } else {
+        iconos = modalIcono_categorias[modalIcono_categoriaActual] || [];
+    }
+    modalIcono_renderizarGrid(iconos.slice(0, 100));
+    document.getElementById('modalIcono_contador').textContent = 'Mostrando ' + Math.min(iconos.length, 100) + ' de ' + iconos.length + ' iconos';
 }
 
-.modalIcono_seleccionado {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    padding: 15px;
-    background: rgba(10, 20, 40, 0.4);
-    border-radius: 12px;
-    margin-bottom: 20px;
-    border: 1px solid rgba(100, 180, 255, 0.15);
+function modalIcono_renderizarGrid(iconos) {
+    const grid = document.getElementById('modalIcono_grid');
+    if (!iconos.length) {
+        grid.innerHTML = '<div class="modalIcono_loading">🔍 No se encontraron iconos</div>';
+        return;
+    }
+    grid.innerHTML = iconos.map(i => '<div class="modalIcono_item" onclick="modalIcono_seleccionar(\'' + i.nombre + '\',\'fas\')" data-icono="' + i.nombre + '"><i class="fas fa-' + i.nombre + '"></i><span>' + i.nombre + '</span></div>').join('');
 }
 
-.modalIcono_grande {
-    width: 60px;
-    height: 60px;
-    background: rgba(74, 144, 226, 0.2);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 32px;
-    color: #F4A261;
-    border: 1px solid rgba(244, 162, 97, 0.3);
+function modalIcono_seleccionar(nombre, clase) {
+    modalIcono_actual = '<i class="' + clase + ' fa-' + nombre + '"></i>';
+    document.getElementById('modalIcono_grande').innerHTML = modalIcono_actual;
+    document.getElementById('modalIcono_input').value = modalIcono_actual;
+    document.querySelectorAll('.modalIcono_item').forEach(el => el.classList.remove('seleccionado'));
+    const item = document.querySelector('.modalIcono_item[data-icono="' + nombre + '"]');
+    if (item) item.classList.add('seleccionado');
 }
 
-.modalIcono_info {
-    flex: 1;
-}
-.modalIcono_info label {
-    color: #a0c4ff;
-    font-size: 13px;
-    display: block;
-    margin-bottom: 4px;
-}
-.modalIcono_info input {
-    width: 100%;
-    padding: 8px 12px;
-    background: rgba(10, 20, 40, 0.6);
-    border: 1px solid rgba(100, 180, 255, 0.2);
-    border-radius: 8px;
-    color: #e0e8ff;
-    font-size: 13px;
-    font-family: monospace;
+function abrirModalIcono(opciones, callback) {
+    modalIcono_callback = callback;
+    modalIcono_actual = (opciones && opciones.icono) || '<i class="fas fa-star"></i>';
+    document.getElementById('modalIcono_grande').innerHTML = modalIcono_actual;
+    document.getElementById('modalIcono_input').value = modalIcono_actual;
+    document.getElementById('modalIcono_overlay').style.display = 'flex';
 }
 
-.modalIcono_contador {
-    font-size: 11px;
-    color: #6070a0;
-    margin-bottom: 8px;
+function modalIcono_guardar() {
+    if (modalIcono_callback) modalIcono_callback({ icono: modalIcono_actual });
+    document.getElementById('modalIcono_overlay').style.display = 'none';
 }
 
-.modalIcono_grid {
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: 8px;
-    max-height: 280px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: 5px;
-    margin-bottom: 20px;
+function modalIcono_cancelar() {
+    document.getElementById('modalIcono_overlay').style.display = 'none';
 }
 
-.modalIcono_item {
-    aspect-ratio: 1;
-    background: rgba(10, 20, 40, 0.4);
-    border: 1px solid rgba(100, 180, 255, 0.15);
-    border-radius: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.2s;
-    padding: 5px;
-    min-width: 0;
-}
-.modalIcono_item:hover {
-    background: rgba(74, 144, 226, 0.2);
-    border-color: #4a90e2;
-}
-.modalIcono_item.seleccionado {
-    background: rgba(244, 162, 97, 0.2);
-    border-color: #F4A261;
-}
-.modalIcono_item i {
-    font-size: 22px;
-    color: #a0c4ff;
-}
-.modalIcono_item span {
-    font-size: 8px;
-    color: #7080a0;
-    margin-top: 4px;
-    text-align: center;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    max-width: 100%;
-    width: 100%;
-}
+window.modalIcono_seleccionarCategoria = modalIcono_seleccionarCategoria;
+window.modalIcono_filtrar = modalIcono_filtrar;
+window.modalIcono_seleccionar = modalIcono_seleccionar;
+window.modalIcono_guardar = modalIcono_guardar;
+window.modalIcono_cancelar = modalIcono_cancelar;
+window.abrirModalIcono = abrirModalIcono;
 
-.modalIcono_loading {
-    text-align: center;
-    padding: 40px;
-    color: #8090b0;
-    grid-column: 1 / -1;
-}
-
-@media (max-width: 600px) {
-    .modalIcono_grid { grid-template-columns: repeat(6, 1fr); }
-    .modalIcono_filtrosRow { flex-direction: column; }
-}
-@media (max-width: 400px) {
-    .modalIcono_grid { grid-template-columns: repeat(4, 1fr); }
-}
+document.addEventListener('DOMContentLoaded', function() {
+    if (document.getElementById('modalIcono_overlay')) {
+        modalIcono_cargarIconos();
+    }
+});
 
 /* ---------------------------------------- */
 /* 2.15 MODAL COLOR                         */
@@ -4159,7 +4111,7 @@ body {
                         <p style="color:#c0d8ff; font-size:13px; margin-bottom:5px;">Imagen seleccionada</p>
                         <p style="color:#6070a0; font-size:11px;" id="modalHero_infoImagen">Sin imagen</p>
                     </div>
-                 <button class="modalHero_btnEditar" onclick="modalHero_elegirDeLibreria()">
+<button class="modalHero_btnEditar" onclick="modalHero_elegirImagenDeLibreria()">
     📁 Elegir de mi Librería
 </button>
                 </div>
@@ -4168,12 +4120,9 @@ body {
 <div id="modalHero_seccionVideo" style="display:none;">
     <label style="color:#a0c4ff;font-size:13px;display:block;margin-bottom:8px;">Video de fondo</label>
     <div style="display:flex;gap:8px;margin-bottom:8px;">
-        <input type="text" id="modalHero_videoUrl" placeholder="URL del video desde tu librería" readonly style="flex:1;padding:12px;background:rgba(10,20,40,0.6);border:1px solid rgba(100,180,255,0.2);border-radius:12px;color:#e0e8ff;font-size:14px;outline:none;">
-        <button onclick="modalHero_elegirVideo()" style="padding:12px 16px;background:rgba(74,144,226,0.2);border:1px solid rgba(74,144,226,0.4);border-radius:12px;color:#a0c4ff;cursor:pointer;font-size:13px;white-space:nowrap;">📁 Mi Librería</button>
+        <input type="text" id="modalHero_videoUrl" placeholder="Selecciona un video de tu librería" readonly style="flex:1;padding:12px;background:rgba(10,20,40,0.6);border:1px solid rgba(100,180,255,0.2);border-radius:12px;color:#e0e8ff;font-size:14px;outline:none;">
+        <button onclick="modalHero_elegirVideo()" style="padding:12px 16px;background:rgba(74,144,226,0.2);border:1px solid rgba(74,144,226,0.4);border-radius:12px;color:#a0c4ff;cursor:pointer;font-size:13px;">📁 Mi Librería</button>
     </div>
-    <p style="color:#6070a0;font-size:11px;margin-top:8px;">
-        💡 Elige un video MP4 o WEBM de tu Librería de Medios
-    </p>
 </div>
             
             <div class="modalHero_sliderContainer">
@@ -5141,7 +5090,7 @@ body {
             <button onclick="modalMedios_cerrar()" style="background:rgba(220,53,69,0.2);border:1px solid rgba(220,53,69,0.4);color:#ff8080;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:18px;">✕</button>
         </div>
         
-        <div id="zonaSubida" style="border:2px dashed rgba(100,180,255,0.4);border-radius:16px;padding:30px;text-align:center;cursor:pointer;margin-bottom:15px;color:#a0c4ff;transition:all 0.2s;" onclick="document.getElementById('modalMedios_fileInput').click()">
+        <div id="zonaSubida" style="border:2px dashed rgba(100,180,255,0.4);border-radius:16px;padding:30px;text-align:center;cursor:pointer;margin-bottom:15px;color:#a0c4ff;" onclick="document.getElementById('modalMedios_fileInput').click()">
             <div style="font-size:36px;margin-bottom:8px;">☁️</div>
             <div style="font-size:15px;font-weight:600;">Arrastra aquí o haz clic para subir</div>
             <div style="font-size:12px;color:#6070a0;margin-top:4px;">JPG, PNG, WEBP, MP4, WEBM</div>
@@ -5292,7 +5241,7 @@ function clearSavedCredentials() {
 function showLoginMessage(text, type) {
     const msg = document.getElementById('loginMessage');
     msg.textContent = text;
-    msg.className = `login-message ${type}`;
+    msg.className = 'login-message ' + type;
 }
 
 async function handleLogin() {
@@ -5344,13 +5293,13 @@ async function handleLogin() {
         
         showLoginMessage('✅ Acceso correcto', 'success');
         
-        setTimeout(() => {
+        setTimeout(function() {
             mostrarDashboard();
         }, 300);
         
     } catch (error) {
         console.error('❌ Error login:', error);
-        showLoginMessage(`❌ ${error.message}`, 'error');
+        showLoginMessage('❌ ' + error.message, 'error');
         btn.innerHTML = originalText;
         btn.disabled = false;
     }
@@ -5433,6 +5382,9 @@ window.cargarDatosDashboard = cargarDatosDashboard;
 // ============================================
 // 6.5 MODAL HERO
 // ============================================
+// ============================================
+// 5.1 MODAL HERO (COMPLETO)
+// ============================================
 let modalHero_callback = null;
 let modalHero_data = {
     superior: '',
@@ -5448,7 +5400,6 @@ let modalHero_data = {
     video: ''
 };
 
-// Inicializar eventos del modal
 function modalHero_init() {
     document.getElementById('modalHero_superior').addEventListener('input', modalHero_actualizarPreview);
     document.getElementById('modalHero_principal').addEventListener('input', modalHero_actualizarPreview);
@@ -5457,10 +5408,10 @@ function modalHero_init() {
     
     document.getElementById('modalHero_overlay').addEventListener('input', function() {
         document.getElementById('modalHero_overlayValor').textContent = this.value;
-        document.getElementById('modalHero_previewOverlay').style.background = `rgba(0,0,0,${this.value})`;
+        document.getElementById('modalHero_previewOverlay').style.background = 'rgba(0,0,0,' + this.value + ')';
     });
     
-    document.querySelectorAll('input[name="modalHero_tipoFondo"]').forEach(radio => {
+    document.querySelectorAll('input[name="modalHero_tipoFondo"]').forEach(function(radio) {
         radio.addEventListener('change', function() {
             document.getElementById('modalHero_seccionImagen').style.display = this.value === 'imagen' ? 'block' : 'none';
             document.getElementById('modalHero_seccionVideo').style.display = this.value === 'video' ? 'block' : 'none';
@@ -5482,48 +5433,29 @@ function modalHero_actualizarPreview() {
 }
 
 function modalHero_actualizarPreviewMedia() {
-    const mediaBox = document.getElementById('modalHero_previewMedia');
-    const tipo = document.querySelector('input[name="modalHero_tipoFondo"]:checked').value;
+    var mediaBox = document.getElementById('modalHero_previewMedia');
+    var tipo = document.querySelector('input[name="modalHero_tipoFondo"]:checked').value;
     
     if (tipo === 'imagen' && modalHero_data.imagen) {
-        mediaBox.innerHTML = `<img src="${modalHero_data.imagen}" style="width:100%;height:100%;object-fit:cover;object-position:${modalHero_data.translateX}% ${modalHero_data.translateY}%;transform:scale(${modalHero_data.zoom/100});">`;
+        mediaBox.innerHTML = '<img src="' + modalHero_data.imagen + '" style="width:100%;height:100%;object-fit:cover;object-position:' + modalHero_data.translateX + '% ' + modalHero_data.translateY + '%;transform:scale(' + (modalHero_data.zoom / 100) + ');">';
         return;
     }
     
     if (tipo === 'video' && modalHero_data.video) {
-        const url = modalHero_data.video.trim();
-        
-        // YouTube
-        const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&?/]+)/);
+        var url = modalHero_data.video.trim();
+        var ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&?/]+)/);
         if (ytMatch) {
-            const videoId = ytMatch[1];
-            mediaBox.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&loop=1&playlist=${videoId}&controls=0&modestbranding=1&showinfo=0&rel=0" style="width:100%;height:100%;border:0;" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+            mediaBox.innerHTML = '<iframe src="https://www.youtube.com/embed/' + ytMatch[1] + '?autoplay=1&mute=1&loop=1&controls=0&modestbranding=1&showinfo=0&rel=0" style="width:100%;height:100%;border:0;" allow="autoplay; encrypted-media" allowfullscreen></iframe>';
             return;
         }
-        
-        // Vimeo
-        const vimeoMatch = url.match(/(?:vimeo\.com\/(?:video\/)?|player\.vimeo\.com\/video\/)(\d+)/);
-        if (vimeoMatch) {
-            const videoId = vimeoMatch[1];
-            mediaBox.innerHTML = `<iframe src="https://player.vimeo.com/video/${videoId}?autoplay=1&muted=1&loop=1&background=1" style="width:100%;height:100%;border:0;" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
-            return;
-        }
-        
-        // MP4 directo
-        if (url.match(/\.(mp4|webm|ogg|mov)($|\?)/i)) {
-            mediaBox.innerHTML = `<video src="${url}" autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;"></video>`;
-            return;
-        }
-        
-        // Fallback
-        mediaBox.innerHTML = `<video src="${url}" autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;"></video>`;
+        mediaBox.innerHTML = '<video src="' + url + '" autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;"></video>';
         return;
     }
     
     mediaBox.innerHTML = '<span class="modalHero_placeholderMedia">🖼️ Sin imagen</span>';
 }
 
-function modalHero_editarImagen() {
+function modalHero_elegirImagenDeLibreria() {
     abrirModalImagen(
         {
             imagen: modalHero_data.imagen,
@@ -5537,7 +5469,7 @@ function modalHero_editarImagen() {
             modalHero_data.translateY = datos.translateY;
             modalHero_data.zoom = datos.zoom;
             
-            const infoImagen = document.getElementById('modalHero_infoImagen');
+            var infoImagen = document.getElementById('modalHero_infoImagen');
             if (infoImagen) infoImagen.textContent = 'Imagen configurada';
             
             modalHero_actualizarPreviewMedia();
@@ -5546,22 +5478,55 @@ function modalHero_editarImagen() {
     );
 }
 
+function modalHero_elegirVideo() {
+    var grid = document.createElement('div');
+    grid.className = 'videoGridTemporal';
+    grid.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:6px;max-height:200px;overflow-y:auto;padding:10px;background:rgba(10,20,40,0.6);border-radius:12px;margin-top:8px;';
+    grid.innerHTML = '<div style="text-align:center;padding:20px;color:#506080;grid-column:1/-1;">⏳ Cargando...</div>';
+    
+    var section = document.getElementById('modalHero_seccionVideo');
+    section.querySelectorAll('.videoGridTemporal').forEach(function(el) { el.remove(); });
+    section.appendChild(grid);
+    
+    (function() {
+        var cid = (window.clienteData && window.clienteData.id_publico) || 'sin_id';
+        supabaseClient.storage.from('media_library').list(cid + '/', { limit: 100 }).then(function(res) {
+            var videos = (res.data || []).filter(function(f) { return /\.(mp4|webm|mov|avi|mkv)$/i.test(f.name); });
+            if (!videos.length) {
+                grid.innerHTML = '<div style="text-align:center;padding:20px;color:#506080;grid-column:1/-1;">🎬 No hay videos</div>';
+                return;
+            }
+            grid.innerHTML = videos.map(function(v) {
+                var url = 'https://nvrcqlxnvjvhznmxozhh.supabase.co/storage/v1/object/public/media_library/' + cid + '/' + v.name;
+                return '<div onclick="document.getElementById(\'modalHero_videoUrl\').value=\'' + url + '\';modalHero_data.video=\'' + url + '\';modalHero_actualizarPreviewMedia();" style="cursor:pointer;position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;border:2px solid transparent;background:#000;"><video src="' + url + '" style="width:100%;height:100%;object-fit:cover;" muted preload="metadata"></video><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:white;font-size:20px;">▶️</div></div>';
+            }).join('');
+        });
+    })();
+}
+
 function abrirModalHero(datosIniciales, callback) {
     modalHero_callback = callback;
     
     if (datosIniciales) {
-        modalHero_data = { ...modalHero_data, ...datosIniciales };
+        modalHero_data.superior = datosIniciales.superior || '';
+        modalHero_data.principal = datosIniciales.principal || '';
+        modalHero_data.inferior = datosIniciales.inferior || '';
+        modalHero_data.boton = datosIniciales.boton || '';
+        modalHero_data.overlay = datosIniciales.overlay || 0.5;
+        modalHero_data.tipoFondo = datosIniciales.tipoFondo || 'imagen';
+        modalHero_data.imagen = datosIniciales.imagen || null;
+        modalHero_data.video = datosIniciales.video || '';
     }
     
-    document.getElementById('modalHero_superior').value = modalHero_data.superior || '';
-    document.getElementById('modalHero_principal').value = modalHero_data.principal || '';
-    document.getElementById('modalHero_inferior').value = modalHero_data.inferior || '';
-    document.getElementById('modalHero_boton').value = modalHero_data.boton || '';
+    document.getElementById('modalHero_superior').value = modalHero_data.superior;
+    document.getElementById('modalHero_principal').value = modalHero_data.principal;
+    document.getElementById('modalHero_inferior').value = modalHero_data.inferior;
+    document.getElementById('modalHero_boton').value = modalHero_data.boton;
     document.getElementById('modalHero_overlay').value = modalHero_data.overlay;
     document.getElementById('modalHero_overlayValor').textContent = modalHero_data.overlay;
-    document.getElementById('modalHero_previewOverlay').style.background = `rgba(0,0,0,${modalHero_data.overlay})`;
+    document.getElementById('modalHero_previewOverlay').style.background = 'rgba(0,0,0,' + modalHero_data.overlay + ')';
     
-    document.querySelector(`input[name="modalHero_tipoFondo"][value="${modalHero_data.tipoFondo}"]`).checked = true;
+    document.querySelector('input[name="modalHero_tipoFondo"][value="' + modalHero_data.tipoFondo + '"]').checked = true;
     document.getElementById('modalHero_seccionImagen').style.display = modalHero_data.tipoFondo === 'imagen' ? 'block' : 'none';
     document.getElementById('modalHero_seccionVideo').style.display = modalHero_data.tipoFondo === 'video' ? 'block' : 'none';
     
@@ -5583,78 +5548,30 @@ function modalHero_guardar() {
     modalHero_data.tipoFondo = document.querySelector('input[name="modalHero_tipoFondo"]:checked').value;
     modalHero_data.video = document.getElementById('modalHero_videoUrl').value;
     
-    const datosParaGuardar = {
-        superior: modalHero_data.superior,
-        principal: modalHero_data.principal,
-        inferior: modalHero_data.inferior,
-        boton: modalHero_data.boton,
-        overlay: modalHero_data.overlay,
-        tipoFondo: modalHero_data.tipoFondo,
-        imagen: modalHero_data.imagen,
-        translateX: modalHero_data.translateX,
-        translateY: modalHero_data.translateY,
-        zoom: modalHero_data.zoom,
-        video: modalHero_data.video
-    };
+    localStorage.setItem('heroData', JSON.stringify(modalHero_data));
     
-    localStorage.setItem('heroData', JSON.stringify(datosParaGuardar));
+    if (modalHero_callback) modalHero_callback(modalHero_data);
     
-    if (modalHero_callback) {
-        modalHero_callback(modalHero_data);
-    }
-    
-    cerrarModal('modalHero_overlay');
+    document.getElementById('modalHero_overlay').style.display = 'none';
     if (typeof cargarDatosDashboard === 'function') cargarDatosDashboard();
 }
 
 function modalHero_cancelar() {
-    cerrarModal('modalHero_overlay');
+    document.getElementById('modalHero_overlay').style.display = 'none';
 }
 
-// Exponer
-window.modalHero_editarImagen = modalHero_editarImagen;
+window.modalHero_elegirImagenDeLibreria = modalHero_elegirImagenDeLibreria;
+window.modalHero_elegirVideo = modalHero_elegirVideo;
 window.modalHero_guardar = modalHero_guardar;
 window.modalHero_cancelar = modalHero_cancelar;
 window.abrirModalHero = abrirModalHero;
 
-// Inicializar
 document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('modalHero_overlay')) {
         modalHero_init();
         registrarModal('hero', abrirModalHero);
     }
 });
-
-function modalHero_elegirVideo() {
-    // Crear un input temporal para seleccionar video de la librería
-    const grid = document.createElement('div');
-    grid.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-height:300px;overflow-y:auto;padding:10px;background:rgba(10,20,40,0.6);border-radius:12px;border:1px solid rgba(100,180,255,0.2);margin-bottom:10px;';
-    grid.innerHTML = '<div style="text-align:center;padding:20px;color:#506080;grid-column:1/-1;">⏳ Cargando videos...</div>';
-    
-    // Insertar grid debajo del campo de video
-    const videoSection = document.getElementById('modalHero_seccionVideo');
-    const oldGrid = videoSection.querySelector('.videoGridTemporal');
-    if (oldGrid) oldGrid.remove();
-    grid.className = 'videoGridTemporal';
-    videoSection.appendChild(grid);
-    
-    // Cargar videos
-    (async function() {
-        const cid = (window.clienteData?.id_publico) || 'sin_id';
-        const { data } = await supabaseClient.storage.from('media_library').list(cid + '/', { limit: 100 });
-        const videos = (data || []).filter(f => /\.(mp4|webm|mov|avi|mkv)$/i.test(f.name));
-        
-        if (!videos.length) {
-            grid.innerHTML = '<div style="text-align:center;padding:20px;color:#506080;grid-column:1/-1;">🎬 No hay videos en tu librería</div>';
-            return;
-        }
-        
-        grid.innerHTML = videos.map(v => {
-            const url = 'https://nvrcqlxnvjvhznmxozhh.supabase.co/storage/v1/object/public/media_library/' + cid + '/' + v.name;
-            return '<div onclick="document.getElementById(\'modalHero_videoUrl\').value=\'' + url + '\';modalHero_data.video=\'' + url + '\';modalHero_actualizarPreviewMedia();this.parentElement.querySelectorAll(\'div\').forEach(d=>d.style.borderColor=\'transparent\');this.style.borderColor=\'#F4A261\';" style="position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;cursor:pointer;border:2px solid transparent;background:rgba(10,20,40,0.6);"><video src="' + url + '" style="width:100%;height:100%;object-fit:cover;" muted preload="metadata"></video><div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;">▶️</div><div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.7);color:white;font-size:8px;padding:3px;text-align:center;">' + v.name + '</div></div>';
-        }).join('');
-    })();
-}
 
 // ============================================
 // 6.6 MODAL PRODUCTOS
@@ -5892,14 +5809,22 @@ function modalServicios_guardarCambios(id) {
 }
 function modalServicios_seleccionarIcono(id) {
     modalServicios_iconoTemporalId = id;
-    const s = modalServicios_lista.find(s => s.id === id);
-    abrirModalIcono({ icono: s?.icono || ICONO_DEFAULT }, function(datos) {
-        if (modalServicios_iconoTemporalId) {
-            const serv = modalServicios_lista.find(s => s.id === modalServicios_iconoTemporalId);
-            if (serv) { serv.icono = datos.icono; document.getElementById(`modalServicios_icono_${modalServicios_iconoTemporalId}`).value = datos.icono; }
-            modalServicios_iconoTemporalId = null; modalServicios_renderizar();
+    var s = modalServicios_lista.find(function(x) { return x.id === id; });
+    abrirModalIcono(
+        { icono: (s && s.icono) || '<i class="fas fa-star"></i>' },
+        function(datos) {
+            if (modalServicios_iconoTemporalId) {
+                var serv = modalServicios_lista.find(function(x) { return x.id === modalServicios_iconoTemporalId; });
+                if (serv && datos) {
+                    serv.icono = datos.icono;
+                    var inputIcono = document.getElementById('modalServicios_icono_' + modalServicios_iconoTemporalId);
+                    if (inputIcono) inputIcono.value = datos.icono;
+                }
+                modalServicios_iconoTemporalId = null;
+                modalServicios_renderizar();
+            }
         }
-    });
+    );
 }
 function abrirModalServicios(callback) {
     modalServicios_callback = (typeof callback === 'function') ? callback : null;
@@ -6775,17 +6700,13 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ============================================
-// 6.12 MODAL IMAGEN (SOLO URLs - COMPLETO Y CORREGIDO)
-// ============================================
-
-// ============================================
-// 6.12 MODAL IMAGEN PROFESIONAL
+// 6.12 MODAL IMAGEN (COMPLETO - SIN URLs EXTERNAS)
 // ============================================
 
 let modalImagen_datos = { translateX: 0, translateY: 0, zoom: 100, imagen: null };
 let modalImagen_estadoInicial = null;
 let modalImagen_callback = null;
-let modalImagen_imagenesLibreria = [];
+let _mli_todas = [];
 
 function modalImagen_init() {
     const slider = document.getElementById('modalImagen_zoomSlider');
@@ -6798,205 +6719,79 @@ function modalImagen_init() {
     }
 }
 
-// ========== CARGAR LIBRERÍA ==========
-async function modalImagen_cargarLibreria() {
+// ========== LIBRERÍA ==========
+function modalImagen_cargarLibreria() {
     const grid = document.getElementById('modalImagen_libreriaGrid');
-    const contador = document.getElementById('modalImagen_contadorLibreria');
-    
     if (!grid) return;
+    grid.innerHTML = '<div style="text-align:center;padding:15px;color:#506080;grid-column:1/-1;font-size:12px;">⏳ Cargando...</div>';
     
-    grid.innerHTML = '<div style="text-align:center;padding:20px;color:#506080;grid-column:1/-1;font-size:13px;">⏳ Cargando...</div>';
-    
-    try {
-        const clienteId = (window.clienteData && window.clienteData.id_publico) || 'sin_id';
-        
-        const { data: archivos, error } = await supabaseClient
-            .storage
-            .from('media_library')
-            .list(clienteId + '/', {
-                limit: 100,
-                sortBy: { column: 'created_at', order: 'desc' }
-            });
-        
-        if (error) throw error;
-        
-        modalImagen_imagenesLibreria = archivos.filter(f => 
-            f.name.match(/\.(jpg|jpeg|png|webp|gif|svg|bmp)$/i)
-        );
-        
-        modalImagen_renderizarGrid(modalImagen_imagenesLibreria);
-        if (contador) contador.textContent = modalImagen_imagenesLibreria.length + ' imágenes en tu librería';
-        
-    } catch (error) {
-        console.error('Error cargando librería:', error);
-        grid.innerHTML = '<div style="text-align:center;padding:20px;color:#ff6b6b;grid-column:1/-1;font-size:13px;">⚠️ Error al cargar</div>';
-    }
+    const cid = (window.clienteData?.id_publico) || 'sin_id';
+    supabaseClient.storage.from('media_library').list(cid + '/', { limit: 200, sortBy: { column: 'created_at', order: 'desc' } })
+        .then(({ data, error }) => {
+            if (error) { grid.innerHTML = '<div style="text-align:center;padding:15px;color:#ff6b6b;grid-column:1/-1;">⚠️ Error</div>'; return; }
+            _mli_todas = (data || []).filter(f => /\.(jpg|jpeg|png|webp|gif|svg|bmp)$/i.test(f.name));
+            modalImagen_renderizarLibreria(_mli_todas);
+        });
 }
 
-function modalImagen_renderizarGrid(imagenes) {
+function modalImagen_renderizarLibreria(lista) {
     const grid = document.getElementById('modalImagen_libreriaGrid');
     if (!grid) return;
-    
-    const clienteId = (window.clienteData && window.clienteData.id_publico) || 'sin_id';
-    
-    if (imagenes.length === 0) {
-        grid.innerHTML = `
-            <div style="text-align:center;padding:20px;color:#506080;grid-column:1/-1;">
-                <span style="font-size:32px;">📭</span>
-                <p style="font-size:12px;margin-top:5px;">No hay imágenes</p>
-            </div>`;
+    if (!lista.length) {
+        grid.innerHTML = '<div style="text-align:center;padding:15px;color:#506080;grid-column:1/-1;font-size:12px;">📭 No hay imágenes</div>';
         return;
     }
-    
-    grid.innerHTML = imagenes.map(img => {
-        const url = `https://nvrcqlxnvjvhznmxozhh.supabase.co/storage/v1/object/public/media_library/${clienteId}/${img.name}`;
-        const seleccionada = modalImagen_datos.imagen === url;
-        return `
-            <div class="modalImagen_libreriaItem ${seleccionada ? 'seleccionada' : ''}" 
-                 data-url="${url}" 
-                 data-nombre="${img.name}"
-                 onclick="modalImagen_seleccionarDeLibreria('${url}', '${img.name.replace(/'/g, "\\'")}')"
-                 style="position:relative; aspect-ratio:1; border-radius:10px; overflow:hidden; cursor:pointer; border:2px solid ${seleccionada ? '#F4A261' : 'transparent'}; background:rgba(10,20,40,0.6); transition:all 0.2s;">
-                <img src="${url}" alt="${img.name}" loading="lazy" 
-                     style="width:100%;height:100%;object-fit:cover;"
-                     onerror="this.parentElement.innerHTML='<div style=width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#506080;font-size:24px;>🖼️</div>'">
-                <button onclick="event.stopPropagation(); modalImagen_eliminarDeLibreria('${img.name.replace(/'/g, "\\'")}')" 
-                        style="position:absolute; top:4px; right:4px; width:22px; height:22px; background:rgba(220,53,69,0.9); color:white; border:none; border-radius:50%; cursor:pointer; font-size:11px; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.2s;"
-                        onmouseover="this.style.opacity='1'" 
-                        onmouseout="this.style.opacity='0'"
-                        title="Eliminar">✕</button>
-                <div style="position:absolute; bottom:0; left:0; right:0; background:rgba(0,0,0,0.7); color:white; font-size:9px; padding:3px 6px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${img.name}</div>
-            </div>
-        `;
+    const cid = (window.clienteData?.id_publico) || 'sin_id';
+    grid.innerHTML = lista.map(item => {
+        const url = 'https://nvrcqlxnvjvhznmxozhh.supabase.co/storage/v1/object/public/media_library/' + cid + '/' + item.name;
+        const sel = modalImagen_datos && modalImagen_datos.imagen === url;
+        return '<div onclick="modalImagen_seleccionarDeLibreria(\'' + url + '\')" style="cursor:pointer;position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;border:2px solid ' + (sel ? '#F4A261' : 'transparent') + ';background:rgba(10,20,40,0.6);">' +
+            '<img src="' + url + '" style="width:100%;height:100%;object-fit:cover;" loading="lazy">' +
+            '<button onclick="event.stopPropagation();modalImagen_eliminarDeLibreria(\'' + item.name.replace(/'/g, "\\'") + '\')" style="position:absolute;top:3px;right:3px;width:20px;height:20px;background:rgba(220,53,69,0.9);color:white;border:none;border-radius:50%;cursor:pointer;font-size:10px;z-index:5;">✕</button>' +
+            '<div style="position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,0.7);color:white;font-size:8px;padding:2px 4px;text-align:center;">' + item.name + '</div></div>';
     }).join('');
 }
 
-// ========== SELECCIONAR DE LIBRERÍA ==========
-function modalImagen_seleccionarDeLibreria(url, nombre) {
+function modalImagen_seleccionarDeLibreria(url) {
     modalImagen_datos.imagen = url;
-    document.getElementById('modalImagen_urlInput').value = url;
-    
-    // Cargar imagen en el visor
     const imgEl = document.getElementById('modalImagen_img');
-    const placeholder = document.getElementById('modalImagen_placeholder');
-    const cruceta = document.getElementById('modalImagen_cruceta');
-    
     imgEl.src = url;
     imgEl.style.display = 'block';
-    if (placeholder) placeholder.style.display = 'none';
-    if (cruceta) cruceta.classList.add('visible');
-    
-    // Resetear posición
+    document.getElementById('modalImagen_placeholder').style.display = 'none';
+    document.getElementById('modalImagen_cruceta').classList.add('visible');
     modalImagen_datos.translateX = 0;
     modalImagen_datos.translateY = 0;
     modalImagen_datos.zoom = 100;
     document.getElementById('modalImagen_zoomSlider').value = 100;
     document.getElementById('modalImagen_zoomValor').textContent = '100%';
     modalImagen_actualizarImagen();
-    
-    // Actualizar grid para marcar seleccionada
-    modalImagen_renderizarGrid(modalImagen_imagenesLibreria);
+    modalImagen_renderizarLibreria(_mli_todas);
 }
 
-// ========== ELIMINAR DE LIBRERÍA ==========
+function modalImagen_filtrar() {
+    const q = document.getElementById('modalImagen_busqueda').value.toLowerCase();
+    modalImagen_renderizarLibreria(q ? _mli_todas.filter(f => f.name.toLowerCase().includes(q)) : _mli_todas);
+}
+
+function modalImagen_recargarLibreria() { modalImagen_cargarLibreria(); }
+
 async function modalImagen_eliminarDeLibreria(nombre) {
-    const confirmar = await abrirModalConfirmar({
-        icono: '🗑️',
-        titulo: '¿Eliminar imagen?',
-        mensaje: `"${nombre}" se eliminará permanentemente de tu librería.`,
-        btnTexto: 'Sí, eliminar',
-        variante: 'peligro'
-    });
-    
-    if (!confirmar) return;
-    
-    try {
-        const clienteId = (window.clienteData && window.clienteData.id_publico) || 'sin_id';
-        
-        const { error } = await supabaseClient
-            .storage
-            .from('media_library')
-            .remove([clienteId + '/' + nombre]);
-        
-        if (error) throw error;
-        
-        // Recargar librería
-        await modalImagen_cargarLibreria();
-        
-    } catch (error) {
-        console.error('Error eliminando:', error);
-        alert('No se pudo eliminar la imagen.');
-    }
-}
-
-// ========== FILTRAR ==========
-function modalImagen_filtrarLibreria() {
-    const busqueda = document.getElementById('modalImagen_busquedaLibreria').value.toLowerCase();
-    if (!busqueda) {
-        modalImagen_renderizarGrid(modalImagen_imagenesLibreria);
-        return;
-    }
-    const filtradas = modalImagen_imagenesLibreria.filter(img => 
-        img.name.toLowerCase().includes(busqueda)
-    );
-    modalImagen_renderizarGrid(filtradas);
-}
-
-// ========== SUBIR NUEVA ==========
-function modalImagen_subirNueva() {
-    document.getElementById('modalImagen_uploadInput').click();
-}
-
-async function modalImagen_procesarSubida(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    
-    if (!file.type.startsWith('image/')) {
-        alert('Solo se permiten imágenes.');
-        return;
-    }
-    
-    const clienteId = (window.clienteData && window.clienteData.id_publico) || 'sin_id';
-    const nombreArchivo = clienteId + '/' + Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9.]/g, '_');
-    
-    try {
-        const { error } = await supabaseClient
-            .storage
-            .from('media_library')
-            .upload(nombreArchivo, file, {
-                cacheControl: '3600',
-                upsert: false
-            });
-        
-        if (error) throw error;
-        
-        // Recargar librería
-        await modalImagen_cargarLibreria();
-        
-    } catch (error) {
-        console.error('Error subiendo:', error);
-        alert('Error al subir la imagen: ' + error.message);
-    }
-    
-    event.target.value = '';
-}
-
-function modalImagen_recargarLibreria() {
+    if (!confirm('🗑️ ¿Eliminar "' + nombre + '"?')) return;
+    const cid = (window.clienteData?.id_publico) || 'sin_id';
+    await supabaseClient.storage.from('media_library').remove([cid + '/' + nombre]);
     modalImagen_cargarLibreria();
 }
 
-// ========== FUNCIONES EXISTENTES ==========
+// ========== VISOR ==========
 function modalImagen_actualizarImagen() {
     const img = document.getElementById('modalImagen_img');
     if (img && img.style.display === 'block') {
         img.style.width = modalImagen_datos.zoom + '%';
         img.style.height = modalImagen_datos.zoom + '%';
-        img.style.transform = `translate(${modalImagen_datos.translateX}px, ${modalImagen_datos.translateY}px)`;
+        img.style.transform = 'translate(' + modalImagen_datos.translateX + 'px, ' + modalImagen_datos.translateY + 'px)';
     }
     const coords = document.getElementById('modalImagen_coordenadas');
-    if (coords) {
-        coords.textContent = `Posición: X=${modalImagen_datos.translateX}px Y=${modalImagen_datos.translateY}px`;
-    }
+    if (coords) coords.textContent = 'Posición: X=' + modalImagen_datos.translateX + 'px Y=' + modalImagen_datos.translateY + 'px';
 }
 
 function modalImagen_mover(dx, dy) {
@@ -7014,38 +6809,43 @@ function modalImagen_centrar() {
 
 function modalImagen_cambiarZoom(delta) {
     if (!modalImagen_datos.imagen) return;
-    if (delta === 0) {
-        modalImagen_datos.zoom = 100;
-    } else {
-        modalImagen_datos.zoom = Math.max(50, Math.min(150, modalImagen_datos.zoom + delta));
-    }
+    if (delta === 0) modalImagen_datos.zoom = 100;
+    else modalImagen_datos.zoom = Math.max(50, Math.min(150, modalImagen_datos.zoom + delta));
     document.getElementById('modalImagen_zoomSlider').value = modalImagen_datos.zoom;
     document.getElementById('modalImagen_zoomValor').textContent = modalImagen_datos.zoom + '%';
     modalImagen_actualizarImagen();
 }
 
-function modalImagen_quitar() {
-    document.getElementById('modalImagen_img').style.display = 'none';
-    document.getElementById('modalImagen_placeholder').style.display = 'flex';
-    document.getElementById('modalImagen_cruceta').classList.remove('visible');
-    document.getElementById('modalImagen_urlInput').value = '';
-    modalImagen_datos.imagen = null;
-    modalImagen_datos.translateX = 0;
-    modalImagen_datos.translateY = 0;
-    modalImagen_datos.zoom = 100;
-    document.getElementById('modalImagen_zoomSlider').value = 100;
-    document.getElementById('modalImagen_zoomValor').textContent = '100%';
-    document.getElementById('modalImagen_coordenadas').textContent = 'Posición: X=0px Y=0px';
-    modalImagen_renderizarGrid(modalImagen_imagenesLibreria);
-}
-
-function modalImagen_guardarEstadoInicial() {
-    modalImagen_estadoInicial = {
-        translateX: modalImagen_datos.translateX,
-        translateY: modalImagen_datos.translateY,
-        zoom: modalImagen_datos.zoom,
-        imagen: modalImagen_datos.imagen
+// ========== ABRIR / CERRAR ==========
+function abrirModalImagen(datosIniciales, callback, origen) {
+    modalImagen_callback = callback;
+    modalImagen_datos = { 
+        translateX: (datosIniciales && datosIniciales.translateX) || 0, 
+        translateY: (datosIniciales && datosIniciales.translateY) || 0, 
+        zoom: (datosIniciales && datosIniciales.zoom) || 100, 
+        imagen: (datosIniciales && datosIniciales.imagen) || null 
     };
+    
+    document.getElementById('modalImagen_zoomSlider').value = modalImagen_datos.zoom;
+    document.getElementById('modalImagen_zoomValor').textContent = modalImagen_datos.zoom + '%';
+    
+    if (modalImagen_datos.imagen) {
+        const imgEl = document.getElementById('modalImagen_img');
+        imgEl.src = modalImagen_datos.imagen;
+        imgEl.style.display = 'block';
+        document.getElementById('modalImagen_placeholder').style.display = 'none';
+        document.getElementById('modalImagen_cruceta').classList.add('visible');
+        modalImagen_actualizarImagen();
+    } else {
+        document.getElementById('modalImagen_img').style.display = 'none';
+        document.getElementById('modalImagen_placeholder').style.display = 'flex';
+        document.getElementById('modalImagen_cruceta').classList.remove('visible');
+    }
+    
+    modalImagen_estadoInicial = { ...modalImagen_datos };
+    document.getElementById('modalImagen_overlay').style.display = 'flex';
+    document.getElementById('modalImagen_busqueda').value = '';
+    setTimeout(modalImagen_cargarLibreria, 200);
 }
 
 function modalImagen_guardar() {
@@ -7057,65 +6857,27 @@ function modalImagen_guardar() {
             zoom: modalImagen_datos.zoom
         });
     }
-    cerrarModal('modalImagen_overlay');
+    document.getElementById('modalImagen_overlay').style.display = 'none';
 }
 
 function modalImagen_cancelar() {
-    if (modalImagen_estadoInicial && modalImagen_estadoInicial.imagen) {
-        modalImagen_datos = { ...modalImagen_estadoInicial };
-    }
-    cerrarModal('modalImagen_overlay');
-}
-
-function abrirModalImagen(datosIniciales, callback) {
-    modalImagen_callback = callback;
-    modalImagen_datos = { 
-        translateX: datosIniciales?.translateX || 0, 
-        translateY: datosIniciales?.translateY || 0, 
-        zoom: datosIniciales?.zoom || 100, 
-        imagen: datosIniciales?.imagen || null 
-    };
-    
-    document.getElementById('modalImagen_zoomSlider').value = modalImagen_datos.zoom;
-    document.getElementById('modalImagen_zoomValor').textContent = modalImagen_datos.zoom + '%';
-    
-    if (modalImagen_datos.imagen) {
-        document.getElementById('modalImagen_img').src = modalImagen_datos.imagen;
-        document.getElementById('modalImagen_img').style.display = 'block';
-        document.getElementById('modalImagen_placeholder').style.display = 'none';
-        document.getElementById('modalImagen_cruceta').classList.add('visible');
-        document.getElementById('modalImagen_urlInput').value = modalImagen_datos.imagen;
-        modalImagen_actualizarImagen();
-    } else {
-        modalImagen_quitar();
-    }
-    
-    modalImagen_guardarEstadoInicial();
-    document.getElementById('modalImagen_overlay').style.display = 'flex';
-    
-    // Cargar librería
-    modalImagen_cargarLibreria();
+    document.getElementById('modalImagen_overlay').style.display = 'none';
 }
 
 // Exponer
 window.modalImagen_mover = modalImagen_mover;
 window.modalImagen_centrar = modalImagen_centrar;
 window.modalImagen_cambiarZoom = modalImagen_cambiarZoom;
-window.modalImagen_quitar = modalImagen_quitar;
-window.modalImagen_guardar = modalImagen_guardar;
-window.modalImagen_cancelar = modalImagen_cancelar;
 window.modalImagen_seleccionarDeLibreria = modalImagen_seleccionarDeLibreria;
 window.modalImagen_eliminarDeLibreria = modalImagen_eliminarDeLibreria;
-window.modalImagen_filtrarLibreria = modalImagen_filtrarLibreria;
-window.modalImagen_subirNueva = modalImagen_subirNueva;
-window.modalImagen_procesarSubida = modalImagen_procesarSubida;
+window.modalImagen_filtrar = modalImagen_filtrar;
 window.modalImagen_recargarLibreria = modalImagen_recargarLibreria;
+window.modalImagen_guardar = modalImagen_guardar;
+window.modalImagen_cancelar = modalImagen_cancelar;
 window.abrirModalImagen = abrirModalImagen;
 
 document.addEventListener('DOMContentLoaded', function() {
-    if (document.getElementById('modalImagen_overlay')) {
-        modalImagen_init();
-    }
+    if (document.getElementById('modalImagen_overlay')) modalImagen_init();
 });
 
 // ============================================
@@ -7292,10 +7054,22 @@ function modalIcono_seleccionar(nombre, clase = 'fas') {
 
 function abrirModalIcono(opciones, callback) {
     modalIcono_callback = callback;
-    if (opciones?.icono) { modalIcono_actual = opciones.icono; document.getElementById('modalIcono_grande').innerHTML = modalIcono_actual; document.getElementById('modalIcono_input').value = modalIcono_actual; }
-    else { modalIcono_actual = '<i class="fas fa-star"></i>'; document.getElementById('modalIcono_grande').innerHTML = modalIcono_actual; document.getElementById('modalIcono_input').value = modalIcono_actual; }
-    if (!modalIcono_todos.length) modalIcono_cargarIconos();
+    if (opciones && opciones.icono) {
+        modalIcono_actual = opciones.icono;
+    } else {
+        modalIcono_actual = '<i class="fas fa-star"></i>';
+    }
+    document.getElementById('modalIcono_grande').innerHTML = modalIcono_actual;
+    document.getElementById('modalIcono_input').value = modalIcono_actual;
     document.getElementById('modalIcono_overlay').style.display = 'flex';
+    
+    if (modalIcono_todos.length === 0) {
+        modalIcono_cargarIconos().then(function() {
+            modalIcono_filtrar();
+        });
+    } else {
+        modalIcono_filtrar();
+    }
 }
 
 function modalIcono_guardar() { if (modalIcono_callback) modalIcono_callback({ icono: modalIcono_actual }); cerrarModal('modalIcono_overlay'); }
@@ -7774,7 +7548,7 @@ async function modalMedios_cargar() {
         const vids = _ml_todos.filter(f => /\.(mp4|webm|mov|avi|mkv)$/i.test(f.name)).length;
         if (contador) contador.innerHTML = '📁 ' + _ml_todos.length + ' archivos · 🖼️ ' + imgs + ' imágenes · 🎬 ' + vids + ' videos';
     } catch(e) {
-        grid.innerHTML = '<div style="text-align:center;padding:30px;color:#ff6b6b;grid-column:1/-1;">⚠️ Error al cargar</div>';
+        grid.innerHTML = '<div style="text-align:center;padding:30px;color:#ff6b6b;grid-column:1/-1;">⚠️ Error</div>';
     }
 }
 
@@ -7853,7 +7627,6 @@ function abrirModalMedios() {
     modalMedios_cargar();
 }
 
-// Eventos
 document.addEventListener('DOMContentLoaded', function() {
     const zona = document.getElementById('zonaSubida');
     if (zona) {
@@ -7865,21 +7638,18 @@ document.addEventListener('DOMContentLoaded', function() {
             if (e.dataTransfer.files.length) modalMedios_mostrarVistaPrevia(e.dataTransfer.files);
         });
     }
-    const input = document.getElementById('modalMedios_fileInput');
-    if (input) input.addEventListener('change', function() { if (this.files.length) modalMedios_mostrarVistaPrevia(this.files); });
-    const buscador = document.getElementById('modalMedios_buscador');
-    if (buscador) buscador.addEventListener('input', function() {
+    document.getElementById('modalMedios_fileInput')?.addEventListener('change', function() {
+        if (this.files.length) modalMedios_mostrarVistaPrevia(this.files);
+    });
+    document.getElementById('modalMedios_buscador')?.addEventListener('input', function() {
         const q = this.value.toLowerCase();
         modalMedios_renderizar(q ? _ml_todos.filter(function(f) { return f.name.toLowerCase().indexOf(q) !== -1; }) : _ml_todos);
     });
-    const btn = document.getElementById('btnSubirYA');
-    if (btn) btn.addEventListener('click', modalMedios_subirYa);
+    document.getElementById('btnSubirYA')?.addEventListener('click', modalMedios_subirYa);
 });
 
 window.modalMedios_eliminar = modalMedios_eliminar;
-window.modalMedios_recargar = modalMedios_recargar;
 window.modalMedios_quitarDeSubida = modalMedios_quitarDeSubida;
-window.modalMedios_subirYa = modalMedios_subirYa;
 window.modalMedios_cerrar = modalMedios_cerrar;
 window.abrirModalMedios = abrirModalMedios;
 // ============================================
